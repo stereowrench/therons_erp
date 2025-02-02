@@ -1,0 +1,41 @@
+<.header>
+  Listing Product categories
+  <:actions>
+    <.link patch={~p"/product_categories/new"}>
+      <.button>New Product category</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="product_categories"
+  rows={@streams.product_categories}
+  row_click={fn {_id, product_category} -> JS.navigate(~p"/product_categories/#{product_category}") end}
+>
+  <:col :let={{_id, product_category}} label="Name">{product_category.name}</:col>
+  <:action :let={{_id, product_category}}>
+    <div class="sr-only">
+      <.link navigate={~p"/product_categories/#{product_category}"}>Show</.link>
+    </div>
+    <.link patch={~p"/product_categories/#{product_category}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, product_category}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: product_category.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="product_category-modal" show on_cancel={JS.patch(~p"/product_categories")}>
+  <.live_component
+    module={TheronsErpWeb.ProductCategoryLive.FormComponent}
+    id={@product_category.id || :new}
+    title={@page_title}
+    action={@live_action}
+    product_category={@product_category}
+    patch={~p"/product_categories"}
+  />
+</.modal>
