@@ -4,19 +4,21 @@ defmodule TheronsErpWeb.ProductLive.NewCategoryForm do
   alias TheronsErp.Inventory
 
   def render(assigns) do
+    ~H"""
+    """
   end
 
   def update(%{product_category: product_category} = assigns, socket) do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign_new(:form, fn -> Inventory.create_product_category(product_category) end)}
+     |> assign_new(:form, fn -> to_form(Inventory.change_product_category(product_category)) end)}
   end
 
   def handle_event("save", %{"product_category" => product_category_params}, socket) do
     product = socket.assigns.product
 
-    case Products.create_product_category(product, product_category_params) do
+    case Inventory.create_product_category(product, product_category_params) do
       {:ok, product_category} ->
         {:noreply,
          socket
