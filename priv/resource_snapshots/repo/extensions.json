@@ -3,6 +3,7 @@
   "installed": [
     "ash-functions",
     "citext",
-    "ash_money_v4"
+    "ash_money_v4",
+    "ltree"
   ]
 }

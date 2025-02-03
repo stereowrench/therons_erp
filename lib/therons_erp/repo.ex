@@ -4,7 +4,7 @@ defmodule TheronsErp.Repo do
 
   def installed_extensions do
     # Add extensions here, and the migration generator will install them.
-    ["ash-functions", "citext", AshMoney.AshPostgresExtension]
+    ["ash-functions", "citext", AshMoney.AshPostgresExtension, "ltree"]
   end
 
   # Don't open unnecessary transactions
