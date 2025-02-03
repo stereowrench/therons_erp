@@ -54,9 +54,41 @@ defmodule TheronsErp.Inventory.ProductCategory do
       end
     end
 
-    def perform_full_name_update(changeset, _) do
-      # TODO avoid infinte loops
+    def validate_no_cycles(_cs, _model, ids \\ [])
+
+    def validate_no_cycles(changeset, nil, _ids) do
       changeset
+    end
+
+    def validate_no_cycles(changeset, model, ids) do
+      id = model.id
+
+      if id in ids do
+        error =
+          Ash.Error.Changes.InvalidRelationship.exception(
+            relatonship: :product_category,
+            message: "Cannot create a cycle in the product category tree"
+          )
+
+        Ash.Changeset.add_error(changeset, error, :product_category_id)
+      else
+        ids = [id | ids]
+
+        if model.product_category_id != nil do
+          next_model = Ash.get!(ProductCategory, model.product_category_id)
+          validate_no_cycles(changeset, next_model, ids)
+        else
+          changeset
+        end
+      end
+    end
+
+    def perform_full_name_update(changeset, _) do
+      first_id = Ash.Changeset.get_attribute(changeset, :id)
+      first_model = if first_id != nil, do: Ash.get!(ProductCategory, first_id), else: nil
+
+      changeset
+      |> validate_no_cycles(first_model)
       |> Ash.Changeset.before_action(fn changeset ->
         farg = Ash.Changeset.get_attribute(changeset, :product_category_id)
 
@@ -68,8 +100,6 @@ defmodule TheronsErp.Inventory.ProductCategory do
             :full_name,
             name
           )
-
-          # |> IO.inspect()
         else
           [parent] =
             ProductCategory
@@ -86,9 +116,6 @@ defmodule TheronsErp.Inventory.ProductCategory do
         end
       end)
       |> Ash.Changeset.after_action(fn changeset, result ->
-        # if Ash.Changeset.get_attribute(changeset, :product_category_id) != nil or (Ash.Changeset.fetch_argument(changeset, :product_category_id) == nil and ) do
-        IO.inspect(changeset)
-
         alt =
           Ash.Changeset.get_attribute(changeset, :product_category_id) == nil and
             Ash.Changeset.fetch_argument(changeset, :product_category_id) != nil
