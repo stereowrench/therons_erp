@@ -43,24 +43,6 @@ defmodule TheronsErpWeb.Router do
 
     get "/", PageController, :home
 
-    live "/product_categories", ProductCategoryLive.Index, :index
-    live "/product_categories/new", ProductCategoryLive.Index, :new
-    live "/product_categories/:id/edit", ProductCategoryLive.Index, :edit
-
-    live "/product_categories/:id", ProductCategoryLive.Show, :show
-    live "/product_categories/:id/show/edit", ProductCategoryLive.Show, :edit
-
-    live "/products", ProductLive.Index, :index
-    live "/products/new", ProductLive.Index, :new
-    # live "/products/new/newcategory", ProductLive.Index, :new_category
-    live "/products/:id/edit", ProductLive.Index, :edit
-
-    live "/products/:id", ProductLive.Show, :show
-    # live "/products/:id/newcategory", ProductLive.Show, :new_category
-    live "/products/:id/show/edit", ProductLive.Show, :edit
-
-    live "/modals/newproduct", ProductLive.ModalManager.Show, :new_product
-    live "/modals/newcategory", ProductLive.ModalManager.Show, :new_category
     auth_routes AuthController, TheronsErp.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
