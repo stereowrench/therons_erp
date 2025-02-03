@@ -5,7 +5,8 @@ defmodule TheronsErp.Inventory.ProductCategory do
   use Ash.Resource,
     otp_app: :therons_erp,
     domain: TheronsErp.Inventory,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshArchival.Resource]
 
   require Ash.Query
 
@@ -16,6 +17,9 @@ defmodule TheronsErp.Inventory.ProductCategory do
 
   actions do
     defaults [:read]
+
+    destroy :delete do
+    end
 
     create :create do
       accept [:name, :product_category_id]

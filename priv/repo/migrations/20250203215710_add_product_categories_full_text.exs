@@ -1,4 +1,4 @@
-defmodule TheronsErp.Repo.Migrations.AddProductCategories do
+defmodule TheronsErp.Repo.Migrations.AddProductCategoriesFullText do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
