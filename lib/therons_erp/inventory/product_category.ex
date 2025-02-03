@@ -66,7 +66,7 @@ defmodule TheronsErp.Inventory.ProductCategory do
       if id in ids do
         error =
           Ash.Error.Changes.InvalidRelationship.exception(
-            relatonship: :product_category,
+            relationship: :product_category,
             message: "Cannot create a cycle in the product category tree"
           )
 
