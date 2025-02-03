@@ -46,12 +46,15 @@ defmodule TheronsErpWeb.Router do
     auth_routes AuthController, TheronsErp.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
-    live "/product_categories", ProductCategoryLive.Index, :index
-    live "/product_categories/new", ProductCategoryLive.Index, :new
-    live "/product_categories/:id/edit", ProductCategoryLive.Index, :edit
+    ash_authentication_live_session :authentication_optional,
+      on_mount: {TheronsErpWeb.LiveUserAuth, :live_user_optional} do
+      live "/product_categories", ProductCategoryLive.Index, :index
+      live "/product_categories/new", ProductCategoryLive.Index, :new
+      live "/product_categories/:id/edit", ProductCategoryLive.Index, :edit
 
-    live "/product_categories/:id", ProductCategoryLive.Show, :show
-    live "/product_categories/:id/show/edit", ProductCategoryLive.Show, :edit
+      live "/product_categories/:id", ProductCategoryLive.Show, :show
+      live "/product_categories/:id/show/edit", ProductCategoryLive.Show, :edit
+    end
 
     # Remove these if you'd like to use your own authentication views
     sign_in_route register_path: "/register",
