@@ -682,7 +682,7 @@ defmodule TheronsErpWeb.CoreComponents do
 
     ~H"""
     <div phx-feedback-for={@field.name}>
-      <.label for={@field.id}><%= @label %></.label>
+      <.label for={@field.id}>{@label}</.label>
       <LiveSelect.live_select
         field={@field}
         text_input_class={[
@@ -695,7 +695,7 @@ defmodule TheronsErpWeb.CoreComponents do
         {@live_select_opts}
       />
 
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end

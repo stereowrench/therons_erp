@@ -40,7 +40,9 @@ defmodule TheronsErpWeb.ProductCategoryLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"product_category" => product_category_params}, socket) do
-    changeset = Inventory.change_product_category(socket.assigns.product_category, product_category_params)
+    changeset =
+      Inventory.change_product_category(socket.assigns.product_category, product_category_params)
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -49,7 +51,10 @@ defmodule TheronsErpWeb.ProductCategoryLive.FormComponent do
   end
 
   defp save_product_category(socket, :edit, product_category_params) do
-    case Inventory.update_product_category(socket.assigns.product_category, product_category_params) do
+    case Inventory.update_product_category(
+           socket.assigns.product_category,
+           product_category_params
+         ) do
       {:ok, product_category} ->
         notify_parent({:saved, product_category})
 

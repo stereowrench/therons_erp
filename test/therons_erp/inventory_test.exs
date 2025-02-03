@@ -23,7 +23,9 @@ defmodule TheronsErp.InventoryTest do
     test "create_product_category/1 with valid data creates a product_category" do
       valid_attrs = %{name: "some name"}
 
-      assert {:ok, %ProductCategory{} = product_category} = Inventory.create_product_category(valid_attrs)
+      assert {:ok, %ProductCategory{} = product_category} =
+               Inventory.create_product_category(valid_attrs)
+
       assert product_category.name == "some name"
     end
 
@@ -35,20 +37,28 @@ defmodule TheronsErp.InventoryTest do
       product_category = product_category_fixture()
       update_attrs = %{name: "some updated name"}
 
-      assert {:ok, %ProductCategory{} = product_category} = Inventory.update_product_category(product_category, update_attrs)
+      assert {:ok, %ProductCategory{} = product_category} =
+               Inventory.update_product_category(product_category, update_attrs)
+
       assert product_category.name == "some updated name"
     end
 
     test "update_product_category/2 with invalid data returns error changeset" do
       product_category = product_category_fixture()
-      assert {:error, %Ecto.Changeset{}} = Inventory.update_product_category(product_category, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Inventory.update_product_category(product_category, @invalid_attrs)
+
       assert product_category == Inventory.get_product_category!(product_category.id)
     end
 
     test "delete_product_category/1 deletes the product_category" do
       product_category = product_category_fixture()
       assert {:ok, %ProductCategory{}} = Inventory.delete_product_category(product_category)
-      assert_raise Ecto.NoResultsError, fn -> Inventory.get_product_category!(product_category.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Inventory.get_product_category!(product_category.id)
+      end
     end
 
     test "change_product_category/1 returns a product_category changeset" do

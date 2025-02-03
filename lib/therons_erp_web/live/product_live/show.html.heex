@@ -30,19 +30,3 @@
     patch={~p"/products/#{@product}"}
   />
 </.modal>
-
-<.modal
-  :if={@live_action == :new_category}
-  id="product-category-modal"
-  show
-  on_cancel={JS.patch(~p"/products/#{@product}/show/edit")}
->
-  <.live_component
-    module={TheronsErpWeb.ProductLive.NewCategoryForm}
-    id={@product.id}
-    title={@page_title}
-    action={@live_action}
-    product_category={@product_category}
-    patch={~p"/products/#{@product}/show/edit"}
-  />
-</.modal>

@@ -49,7 +49,9 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
     test "updates product_category in listing", %{conn: conn, product_category: product_category} do
       {:ok, index_live, _html} = live(conn, ~p"/product_categories")
 
-      assert index_live |> element("#product_categories-#{product_category.id} a", "Edit") |> render_click() =~
+      assert index_live
+             |> element("#product_categories-#{product_category.id} a", "Edit")
+             |> render_click() =~
                "Edit Product category"
 
       assert_patch(index_live, ~p"/product_categories/#{product_category}/edit")
@@ -72,7 +74,10 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
     test "deletes product_category in listing", %{conn: conn, product_category: product_category} do
       {:ok, index_live, _html} = live(conn, ~p"/product_categories")
 
-      assert index_live |> element("#product_categories-#{product_category.id} a", "Delete") |> render_click()
+      assert index_live
+             |> element("#product_categories-#{product_category.id} a", "Delete")
+             |> render_click()
+
       refute has_element?(index_live, "#product_categories-#{product_category.id}")
     end
   end
@@ -87,7 +92,10 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
       assert html =~ product_category.name
     end
 
-    test "updates product_category within modal", %{conn: conn, product_category: product_category} do
+    test "updates product_category within modal", %{
+      conn: conn,
+      product_category: product_category
+    } do
       {:ok, show_live, _html} = live(conn, ~p"/product_categories/#{product_category}")
 
       assert show_live |> element("a", "Edit") |> render_click() =~

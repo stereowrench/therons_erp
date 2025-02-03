@@ -33,7 +33,10 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
   end
 
   @impl true
-  def handle_info({TheronsErpWeb.ProductCategoryLive.FormComponent, {:saved, product_category}}, socket) do
+  def handle_info(
+        {TheronsErpWeb.ProductCategoryLive.FormComponent, {:saved, product_category}},
+        socket
+      ) do
     {:noreply, stream_insert(socket, :product_categories, product_category)}
   end
 

@@ -32,6 +32,21 @@ defmodule TheronsErp.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:ex_money_sql, "~> 1.0"},
+      {:picosat_elixir, "~> 0.2"},
+      {:sourceror, "~> 1.7", only: [:dev, :test]},
+      {:oban, "~> 2.0"},
+      {:ash_paper_trail, "~> 0.5"},
+      {:ash_archival, "~> 1.0"},
+      {:ash_double_entry, "~> 1.0"},
+      {:ash_state_machine, "~> 0.2"},
+      {:ash_oban, "~> 0.3"},
+      {:ash_money, "~> 0.1"},
+      {:ash_authentication_phoenix, "~> 2.0"},
+      {:ash_authentication, "~> 4.0"},
+      {:ash_postgres, "~> 2.0"},
+      {:ash_phoenix, "~> 2.0"},
+      {:ash, "~> 3.0"},
       {:phoenix, "~> 1.7.19"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
@@ -59,7 +74,8 @@ defmodule TheronsErp.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:live_select, "~> 1.0"},
-      {:seqfuzz, "~> 0.2.0"}
+      {:seqfuzz, "~> 0.2.0"},
+      {:igniter, "~> 0.5", only: [:dev, :test]}
     ]
   end
 
@@ -71,10 +87,10 @@ defmodule TheronsErp.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      setup: ["deps.get", "ash.setup", "assets.setup", "assets.build", "run priv/repo/seeds.exs"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: ["ash.setup --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind therons_erp", "esbuild therons_erp"],
       "assets.deploy": [

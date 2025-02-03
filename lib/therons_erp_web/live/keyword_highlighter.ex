@@ -9,7 +9,7 @@ defmodule TheronsErpWeb.KeywordHighlighter do
 
     case matches do
       nil ->
-        ~H"<%= @string %>"
+        ~H"{@string}"
 
       _ ->
         hs =
@@ -18,11 +18,11 @@ defmodule TheronsErpWeb.KeywordHighlighter do
             case idx in matches do
               true ->
                 assigns = %{string: string, idx: idx}
-                ~H"<b><%= String.at(@string, @idx) %></b>"
+                ~H"<b>{String.at(@string, @idx)}</b>"
 
               false ->
                 assigns = %{string: string, idx: idx}
-                ~H"<%= String.at(@string, @idx) %>"
+                ~H"{String.at(@string, @idx)}"
             end
           end)
 

@@ -7,9 +7,57 @@
 # General application configuration
 import Config
 
+config :therons_erp, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.Postgres,
+  queues: [default: 10],
+  repo: TheronsErp.Repo
+
+config :ex_cldr, default_backend: TheronsErp.Cldr
+
+config :ash,
+  allow_forbidden_field_for_relationships_by_default?: true,
+  include_embedded_source_by_default?: false,
+  show_keysets_for_all_actions?: false,
+  default_page_type: :keyset,
+  policies: [no_filter_static_forbidden_reads?: false],
+  known_types: [AshMoney.Types.Money],
+  custom_types: [money: AshMoney.Types.Money]
+
+config :spark,
+  formatter: [
+    remove_parens?: true,
+    "Ash.Resource": [
+      section_order: [
+        :account,
+        :balance,
+        :transfer,
+        :authentication,
+        :tokens,
+        :postgres,
+        :resource,
+        :code_interface,
+        :actions,
+        :policies,
+        :pub_sub,
+        :preparations,
+        :changes,
+        :validations,
+        :multitenancy,
+        :attributes,
+        :relationships,
+        :calculations,
+        :aggregates,
+        :identities
+      ]
+    ],
+    "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
+  ]
+
 config :therons_erp,
   ecto_repos: [TheronsErp.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  ash_domains: [TheronsErp.Ledger, TheronsErp.Accounts]
 
 # Configures the endpoint
 config :therons_erp, TheronsErpWeb.Endpoint,

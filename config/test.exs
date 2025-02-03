@@ -1,4 +1,7 @@
 import Config
+config :therons_erp, Oban, testing: :manual
+config :therons_erp, token_signing_secret: "mX3jn0HNkCoVKy3YiiF4B1CxZMTGajAA"
+config :ash, disable_async?: true
 
 # Configure your database
 #

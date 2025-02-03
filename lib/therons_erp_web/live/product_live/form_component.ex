@@ -113,7 +113,9 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
       socket =
         if socket.assigns.id == :new do
           socket
-          |> push_redirect(to: ~p"/products/new/newcategory")
+          |> push_redirect(
+            to: ~p"/product_categories/new/#{[product: socket.assigns.product.id]}"
+          )
         else
           socket
           |> push_redirect(to: ~p"/products/#{socket.assigns.id}/newcategory")

@@ -8,6 +8,11 @@ defmodule TheronsErp.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {Oban,
+       AshOban.config(
+         Application.fetch_env!(:therons_erp, :ash_domains),
+         Application.fetch_env!(:therons_erp, Oban)
+       )},
       TheronsErpWeb.Telemetry,
       TheronsErp.Repo,
       {DNSCluster, query: Application.get_env(:therons_erp, :dns_cluster_query) || :ignore},
@@ -17,7 +22,8 @@ defmodule TheronsErp.Application do
       # Start a worker by calling: TheronsErp.Worker.start_link(arg)
       # {TheronsErp.Worker, arg},
       # Start to serve requests, typically the last entry
-      TheronsErpWeb.Endpoint
+      TheronsErpWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :therons_erp]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

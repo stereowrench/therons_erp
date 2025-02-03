@@ -63,7 +63,7 @@ config :therons_erp, TheronsErpWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :therons_erp, dev_routes: true
+config :therons_erp, dev_routes: true, token_signing_secret: "WLLIVZhNakhpRw+lsfSKK9wS5GM5WPzh"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
