@@ -5,8 +5,9 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
   def render(assigns) do
     ~H"""
     <.header>
-      Product category {@product_category.id}
-      <:subtitle>This is a product_category record from your database.</:subtitle>
+      {@product_category.name}
+
+      <:subtitle>{@product_category.id}</:subtitle>
 
       <:actions>
         <.link
