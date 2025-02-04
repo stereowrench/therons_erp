@@ -3,6 +3,19 @@ defmodule TheronsErp.Inventory.Product do
     otp_app: :therons_erp,
     domain: TheronsErp.Inventory
 
+  actions do
+    create :create do
+      accept [:name, :sales_price, :type, :category_id]
+    end
+
+    update :update do
+      accept [:name, :sales_price, :type, :category_id]
+    end
+
+    destroy :destroy do
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -11,7 +24,11 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     attribute :sales_price, :money
-    attribute :type, TheronsErp.Inventory.Product.Types
+
+    attribute :type, TheronsErp.Inventory.Product.Types do
+      default :goods
+    end
+
     timestamps()
   end
 
