@@ -1,7 +1,8 @@
 defmodule TheronsErpWeb.ProductLive.FormComponent do
   use TheronsErpWeb, :live_component
-  alias TheronsErp.Inventory
   alias TheronsErpWeb.Breadcrumbs
+
+  alias TheronsErpWeb.ProductLive.Show
 
   @impl true
   def render(assigns) do
@@ -52,38 +53,16 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
     """
   end
 
-  defp get_categories(selected) do
-    list =
-      Inventory.get_categories!()
-      |> Enum.map(fn cat ->
-        %{
-          value: to_string(cat.id),
-          label: cat.full_name,
-          matches: []
-        }
-      end)
-
-    found = Enum.find(list, &(&1.value == to_string(selected)))
-
-    if found do
-      [found | list |> Enum.take(4)]
-    else
-      list |> Enum.take(5)
-    end
+  def get_initial_options(selected) do
+    Show.get_initial_options(selected)
   end
 
-  defp additional_options do
-    [
-      %{
-        value: :create,
-        label: "Create New",
-        matches: []
-      }
-    ]
+  def get_categories(selected) do
+    Show.get_categories(selected)
   end
 
-  defp get_initial_options(selected) do
-    get_categories(selected) ++ additional_options()
+  def additional_options do
+    Show.additional_options()
   end
 
   @impl true

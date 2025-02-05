@@ -74,6 +74,9 @@ defmodule TheronsErpWeb.Breadcrumbs do
       case from do
         {"product_category", "new", _product_category_id} ->
           ~p"/product_categories"
+
+        {"products", "edit", product_id} ->
+          ~p"/products/#{product_id}"
       end
 
     {which, []}
