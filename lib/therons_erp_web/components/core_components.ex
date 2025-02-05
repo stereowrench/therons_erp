@@ -674,8 +674,6 @@ defmodule TheronsErpWeb.CoreComponents do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
 
-  slot :inject_adjacent, required: false
-
   def live_select(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     assigns =
       assigns
