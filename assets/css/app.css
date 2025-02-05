@@ -26,3 +26,19 @@
     @apply text-sky-700 hover:text-sky-400;
     @apply hover:bg-transparent !important;
 }
+
+.inline-container:hover + .link-to-inside-field > a > span {
+    visibility: visible;
+}
+
+.link-to-inside-field {
+    span {
+        position: relative;
+        left: -35px;
+        visibility: hidden;
+    }
+
+    span:hover {
+        visibility: visible;
+    }
+}

@@ -674,15 +674,20 @@ defmodule TheronsErpWeb.CoreComponents do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
 
+  slot :inject_adjacent, required: false
+
   def live_select(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     assigns =
       assigns
       |> assign(:errors, Enum.map(field.errors, &translate_error(&1)))
       |> assign(:inline, assigns[:inline] || false)
-      |> assign(:live_select_opts, assigns_to_attributes(assigns, [:errors, :label, :inline]))
+      |> assign(
+        :live_select_opts,
+        assigns_to_attributes(assigns, [:errors, :label, :inline, :inject_adjacent])
+      )
 
     ~H"""
-    <div phx-feedback-for={@field.name}>
+    <div phx-feedback-for={@field.name} style={if @inline, do: "display: inline-block;"}>
       <.label for={@field.id}>{@label}</.label>
       <LiveSelect.live_select
         field={@field}
@@ -707,6 +712,7 @@ defmodule TheronsErpWeb.CoreComponents do
         }
         {@live_select_opts}
       />
+      {render_slot(@inject_adjacent)}
 
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>

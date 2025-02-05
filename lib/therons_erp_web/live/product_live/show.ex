@@ -14,8 +14,16 @@ defmodule TheronsErpWeb.ProductLive.Show do
             <.icon name="hero-check-circle" />
           </.button>
         <% end %>
-        <:subtitle>
-          <%= if @live_action != :edit do %>
+        <:subtitle></:subtitle>
+
+        <:actions>
+          <.link patch={~p"/products/#{@product}/show/edit"} phx-click={JS.push_focus()}>
+            <.button>Edit product</.button>
+          </.link>
+        </:actions>
+
+        <%= if @live_action != :edit do %>
+          <div>
             <.live_select
               field={@form[:category_id]}
               label="Category"
@@ -30,15 +38,16 @@ defmodule TheronsErpWeb.ProductLive.Show do
               <:option :let={opt}>
                 <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
               </:option>
+              <:inject_adjacent>
+                <span class="link-to-inside-field">
+                  <.link navigate={~p"/"}>
+                    <.icon name="hero-arrow-right" />
+                  </.link>
+                </span>
+              </:inject_adjacent>
             </.live_select>
-          <% end %>
-        </:subtitle>
-
-        <:actions>
-          <.link patch={~p"/products/#{@product}/show/edit"} phx-click={JS.push_focus()}>
-            <.button>Edit product</.button>
-          </.link>
-        </:actions>
+          </div>
+        <% end %>
       </.header>
       <.list>
         <:item title="Id">{@product.id}</:item>
