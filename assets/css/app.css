@@ -4,3 +4,20 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+
+.inline-container {
+    @apply h-full relative;
+    display: inline-block;
+}
+
+.inline-text-input {
+    color: green;
+}
+
+.inline-dropdown {
+    @apply absolute z-50 bg-gray-200 inset-x-0 top-full;
+}
+
+.inline-active-option {
+    background-color: green;
+}

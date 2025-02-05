@@ -18,9 +18,13 @@ defmodule TheronsErpWeb.ProductLive.Show do
             <.live_select
               field={@form[:category_id]}
               label="Category"
+              inline={true}
               options={@initial_categories}
               update_min_len={0}
               phx-focus="set-default"
+              container_class="inline-container"
+              text_input_class="inline-text-input"
+              dropdown_class="inline-dropdown"
             >
               <:option :let={opt}>
                 <.highlight matches={opt.matches} string={opt.label} value={opt.value} />

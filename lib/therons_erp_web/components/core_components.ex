@@ -396,7 +396,7 @@ defmodule TheronsErpWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+    <label for={@for} class="text-sm font-semibold leading-6 text-zinc-800">
       {render_slot(@inner_block)}
     </label>
     """
@@ -678,20 +678,33 @@ defmodule TheronsErpWeb.CoreComponents do
     assigns =
       assigns
       |> assign(:errors, Enum.map(field.errors, &translate_error(&1)))
-      |> assign(:live_select_opts, assigns_to_attributes(assigns, [:errors, :label]))
+      |> assign(:inline, assigns[:inline] || false)
+      |> assign(:live_select_opts, assigns_to_attributes(assigns, [:errors, :label, :inline]))
 
     ~H"""
     <div phx-feedback-for={@field.name}>
       <.label for={@field.id}>{@label}</.label>
       <LiveSelect.live_select
         field={@field}
-        text_input_class={[
-          "mt-2 block w-full rounded-lg border-zinc-300 py-[7px] px-[11px]",
-          "text-zinc-900 focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-          "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
-          @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
-        ]}
+        text_input_class={
+          if @inline do
+            [
+              "mt-2 block w-full border-none rounded-lg py-[7px] px-[11px]",
+              "text-zinc-900 focus:outline-solid focus:ring-4 sm:text-sm sm:leading-6",
+              "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
+              "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
+              @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
+            ]
+          else
+            [
+              "mt-2 block w-full rounded-lg border-zinc-300 py-[7px] px-[11px]",
+              "text-zinc-900 focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
+              "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
+              "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
+              @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
+            ]
+          end
+        }
         {@live_select_opts}
       />
 
