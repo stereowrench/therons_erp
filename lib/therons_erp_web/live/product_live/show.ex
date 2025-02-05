@@ -17,7 +17,6 @@ defmodule TheronsErpWeb.ProductLive.Show do
           <%= if @live_action != :edit do %>
             <.live_select
               field={@form[:category_id]}
-              style={:none}
               label="Category"
               options={@initial_categories}
               update_min_len={0}
@@ -128,7 +127,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
        socket
        |> Breadcrumbs.navigate_to(
          {"product_category", "new", pid},
-         {"product", "edit", product_params}
+         {"products", "edit", pid, product_params}
        )}
     else
       {:noreply,
@@ -210,6 +209,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
     else
       list |> Enum.take(5)
     end
+    |> Enum.uniq()
   end
 
   def additional_options do
@@ -223,6 +223,6 @@ defmodule TheronsErpWeb.ProductLive.Show do
   end
 
   def get_initial_options(selected) do
-    get_categories(selected) ++ additional_options()
+    (get_categories(selected) ++ additional_options()) |> Enum.uniq()
   end
 end

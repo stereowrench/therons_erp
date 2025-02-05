@@ -36,6 +36,14 @@ defmodule TheronsErpWeb.Breadcrumbs do
     %{route: route, action: action, args: args}
   end
 
+  defp to_json_map({route, action, param, args}) do
+    %{route: route, action: action, param: param, args: args}
+  end
+
+  defp from_json_map(%{"route" => route, "action" => action, "args" => args, "param" => param}) do
+    {route, action, param, args}
+  end
+
   defp from_json_map(%{"route" => route, "action" => action, "args" => args}) do
     {route, action, args}
   end
@@ -85,11 +93,18 @@ defmodule TheronsErpWeb.Breadcrumbs do
   defp _navigate_back([breadcrumb | breadcrumbs], _from, from_args) do
     which =
       case breadcrumb do
-        {"product", "new", args} ->
+        {"products", "new", args} ->
           if from_args do
             ~p"/products/new?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args, from_args: from_args]}"
           else
             ~p"/products/new?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
+          end
+
+        {"products", "edit", pid, args} ->
+          if from_args do
+            ~p"/products/#{pid}/show/edit?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args, from_args: from_args]}"
+          else
+            ~p"/products/#{pid}/show/edit?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
           end
       end
 
