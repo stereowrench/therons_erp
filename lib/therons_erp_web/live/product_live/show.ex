@@ -91,6 +91,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
      |> assign(:product, product)
      |> assign(:args, params["args"])
      |> assign(:from_args, params["from_args"])
+     |> assign(:set_category, %{text: nil, value: nil})
      |> assign_form()}
   end
 
@@ -143,8 +144,20 @@ defmodule TheronsErpWeb.ProductLive.Show do
          {"products", "edit", pid, product_params}
        )}
     else
+      id = product_params["category_id"]
+
+      set_category =
+        socket.assigns.categories
+        |> Enum.find(fn c -> c.value == id end)
+        |> case do
+          nil -> %{text: nil, value: nil}
+          c -> %{text: c.label, value: c.value}
+        end
+
       {:noreply,
-       assign(socket, form: AshPhoenix.Form.validate(socket.assigns.form, product_params))}
+       socket
+       |> assign(form: AshPhoenix.Form.validate(socket.assigns.form, product_params))
+       |> assign(:set_category, set_category)}
     end
   end
 
@@ -191,8 +204,8 @@ defmodule TheronsErpWeb.ProductLive.Show do
         value: cid
       )
     else
-      text = socket.assigns.product.category.full_name
-      value = socket.assigns.product.category_id
+      text = socket.assigns.set_category.text || socket.assigns.product.category.full_name
+      value = socket.assigns.set_category.value || socket.assigns.product.category_id
       opts = prepare_matches(socket.assigns.categories, text)
 
       send_update(LiveSelect.Component,
