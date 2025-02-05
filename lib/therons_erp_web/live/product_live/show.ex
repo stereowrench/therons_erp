@@ -112,7 +112,16 @@ defmodule TheronsErpWeb.ProductLive.Show do
         _ -> AshPhoenix.Form.validate(form, Map.merge(args, from_args))
       end
 
-    assign(socket, form: to_form(form))
+    initial_categories =
+      if from_args["category_id"] do
+        get_initial_options(from_args["category_id"])
+      else
+        socket.assigns.initial_categories
+      end
+
+    socket
+    |> assign(form: to_form(form))
+    |> assign(:initial_categories, initial_categories)
   end
 
   defp page_title(:show), do: "Show Product"
@@ -167,15 +176,27 @@ defmodule TheronsErpWeb.ProductLive.Show do
         %{"id" => "product_category_id_live_select_component" = id},
         socket
       ) do
-    text = socket.assigns.product.category.full_name
-    value = socket.assigns.product.category_id
-    opts = prepare_matches(socket.assigns.categories, text)
+    if cid = socket.assigns.from_args["category_id"] do
+      # text = socket.assigns.product.category.full_name
+      # value = socket.assigns.product.category_id
+      opts = get_initial_options(cid)
 
-    send_update(LiveSelect.Component,
-      options: opts,
-      id: id,
-      value: value
-    )
+      send_update(LiveSelect.Component,
+        options: opts,
+        id: id,
+        value: cid
+      )
+    else
+      text = socket.assigns.product.category.full_name
+      value = socket.assigns.product.category_id
+      opts = prepare_matches(socket.assigns.categories, text)
+
+      send_update(LiveSelect.Component,
+        options: opts,
+        id: id,
+        value: value
+      )
+    end
 
     {:noreply, socket}
   end
@@ -205,9 +226,9 @@ defmodule TheronsErpWeb.ProductLive.Show do
     found = Enum.find(list, &(&1.value == to_string(selected)))
 
     if found do
-      [found | list |> Enum.take(4)]
+      [found | list]
     else
-      list |> Enum.take(5)
+      list
     end
     |> Enum.uniq()
   end
@@ -223,6 +244,6 @@ defmodule TheronsErpWeb.ProductLive.Show do
   end
 
   def get_initial_options(selected) do
-    (get_categories(selected) ++ additional_options()) |> Enum.uniq()
+    (get_categories(selected) ++ additional_options()) |> Enum.uniq() |> Enum.take(5)
   end
 end

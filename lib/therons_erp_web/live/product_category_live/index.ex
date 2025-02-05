@@ -20,7 +20,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
         fn {_id, product_category} -> JS.navigate(~p"/product_categories/#{product_category}") end
       }
     >
-      <:col :let={{_id, product_category}} label="Id">{product_category.id}</:col>
+      <:col :let={{_id, product_category}} label="Name">{product_category.full_name}</:col>
 
       <:action :let={{_id, product_category}}>
         <div class="sr-only">

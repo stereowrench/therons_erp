@@ -102,9 +102,9 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
         {"products", "edit", pid, args} ->
           if from_args do
-            ~p"/products/#{pid}/show/edit?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args, from_args: from_args]}"
+            ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args, from_args: from_args]}"
           else
-            ~p"/products/#{pid}/show/edit?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
+            ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
           end
       end
 
