@@ -38,6 +38,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
         action={@live_action}
         current_user={@current_user}
         product_category={@product_category}
+        breadcrumbs={@breadcrumbs}
         patch={~p"/product_categories/#{@product_category}"}
       />
     </.modal>

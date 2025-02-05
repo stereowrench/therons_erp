@@ -699,4 +699,14 @@ defmodule TheronsErpWeb.CoreComponents do
     </div>
     """
   end
+
+  alias TheronsErpWeb.KeywordHighlighter
+
+  attr :string, :string, required: true
+  attr :matches, :list, required: true
+  attr :value, :string, default: nil
+
+  def highlight(assigns) do
+    KeywordHighlighter.highlight(assigns.string, assigns.matches, assigns.value)
+  end
 end

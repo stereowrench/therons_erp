@@ -33,6 +33,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
         title={@page_title}
         action={@live_action}
         current_user={@current_user}
+        breadcrumbs={@breadcrumbs}
         product={@product}
         patch={~p"/products/#{@product}"}
       />

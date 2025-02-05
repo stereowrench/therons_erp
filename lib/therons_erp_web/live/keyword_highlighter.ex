@@ -28,7 +28,7 @@ defmodule TheronsErpWeb.KeywordHighlighter do
 
         assigns = %{hs: hs}
 
-        if value < 0 do
+        if is_atom(value) do
           ~H"""
           <span class="text-purple-400" phx-no-format><%= for h <- @hs do %><%= h %><% end %></span>
           """

@@ -18,6 +18,9 @@ defmodule TheronsErp.Inventory.ProductCategory do
   actions do
     defaults [:read]
 
+    read :list do
+    end
+
     destroy :delete do
     end
 

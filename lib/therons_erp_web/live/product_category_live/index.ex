@@ -44,7 +44,14 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
       :if={@live_action in [:new, :edit]}
       id="product_category-modal"
       show
-      on_cancel={JS.patch(~p"/product_categories")}
+      on_cancel={
+        JS.patch(
+          TheronsErpWeb.Breadcrumbs.get_previous_path(
+            @breadcrumbs,
+            {"product_category", "new", @product_id}
+          )
+        )
+      }
     >
       <.live_component
         module={TheronsErpWeb.ProductCategoryLive.FormComponent}
@@ -53,6 +60,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
         current_user={@current_user}
         action={@live_action}
         product_category={@product_category}
+        breadcrumbs={@breadcrumbs}
         patch={~p"/product_categories"}
       />
     </.modal>
@@ -84,8 +92,9 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     )
   end
 
-  defp apply_action(socket, :new, _params) do
+  defp apply_action(socket, :new, params) do
     socket
+    |> assign(:product_id, params["product_id"])
     |> assign(:page_title, "New Product category")
     |> assign(:product_category, nil)
   end

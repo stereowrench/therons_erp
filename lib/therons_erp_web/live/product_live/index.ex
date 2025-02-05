@@ -50,6 +50,7 @@ defmodule TheronsErpWeb.ProductLive.Index do
         title={@page_title}
         current_user={@current_user}
         action={@live_action}
+        breadcrumbs={@breadcrumbs}
         product={@product}
         patch={~p"/products"}
       />
