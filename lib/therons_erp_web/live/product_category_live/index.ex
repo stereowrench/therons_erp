@@ -45,7 +45,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
       id="product_category-modal"
       show
       on_cancel={
-        JS.patch(
+        JS.navigate(
           TheronsErpWeb.Breadcrumbs.get_previous_path(
             @breadcrumbs,
             {"product_category", "new", (@product_category && @product_category.id) || nil}

@@ -42,7 +42,7 @@ defmodule TheronsErpWeb.ProductLive.Index do
       :if={@live_action in [:new, :edit]}
       id="product-modal"
       show
-      on_cancel={JS.patch(~p"/products")}
+      on_cancel={JS.navigate(~p"/products")}
     >
       <.live_component
         module={TheronsErpWeb.ProductLive.FormComponent}
@@ -68,14 +68,15 @@ defmodule TheronsErpWeb.ProductLive.Index do
        :products,
        Ash.read!(TheronsErp.Inventory.Product, actor: socket.assigns[:current_user])
      )
-     |> assign_new(:from_args, fn -> params["from_args"] end)
-     |> assign_new(:args, fn -> params["args"] end)
      |> assign_new(:current_user, fn -> nil end)}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    {:noreply,
+     apply_action(socket, socket.assigns.live_action, params)
+     |> assign(:from_args, params["from_args"])
+     |> assign(:args, params["args"])}
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do

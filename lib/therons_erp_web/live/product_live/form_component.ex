@@ -51,6 +51,7 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
   end
 
   defp get_categories do
+    # TODO limit count but include current one
     Inventory.get_categories!()
     |> Enum.map(fn cat ->
       %{
@@ -152,8 +153,12 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
       end
 
     form =
-      form
-      |> AshPhoenix.Form.validate(Map.merge(args, from_args))
+      case {args, from_args} do
+        {nil, nil} -> form
+        {_, nil} -> AshPhoenix.Form.validate(form, args)
+        {nil, _} -> AshPhoenix.Form.validate(form, from_args)
+        _ -> AshPhoenix.Form.validate(form, Map.merge(args, from_args))
+      end
 
     assign(socket, form: to_form(form))
   end
