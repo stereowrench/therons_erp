@@ -50,16 +50,24 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
     """
   end
 
-  defp get_categories do
-    # TODO limit count but include current one
-    Inventory.get_categories!()
-    |> Enum.map(fn cat ->
-      %{
-        value: to_string(cat.id),
-        label: cat.full_name,
-        matches: []
-      }
-    end)
+  defp get_categories(selected) do
+    list =
+      Inventory.get_categories!()
+      |> Enum.map(fn cat ->
+        %{
+          value: to_string(cat.id),
+          label: cat.full_name,
+          matches: []
+        }
+      end)
+
+    found = Enum.find(list, &(&1.value == to_string(selected)))
+
+    if found do
+      [found | list |> Enum.take(4)]
+    else
+      list |> Enum.take(5)
+    end
   end
 
   defp additional_options do
@@ -72,8 +80,8 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
     ]
   end
 
-  defp get_initial_options do
-    get_categories() ++ additional_options()
+  defp get_initial_options(selected) do
+    get_categories(selected) ++ additional_options()
   end
 
   def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
@@ -93,11 +101,13 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
 
   @impl true
   def update(assigns, socket) do
+    current_category_id = (assigns.product && assigns.product.category_id) || nil
+
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:categories, get_categories())
-     |> assign(:initial_options, get_initial_options())
+     |> assign(:categories, get_categories(current_category_id))
+     |> assign(:initial_options, get_initial_options(current_category_id))
      |> assign_form()}
   end
 
