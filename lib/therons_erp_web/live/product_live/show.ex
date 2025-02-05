@@ -40,7 +40,13 @@ defmodule TheronsErpWeb.ProductLive.Show do
               </:option>
               <:inject_adjacent>
                 <span class="link-to-inside-field">
-                  <.link navigate={~p"/"}>
+                  <.link navigate={
+                    TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                      @breadcrumbs,
+                      {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id)},
+                      {"products", @product.id}
+                    )
+                  }>
                     <.icon name="hero-arrow-right" />
                   </.link>
                 </span>

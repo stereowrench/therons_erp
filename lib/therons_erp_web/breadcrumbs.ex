@@ -111,26 +111,25 @@ defmodule TheronsErpWeb.Breadcrumbs do
     {which, breadcrumbs}
   end
 
-  def navigate_to(socket, {"product_categories"}, from) do
+  def navigate_to(socket, part, from) do
     socket
-    |> Phoenix.LiveView.redirect(
-      to: ~p"/product_categories?#{[breadcrumbs: append_and_encode(socket, from)]}"
-    )
+    |> Phoenix.LiveView.redirect(to: navigate_to_url(socket.assigns.breadcrumbs, part, from))
   end
 
-  def navigate_to(socket, {"product_category", "new", product_id}, from) do
-    socket
-    |> Phoenix.LiveView.redirect(
-      to:
-        ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(socket, from), product_id: product_id]}"
-    )
+  def navigate_to_url(breadcrumbs, {"product_categories"}, from) do
+    ~p"/product_categories?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
   end
 
-  defp append_and_encode(socket, breadcrumb) do
-    breadcrumbs = socket.assigns.breadcrumbs
+  def navigate_to_url(breadcrumbs, {"product_category", "new", product_id}, from) do
+    ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), product_id: product_id]}"
+  end
 
+  def navigate_to_url(breadcrumbs, {"product_category", id}, from) do
+    ~p"/product_categories/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
+  end
+
+  defp append_and_encode(breadcrumbs, breadcrumb) do
     [breadcrumb | breadcrumbs]
-    |> IO.inspect()
     |> encode_breadcrumbs()
   end
 end
