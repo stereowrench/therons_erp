@@ -36,6 +36,8 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
           label="Category"
           phx-target={@myself}
           options={@initial_options}
+          update_min_len={0}
+          phx-focus="set-default"
         >
           <:option :let={opt}>
             <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
@@ -82,6 +84,13 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
 
   defp get_initial_options(selected) do
     get_categories(selected) ++ additional_options()
+  end
+
+  @impl true
+  def handle_event("set-default", %{"id" => id}, socket) do
+    send_update(LiveSelect.Component, options: socket.assigns.categories, id: id)
+
+    {:noreply, socket}
   end
 
   def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
