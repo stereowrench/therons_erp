@@ -153,8 +153,7 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
 
     form =
       form
-      |> AshPhoenix.Form.validate(args)
-      |> AshPhoenix.Form.validate(from_args)
+      |> AshPhoenix.Form.validate(Map.merge(args, from_args))
 
     assign(socket, form: to_form(form))
   end
