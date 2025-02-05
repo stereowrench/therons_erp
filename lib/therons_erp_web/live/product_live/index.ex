@@ -18,7 +18,10 @@ defmodule TheronsErpWeb.ProductLive.Index do
       rows={@streams.products}
       row_click={fn {_id, product} -> JS.navigate(~p"/products/#{product}") end}
     >
-      <:col :let={{_id, product}} label="Id">{product.id}</:col>
+      <:col :let={{_id, product}} label="Name">{product.name}</:col>
+      <:col :let={{_id, product}} label="Category">
+        {(product.category && product.category.full_name) || ""}
+      </:col>
 
       <:action :let={{_id, product}}>
         <div class="sr-only">
@@ -67,6 +70,7 @@ defmodule TheronsErpWeb.ProductLive.Index do
      |> stream(
        :products,
        Ash.read!(TheronsErp.Inventory.Product, actor: socket.assigns[:current_user])
+       |> Ash.load!(:category)
      )
      |> assign_new(:current_user, fn -> nil end)}
   end
