@@ -137,7 +137,7 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
-  defp assign_form(%{assigns: %{product: product}} = socket) do
+  defp assign_form(%{assigns: %{product: product, args: args, from_args: from_args}} = socket) do
     form =
       if product do
         AshPhoenix.Form.for_update(product, :update,
@@ -150,6 +150,11 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
           actor: socket.assigns.current_user
         )
       end
+
+    form =
+      form
+      |> AshPhoenix.Form.validate(args)
+      |> AshPhoenix.Form.validate(from_args)
 
     assign(socket, form: to_form(form))
   end

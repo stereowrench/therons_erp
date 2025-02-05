@@ -1,5 +1,6 @@
 defmodule TheronsErpWeb.ProductCategoryLive.FormComponent do
   use TheronsErpWeb, :live_component
+  alias TheronsErpWeb.Breadcrumbs
 
   @impl true
   def render(assigns) do
@@ -58,12 +59,24 @@ defmodule TheronsErpWeb.ProductCategoryLive.FormComponent do
         socket =
           socket
           |> put_flash(:info, "Product category #{socket.assigns.form.source.type}d successfully")
-          |> push_patch(to: socket.assigns.patch)
+          |> handle_save_patch(product_category)
 
         {:noreply, socket}
 
       {:error, form} ->
         {:noreply, assign(socket, form: form)}
+    end
+  end
+
+  defp handle_save_patch(socket, product_category) do
+    if Breadcrumbs.has_breadcrumb?(socket.assigns.breadcrumbs) do
+      Breadcrumbs.navigate_back(
+        socket,
+        {"product_category", "new", product_category.id},
+        %{category_id: product_category.id}
+      )
+    else
+      push_patch(socket, to: socket.assigns.patch)
     end
   end
 

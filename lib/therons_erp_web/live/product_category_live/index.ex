@@ -48,7 +48,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
         JS.patch(
           TheronsErpWeb.Breadcrumbs.get_previous_path(
             @breadcrumbs,
-            {"product_category", "new", @product_id}
+            {"product_category", "new", (@product_category && @product_category.id) || nil}
           )
         )
       }
@@ -94,7 +94,6 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
 
   defp apply_action(socket, :new, params) do
     socket
-    |> assign(:product_id, params["product_id"])
     |> assign(:page_title, "New Product category")
     |> assign(:product_category, nil)
   end

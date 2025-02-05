@@ -52,6 +52,8 @@ defmodule TheronsErpWeb.ProductLive.Index do
         action={@live_action}
         breadcrumbs={@breadcrumbs}
         product={@product}
+        args={@args}
+        from_args={@from_args}
         patch={~p"/products"}
       />
     </.modal>
@@ -59,13 +61,15 @@ defmodule TheronsErpWeb.ProductLive.Index do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     {:ok,
      socket
      |> stream(
        :products,
        Ash.read!(TheronsErp.Inventory.Product, actor: socket.assigns[:current_user])
      )
+     |> assign_new(:from_args, fn -> params["from_args"] end)
+     |> assign_new(:args, fn -> params["args"] end)
      |> assign_new(:current_user, fn -> nil end)}
   end
 

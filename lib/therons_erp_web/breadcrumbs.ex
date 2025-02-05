@@ -20,6 +20,14 @@ defmodule TheronsErpWeb.Breadcrumbs do
     |> Enum.map(&from_json_map/1)
   end
 
+  def has_breadcrumb?([]) do
+    false
+  end
+
+  def has_breadcrumb?(_breadcrumbs) do
+    true
+  end
+
   defp to_json_map({route, action}) do
     %{route: route, action: action}
   end
@@ -50,29 +58,36 @@ defmodule TheronsErpWeb.Breadcrumbs do
     path
   end
 
-  def navigate_back(socket, from) do
+  def navigate_back(socket, from, args \\ nil) do
     breadcrumbs = socket.assigns.breadcrumbs
-    path = _navigate_back(breadcrumbs, from)
+    {path, _breadcrumbs} = _navigate_back(breadcrumbs, from, args)
 
     socket
+    |> assign(:breadcrumbs, encode_breadcrumbs(breadcrumbs))
     |> Phoenix.LiveView.redirect(to: path)
   end
 
-  defp _navigate_back([], from) do
+  defp _navigate_back(_breadcrumbs, _from, args \\ nil)
+
+  defp _navigate_back([], from, args) do
     which =
       case from do
-        {"product_category", "new", product_id} ->
+        {"product_category", "new", _product_category_id} ->
           ~p"/product_categories"
       end
 
     {which, []}
   end
 
-  defp _navigate_back([breadcrumb | breadcrumbs], _from) do
+  defp _navigate_back([breadcrumb | breadcrumbs], _from, from_args) do
     which =
       case breadcrumb do
         {"product", "new", args} ->
-          ~p"/products/new?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
+          if from_args do
+            ~p"/products/new?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args, from_args: from_args]}"
+          else
+            ~p"/products/new?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
+          end
       end
 
     {which, breadcrumbs}
