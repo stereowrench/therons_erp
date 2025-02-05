@@ -7,12 +7,13 @@ defmodule TheronsErpWeb.ProductLive.Show do
   def render(assigns) do
     ~H"""
     <.simple_form for={@form} id="product-inline-form" phx-change="validate" phx-submit="save">
-      <:actions>
-        <.button phx-disable-with="Saving...">Save Product</.button>
-      </:actions>
-
       <.header>
         {@product.name}
+        <%= if @unsaved_changes do %>
+          <.button phx-disable-with="Saving..." class="save-button">
+            <.icon name="hero-check-circle" />
+          </.button>
+        <% end %>
         <:subtitle>
           <%= if @live_action != :edit do %>
             <.live_select
@@ -31,7 +32,6 @@ defmodule TheronsErpWeb.ProductLive.Show do
               </:option>
             </.live_select>
           <% end %>
-          {(@product.category && @product.category.full_name) || ""}
         </:subtitle>
 
         <:actions>
@@ -92,6 +92,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
      |> assign(:args, params["args"])
      |> assign(:from_args, params["from_args"])
      |> assign(:set_category, %{text: nil, value: nil})
+     |> assign(:unsaved_changes, false)
      |> assign_form()}
   end
 
@@ -126,6 +127,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
 
     socket
     |> assign(form: to_form(form))
+    |> assign(:unsaved_changes, form.changed?)
     |> assign(:initial_categories, initial_categories)
   end
 
@@ -154,9 +156,12 @@ defmodule TheronsErpWeb.ProductLive.Show do
           c -> %{text: c.label, value: c.value}
         end
 
+      form = AshPhoenix.Form.validate(socket.assigns.form, product_params)
+
       {:noreply,
        socket
-       |> assign(form: AshPhoenix.Form.validate(socket.assigns.form, product_params))
+       |> assign(form: form)
+       |> assign(:unsaved_changes, form.source.changed?)
        |> assign(:set_category, set_category)}
     end
   end
@@ -204,7 +209,10 @@ defmodule TheronsErpWeb.ProductLive.Show do
         value: cid
       )
     else
-      text = socket.assigns.set_category.text || socket.assigns.product.category.full_name
+      text =
+        socket.assigns.set_category.text ||
+          (socket.assigns.product.category && socket.assigns.product.category.full_name) || ""
+
       value = socket.assigns.set_category.value || socket.assigns.product.category_id
       opts = prepare_matches(socket.assigns.categories, text)
 
