@@ -75,7 +75,8 @@ defmodule TheronsErp.MixProject do
       {:bandit, "~> 1.5"},
       {:live_select, "~> 1.0"},
       {:seqfuzz, "~> 0.2.0"},
-      {:igniter, "~> 0.5", only: [:dev, :test]}
+      {:igniter, "~> 0.5", only: [:dev, :test]},
+      {:petal_components, "~> 2.8"}
     ]
   end
 
