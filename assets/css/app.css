@@ -42,3 +42,11 @@
         visibility: visible;
     }
 }
+
+.breadcrumbs {
+    @apply text-sm;
+
+    a {
+        @apply text-sky-700 hover:text-sky-400;
+    }
+}

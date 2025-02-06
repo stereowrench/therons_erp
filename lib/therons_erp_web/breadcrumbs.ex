@@ -107,7 +107,7 @@ defmodule TheronsErpWeb.Breadcrumbs do
             ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
           end
 
-        {"products", pid} ->
+        {"products", pid, _identifier} ->
           if from_args do
             ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args]}"
           else
@@ -144,8 +144,8 @@ defmodule TheronsErpWeb.Breadcrumbs do
     "P#{pid}"
   end
 
-  defp name_for_crumb({"products", pid}) do
-    "P#{pid}"
+  defp name_for_crumb({"products", _pid, identifier}) do
+    "P#{identifier}"
   end
 
   def stream_crumbs(list) when is_list(list) do

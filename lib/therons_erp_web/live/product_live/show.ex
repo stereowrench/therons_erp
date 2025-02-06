@@ -45,7 +45,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
                       TheronsErpWeb.Breadcrumbs.navigate_to_url(
                         @breadcrumbs,
                         {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id)},
-                        {"products", @product.id}
+                        {"products", @product.id, @product.identifier}
                       )
                     }>
                       <.icon name="hero-arrow-right" />
