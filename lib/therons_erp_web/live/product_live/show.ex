@@ -39,17 +39,19 @@ defmodule TheronsErpWeb.ProductLive.Show do
                 <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
               </:option>
               <:inject_adjacent>
-                <span class="link-to-inside-field">
-                  <.link navigate={
-                    TheronsErpWeb.Breadcrumbs.navigate_to_url(
-                      @breadcrumbs,
-                      {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id)},
-                      {"products", @product.id}
-                    )
-                  }>
-                    <.icon name="hero-arrow-right" />
-                  </.link>
-                </span>
+                <%= if Phoenix.HTML.Form.input_value(@form, :category_id) do %>
+                  <span class="link-to-inside-field">
+                    <.link navigate={
+                      TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                        @breadcrumbs,
+                        {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id)},
+                        {"products", @product.id}
+                      )
+                    }>
+                      <.icon name="hero-arrow-right" />
+                    </.link>
+                  </span>
+                <% end %>
               </:inject_adjacent>
             </.live_select>
           </div>
@@ -213,9 +215,9 @@ defmodule TheronsErpWeb.ProductLive.Show do
         %{"id" => "product_category_id_live_select_component" = id},
         socket
       ) do
+    IO.inspect(socket.assigns.form)
+
     if cid = socket.assigns.from_args["category_id"] do
-      # text = socket.assigns.product.category.full_name
-      # value = socket.assigns.product.category_id
       opts = get_initial_options(cid)
 
       send_update(LiveSelect.Component,
