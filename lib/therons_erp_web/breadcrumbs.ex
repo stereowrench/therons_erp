@@ -113,6 +113,13 @@ defmodule TheronsErpWeb.Breadcrumbs do
           else
             ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs)]}"
           end
+
+        {"product_category", id, _name} ->
+          if from_args do
+            ~p"/product_categories/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args]}"
+          else
+            ~p"/product_categories/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs)]}"
+          end
       end
 
     {which, breadcrumbs}
@@ -131,8 +138,12 @@ defmodule TheronsErpWeb.Breadcrumbs do
     ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), product_id: product_id]}"
   end
 
-  def navigate_to_url(breadcrumbs, {"product_category", id}, from) do
+  def navigate_to_url(breadcrumbs, {"product_category", id, _full_name}, from) do
     ~p"/product_categories/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
+  end
+
+  def navigate_to_url(breadcrumbs, {"products", id, _name}, from) do
+    ~p"/products/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
   end
 
   defp append_and_encode(breadcrumbs, breadcrumb) do
@@ -141,11 +152,15 @@ defmodule TheronsErpWeb.Breadcrumbs do
   end
 
   defp name_for_crumb({"products", "edit", pid}) do
-    "P#{pid}"
+    "Edit #{pid}"
   end
 
   defp name_for_crumb({"products", _pid, identifier}) do
-    "P#{identifier}"
+    "#{identifier}"
+  end
+
+  defp name_for_crumb({"product_category", _cid, name}) do
+    "#{name}"
   end
 
   def stream_crumbs(list) when is_list(list) do
@@ -157,7 +172,7 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
   defp _stream_crumbs(current_list = [_ | rest]) do
     Stream.concat([
-      current_list,
+      [current_list],
       # Recursive call
       stream_crumbs(rest)
     ])
@@ -183,11 +198,11 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
         ~H"""
         <span class="breadcrumbs">
-          <.link href={_navigate_back([@first, @second], nil, nil) |> elem(0)}>
-            {name_for_crumb(@first)}
+          <.link href={_navigate_back([@second], nil, nil) |> elem(0)}>
+            {name_for_crumb(@second)}
           </.link>
           /
-          <.link href={_navigate_back([@first], nil, nil) |> elem(0)}>
+          <.link href={_navigate_back([@first, @second], nil, nil) |> elem(0)}>
             {name_for_crumb(@first)}
           </.link>
         </span>
@@ -202,13 +217,15 @@ defmodule TheronsErpWeb.Breadcrumbs do
         ~H"""
         <span class="breadcrumbs">
           <PC.dropdown js_lib="live_view_js" placement="right">
-            <%= for crumb <- stream_crumbs(@rest) do %>
-              <PC.dropdown_menu_item>{name_for_crumb(crumb)}</PC.dropdown_menu_item>
+            <%= for crumb = [f | _] <- stream_crumbs(@rest) do %>
+              <PC.dropdown_menu_item link_type="a" to={_navigate_back(crumb, nil, nil) |> elem(0)}>
+                {name_for_crumb(f)}
+              </PC.dropdown_menu_item>
             <% end %>
           </PC.dropdown>
           /
           <.link href={_navigate_back([@second | @rest], nil, nil) |> elem(0)}>
-            {name_for_crumb(@first)}
+            {name_for_crumb(@second)}
           </.link>
           /
           <.link href={_navigate_back([@first, @second | @rest], nil, nil) |> elem(0)}>

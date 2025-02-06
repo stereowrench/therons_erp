@@ -50,3 +50,7 @@
         @apply text-sky-700 hover:text-sky-400;
     }
 }
+
+.pc-dropdown {
+    vertical-align: middle;
+}

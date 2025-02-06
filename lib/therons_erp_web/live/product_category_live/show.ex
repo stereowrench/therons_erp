@@ -23,6 +23,24 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
       <:item title="Id">{@product_category.id}</:item>
     </.list>
 
+    <.table
+      id="products"
+      rows={@product_category.products}
+      row_click={
+        fn product ->
+          JS.navigate(
+            TheronsErpWeb.Breadcrumbs.navigate_to_url(
+              @breadcrumbs,
+              {"products", product.id, product.name},
+              {"product_category", @product_category.id, @product_category.full_name}
+            )
+          )
+        end
+      }
+    >
+      <:col :let={product} label="name">{product.name}</:col>
+    </.table>
+
     <.back navigate={~p"/product_categories"}>Back to product_categories</.back>
 
     <.modal
@@ -57,7 +75,10 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
      |> assign(:page_title, page_title(socket.assigns.live_action))
      |> assign(
        :product_category,
-       Ash.get!(TheronsErp.Inventory.ProductCategory, id, actor: socket.assigns.current_user)
+       Ash.get!(TheronsErp.Inventory.ProductCategory, id,
+         actor: socket.assigns.current_user,
+         load: :products
+       )
      )}
   end
 

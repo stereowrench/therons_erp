@@ -59,6 +59,10 @@ defmodule TheronsErp.Inventory.ProductCategory do
       has_many :subcategories, TheronsErp.Inventory.ProductCategory do
         destination_attribute :product_category_id
       end
+
+      has_many :products, TheronsErp.Inventory.Product do
+        destination_attribute :category_id
+      end
     end
 
     def validate_no_cycles(_cs, _model, ids \\ [])

@@ -44,8 +44,12 @@ defmodule TheronsErpWeb.ProductLive.Show do
                     <.link navigate={
                       TheronsErpWeb.Breadcrumbs.navigate_to_url(
                         @breadcrumbs,
-                        {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id)},
-                        {"products", @product.id, @product.identifier}
+                        {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id),
+                         get_category_name(
+                           @categories,
+                           Phoenix.HTML.Form.input_value(@form, :category_id)
+                         )},
+                        {"products", @product.id, @product.name}
                       )
                     }>
                       <.icon name="hero-arrow-right" />
@@ -83,6 +87,14 @@ defmodule TheronsErpWeb.ProductLive.Show do
       />
     </.modal>
     """
+  end
+
+  def get_category_name(categories, id) do
+    found =
+      categories
+      |> Enum.find(&(to_string(&1.value) == to_string(id)))
+
+    found.label
   end
 
   @impl true
