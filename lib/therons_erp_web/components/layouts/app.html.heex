@@ -36,6 +36,7 @@
   </nav>
 </header>
 <main class="px-4 py-20 sm:px-6 lg:px-8">
+  <TheronsErpWeb.Breadcrumbs.render_breadcrumbs breadcrumbs={@breadcrumbs} />
   <div class="mx-auto max-w-2xl">
     <.flash_group flash={@flash} />
     {@inner_content}

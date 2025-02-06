@@ -103,6 +103,7 @@ defmodule TheronsErpWeb do
         defdelegate card_footer(assigns), to: PetalComponents.Card
         defdelegate container(assigns), to: PetalComponents.Container
         defdelegate dropdown(assigns), to: PetalComponents.Dropdown
+        defdelegate dropdown_menu_item(assigns), to: PetalComponents.Dropdown
         defdelegate form_label(assigns), to: PetalComponents.Form
         defdelegate field(assigns), to: PetalComponents.Field
         defdelegate icon(assigns), to: PetalComponents.Icon

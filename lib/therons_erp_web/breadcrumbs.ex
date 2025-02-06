@@ -1,6 +1,6 @@
 defmodule TheronsErpWeb.Breadcrumbs do
   import Phoenix.Component
-  use TheronsErpWeb, :verified_routes
+  use TheronsErpWeb, :html
 
   def on_mount(:default, params, _session, socket) do
     socket = assign(socket, :breadcrumbs, decode_breadcrumbs(params["breadcrumbs"]))
@@ -106,6 +106,13 @@ defmodule TheronsErpWeb.Breadcrumbs do
           else
             ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
           end
+
+        {"products", pid} ->
+          if from_args do
+            ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args]}"
+          else
+            ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs)]}"
+          end
       end
 
     {which, breadcrumbs}
@@ -131,5 +138,88 @@ defmodule TheronsErpWeb.Breadcrumbs do
   defp append_and_encode(breadcrumbs, breadcrumb) do
     [breadcrumb | breadcrumbs]
     |> encode_breadcrumbs()
+  end
+
+  defp name_for_crumb({"products", "edit", pid}) do
+    "P#{pid}"
+  end
+
+  defp name_for_crumb({"products", pid}) do
+    "P#{pid}"
+  end
+
+  def stream_crumbs(list) when is_list(list) do
+    _stream_crumbs(list)
+  end
+
+  # Handle empty list case. Important!
+  defp _stream_crumbs([]), do: []
+
+  defp _stream_crumbs(current_list = [_ | rest]) do
+    Stream.concat([
+      current_list,
+      # Recursive call
+      stream_crumbs(rest)
+    ])
+  end
+
+  def render_breadcrumbs(assigns) do
+    case assigns.breadcrumbs do
+      [first] ->
+        assigns = assign(assigns, :first, first)
+
+        ~H"""
+        <span class="breadcrumbs">
+          <.link href={_navigate_back([@first], nil, nil) |> elem(0)}>
+            {name_for_crumb(@first)}
+          </.link>
+        </span>
+        """
+
+      [first, second] ->
+        assigns =
+          assign(assigns, :first, first)
+          |> assign(:second, second)
+
+        ~H"""
+        <span class="breadcrumbs">
+          <.link href={_navigate_back([@first, @second], nil, nil) |> elem(0)}>
+            {name_for_crumb(@first)}
+          </.link>
+          /
+          <.link href={_navigate_back([@first], nil, nil) |> elem(0)}>
+            {name_for_crumb(@first)}
+          </.link>
+        </span>
+        """
+
+      [first, second | rest] ->
+        assigns =
+          assign(assigns, :first, first)
+          |> assign(:second, second)
+          |> assign(:rest, rest)
+
+        ~H"""
+        <span class="breadcrumbs">
+          <PC.dropdown js_lib="live_view_js" placement="right">
+            <%= for crumb <- stream_crumbs(@rest) do %>
+              <PC.dropdown_menu_item>{name_for_crumb(crumb)}</PC.dropdown_menu_item>
+            <% end %>
+          </PC.dropdown>
+          /
+          <.link href={_navigate_back([@second | @rest], nil, nil) |> elem(0)}>
+            {name_for_crumb(@first)}
+          </.link>
+          /
+          <.link href={_navigate_back([@first, @second | @rest], nil, nil) |> elem(0)}>
+            {name_for_crumb(@first)}
+          </.link>
+        </span>
+        """
+
+      [] ->
+        ~H"""
+        """
+    end
   end
 end
