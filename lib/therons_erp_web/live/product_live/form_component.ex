@@ -120,7 +120,7 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
   def handle_event("save", %{"product" => product_params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.form, params: product_params) do
       {:ok, product} ->
-        notify_parent({:saved, product})
+        notify_parent({:saved, product |> Ash.load!(:category)})
 
         socket =
           socket

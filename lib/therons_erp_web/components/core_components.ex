@@ -679,6 +679,7 @@ defmodule TheronsErpWeb.CoreComponents do
       assigns
       |> assign(:errors, Enum.map(field.errors, &translate_error(&1)))
       |> assign(:inline, assigns[:inline] || false)
+      |> assign(:inject_adjacent, assigns[:inject_adjacent] || [])
       |> assign(
         :live_select_opts,
         assigns_to_attributes(assigns, [:errors, :label, :inline, :inject_adjacent])
@@ -710,6 +711,7 @@ defmodule TheronsErpWeb.CoreComponents do
         }
         {@live_select_opts}
       />
+
       {render_slot(@inject_adjacent)}
 
       <.error :for={msg <- @errors}>{msg}</.error>

@@ -8,7 +8,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
     ~H"""
     <.simple_form for={@form} id="product-inline-form" phx-change="validate" phx-submit="save">
       <.header>
-        {@product.name}
+        {@product.name} [{@product.identifier}]
         <%= if @unsaved_changes do %>
           <.button phx-disable-with="Saving..." class="save-button">
             <.icon name="hero-check-circle" />

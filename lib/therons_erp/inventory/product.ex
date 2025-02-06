@@ -31,6 +31,10 @@ defmodule TheronsErp.Inventory.Product do
       allow_nil? false
     end
 
+    attribute :identifier, :integer do
+      generated? true
+    end
+
     attribute :sales_price, :money
 
     attribute :type, TheronsErp.Inventory.Product.Types do
