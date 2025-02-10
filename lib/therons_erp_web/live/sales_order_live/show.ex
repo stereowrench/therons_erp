@@ -8,6 +8,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     <.simple_form for={@form} id="sales_order-form" phx-change="validate" phx-submit="save">
       <.header>
         Sales order {@sales_order.identifier}
+        <PC.badge color="info">{@sales_order.state}</PC.badge>
         <%= if @unsaved_changes do %>
           <.button phx-disable-with="Saving..." class="save-button">
             <.icon name="hero-check-circle" />

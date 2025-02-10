@@ -2,14 +2,43 @@ defmodule TheronsErp.Sales.SalesOrder do
   use Ash.Resource,
     otp_app: :therons_erp,
     domain: TheronsErp.Sales,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshStateMachine]
 
   postgres do
     table "sales_orders"
     repo TheronsErp.Repo
   end
 
+  state_machine do
+    initial_states([:draft])
+    default_initial_state(:draft)
+
+    transitions do
+      transition(:ready, from: :draft, to: [:ready, :cancelled])
+      transition(:cancel, from: [:draft, :ready], to: :cancelled)
+      transition(:revive, from: :cancelled, to: [:draft, :ready])
+      transition(:complete, from: [:draft, :ready], to: :complete)
+    end
+  end
+
   actions do
+    update :ready do
+      change transition_state(:ready)
+    end
+
+    update :cancel do
+      change transition_state(:cancelled)
+    end
+
+    update :revive do
+      change transition_state(:draft)
+    end
+
+    update :complete do
+      change transition_state(:complete)
+    end
+
     defaults [:read]
 
     destroy :destroy do
