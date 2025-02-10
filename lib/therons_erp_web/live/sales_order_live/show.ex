@@ -48,7 +48,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               <td>
                 <.live_select
                   field={sales_line[:product_id]}
-                  options={@default_products[Phoenix.HTML.Form.input_value(sales_line, :product_id)]}
+                  options={
+                    @default_products[Phoenix.HTML.Form.input_value(sales_line, :product_id)] || []
+                  }
                   inline={true}
                   update_min_len={0}
                   phx-focus="set-default"
@@ -206,6 +208,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   @impl true
   def handle_event("validate", %{"sales_order" => sales_order_params} = params, socket) do
     if sales_order_params["product_id"] == "create" do
+      # TODO implement create
       IO.inspect(params)
       {:noreply, socket}
     else
@@ -242,7 +245,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         {:noreply, socket}
 
       {:error, form} ->
-        IO.inspect(form)
         {:noreply, assign(socket, form: form)}
     end
   end
@@ -293,6 +295,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       |> prepare_matches(text)
 
     send_update(LiveSelect.Component, id: id, options: opts)
+
     {:noreply, socket}
   end
 

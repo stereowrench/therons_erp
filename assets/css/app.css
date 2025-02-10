@@ -67,3 +67,11 @@
         }
     }
 }
+
+.product-category-table {
+    td {
+        input {
+            width: 100%;
+        }
+    }
+}
