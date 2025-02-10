@@ -43,5 +43,9 @@ defmodule TheronsErp.People.Entity do
 
   relationships do
     has_many :addresses, TheronsErp.People.Address
+
+    has_many :sales_orders, TheronsErp.Sales.SalesOrder do
+      destination_attribute :customer_id
+    end
   end
 end
