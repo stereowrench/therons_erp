@@ -23,6 +23,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
         <PC.badge color="info">{sales_order.state}</PC.badge>
       </:col>
 
+      <:col :let={{_id, sales_order}} label="Customer">
+        {if sales_order.customer, do: sales_order.customer.name, else: ""}
+      </:col>
+
       <:action :let={{_id, sales_order}}>
         <div class="sr-only">
           <.link navigate={~p"/sales_orders/#{sales_order}"}>Show</.link>
@@ -60,13 +64,18 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
     """
   end
 
+  @ash_loads [:customer]
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
      |> stream(
        :sales_orders,
-       Ash.read!(TheronsErp.Sales.SalesOrder, actor: socket.assigns[:current_user])
+       Ash.read!(TheronsErp.Sales.SalesOrder,
+         actor: socket.assigns[:current_user],
+         load: @ash_loads
+       )
      )
      |> assign_new(:current_user, fn -> nil end)}
   end
@@ -81,7 +90,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
     |> assign(:page_title, "Edit Sales order")
     |> assign(
       :sales_order,
-      Ash.get!(TheronsErp.Sales.SalesOrder, id, actor: socket.assigns.current_user)
+      Ash.get!(TheronsErp.Sales.SalesOrder, id,
+        actor: socket.assigns.current_user,
+        load: @ash_loads
+      )
     )
   end
 

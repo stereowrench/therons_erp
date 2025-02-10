@@ -72,6 +72,13 @@ defmodule TheronsErpWeb.Router do
 
       live "/sales_orders/:id", SalesOrderLive.Show, :show
       live "/sales_orders/:id/show/edit", SalesOrderLive.Show, :edit
+
+      live "/people", EntityLive.Index, :index
+      live "/people/new", EntityLive.Index, :new
+      live "/people/:id/edit", EntityLive.Index, :edit
+
+      live "/people/:id", EntityLive.Show, :show
+      live "/people/:id/show/edit", EntityLive.Show, :edit
     end
 
     # Remove these if you'd like to use your own authentication views

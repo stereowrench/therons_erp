@@ -12,11 +12,14 @@ defmodule TheronsErpWeb.Nav do
       case {socket.view, socket.assigns.live_action} do
         {so, _} when so in [TheronsErpWeb.SalesOrderLive.Index, TheronsErpWeb.SalesOrderLive.Show] ->
           :sales_orders
+
         {po, _} when po in [TheronsErpWeb.ProductLive.Index, TheronsErpWeb.ProductLive.Show] ->
           :products
-        # {_, _} ->
+
+        {pp, _} when pp in [TheronsErpWeb.EntityLive.Index, TheronsErpWeb.EntityLive.Show] ->
+          :people
+
         {a, b} ->
-          IO.inspect({a,b})
           nil
       end
 

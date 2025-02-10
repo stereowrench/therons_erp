@@ -72,6 +72,8 @@ defmodule TheronsErp.Sales.SalesOrder do
     has_many :sales_lines, TheronsErp.Sales.SalesLine do
       destination_attribute :sales_order_id
     end
+
+    belongs_to :customer, TheronsErp.People.Entity
   end
 
   aggregates do

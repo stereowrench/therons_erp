@@ -9,6 +9,24 @@ defmodule TheronsErp.People.Address do
     repo TheronsErp.Repo
   end
 
+  actions do
+    defaults [:read]
+
+    create :create do
+      primary? true
+      accept [:address, :city, :state, :zip_code]
+    end
+
+    update :update do
+      primary? true
+      accept [:address, :city, :state, :zip_code]
+    end
+
+    destroy :destroy do
+      primary? true
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 
