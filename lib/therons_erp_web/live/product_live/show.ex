@@ -9,63 +9,60 @@ defmodule TheronsErpWeb.ProductLive.Show do
     ~H"""
     <.simple_form for={@form} id="product-inline-form" phx-change="validate" phx-submit="save">
       <.header>
-        {@product.name} [{@product.identifier}]
+        <span class="product-name-field">
+          <.input field={@form[:name]} label="" data-1p-ignore />
+        </span>
         <%= if @unsaved_changes do %>
           <.button phx-disable-with="Saving..." class="save-button">
             <.icon name="hero-check-circle" />
           </.button>
         <% end %>
-        <:subtitle></:subtitle>
-
-        <:actions>
-          <.link patch={~p"/products/#{@product}/show/edit"} phx-click={JS.push_focus()}>
-            <.button>Edit product</.button>
-          </.link>
-        </:actions>
-
-        <%= if @live_action != :edit do %>
-          <div>
-            <.live_select
-              field={@form[:category_id]}
-              label="Category"
-              inline={true}
-              options={@initial_categories}
-              update_min_len={0}
-              phx-focus="set-default"
-              container_class="inline-container"
-              text_input_class="inline-text-input"
-              dropdown_class="inline-dropdown"
-            >
-              <:option :let={opt}>
-                <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
-              </:option>
-              <:inject_adjacent>
-                <%= if Phoenix.HTML.Form.input_value(@form, :category_id) do %>
-                  <span class="link-to-inside-field">
-                    <.link navigate={
-                      TheronsErpWeb.Breadcrumbs.navigate_to_url(
-                        @breadcrumbs,
-                        {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id),
-                         get_category_name(
-                           @categories,
-                           Phoenix.HTML.Form.input_value(@form, :category_id)
-                         )},
-                        {"products", @product.id, @product.name}
-                      )
-                    }>
-                      <.icon name="hero-arrow-right" />
-                    </.link>
-                  </span>
-                <% end %>
-              </:inject_adjacent>
-            </.live_select>
-          </div>
-        <% end %>
+        <:subtitle>
+          [{@product.identifier}]
+        </:subtitle>
       </.header>
-      <.list>
+      <%!-- <.list>
         <:item title="Id">{@product.id}</:item>
-      </.list>
+      </.list> --%>
 
+      <%= if @live_action != :edit do %>
+        <div>
+          <.live_select
+            field={@form[:category_id]}
+            label="Category"
+            inline={true}
+            options={@initial_categories}
+            update_min_len={0}
+            phx-focus="set-default"
+            container_class="inline-container"
+            text_input_class="inline-text-input"
+            dropdown_class="inline-dropdown"
+          >
+            <:option :let={opt}>
+              <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
+            </:option>
+            <:inject_adjacent>
+              <%= if Phoenix.HTML.Form.input_value(@form, :category_id) do %>
+                <span class="link-to-inside-field">
+                  <.link navigate={
+                    TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                      @breadcrumbs,
+                      {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id),
+                       get_category_name(
+                         @categories,
+                         Phoenix.HTML.Form.input_value(@form, :category_id)
+                       )},
+                      {"products", @product.id, @product.name}
+                    )
+                  }>
+                    <.icon name="hero-arrow-right" />
+                  </.link>
+                </span>
+              <% end %>
+            </:inject_adjacent>
+          </.live_select>
+        </div>
+      <% end %>
       <.back navigate={~p"/products"}>Back to products</.back>
     </.simple_form>
     <.modal

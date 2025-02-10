@@ -93,9 +93,12 @@ defmodule TheronsErpWeb.ProductLive.Index do
   end
 
   defp apply_action(socket, :new, _params) do
+    product = TheronsErp.Inventory.create_product_stub!()
+
     socket
     |> assign(:page_title, "New Product")
     |> assign(:product, nil)
+    |> push_navigate(to: ~p"/products/#{product}")
   end
 
   defp apply_action(socket, :index, _params) do

@@ -103,7 +103,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
     socket
     |> assign(:page_title, "New Sales order")
     |> assign(:sales_order, nil)
-    |> push_redirect(to: ~p"/sales_orders/#{sales_order}")
+    |> push_navigate(to: ~p"/sales_orders/#{sales_order}")
   end
 
   defp apply_action(socket, :index, _params) do

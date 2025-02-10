@@ -67,7 +67,7 @@ defmodule TheronsErpWeb.Router do
       live "/products/:id/show/edit", ProductLive.Show, :edit
 
       live "/sales_orders", SalesOrderLive.Index, :index
-      live "/sales_orders/new", SalesOrderLive.Index, :new
+      # live "/sales_orders/new", SalesOrderLive.Index, :new
       live "/sales_orders/:id/edit", SalesOrderLive.Index, :edit
 
       live "/sales_orders/:id", SalesOrderLive.Show, :show

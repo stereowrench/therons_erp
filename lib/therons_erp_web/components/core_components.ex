@@ -696,7 +696,7 @@ defmodule TheronsErpWeb.CoreComponents do
               "mt-2 block w-full border-transparent rounded-lg py-[7px] px-[11px] hover:border-solid box-border",
               "text-zinc-900 focus:outline-solid focus:ring-4 sm:text-sm sm:leading-6",
               "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-              "hover:border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
+              "hover:border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5 border-b-brand",
               @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
             ]
           else

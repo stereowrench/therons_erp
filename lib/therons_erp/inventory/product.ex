@@ -19,6 +19,14 @@ defmodule TheronsErp.Inventory.Product do
       accept [:name, :sales_price, :type, :category_id]
     end
 
+    create :create_stub do
+      accept []
+
+      change fn changeset, context ->
+        Ash.Changeset.change_attribute(changeset, :name, "New Product")
+      end
+    end
+
     update :update do
       accept [:name, :sales_price, :type, :category_id]
     end
