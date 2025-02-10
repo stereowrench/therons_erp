@@ -1,5 +1,6 @@
 defmodule TheronsErpWeb.SalesOrderLive.Show do
   use TheronsErpWeb, :live_view
+  import TheronsErpWeb.Selects
 
   @impl true
   def render(assigns) do
@@ -44,7 +45,38 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         <tbody>
           <.inputs_for :let={sales_line} field={@form[:sales_lines]}>
             <tr>
-              <td><.input field={sales_line[:product_id]} /></td>
+              <td>
+                <.live_select
+                  field={sales_line[:product_id]}
+                  options={@default_products[Phoenix.HTML.Form.input_value(sales_line, :product_id)]}
+                  inline={true}
+                  update_min_len={0}
+                  phx-focus="set-default"
+                  container_class="inline-container"
+                  text_input_class="inline-text-input"
+                  dropdown_class="inline-dropdown"
+                  label=""
+                >
+                  <:option :let={opt}>
+                    <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
+                  </:option>
+                  <:inject_adjacent>
+                    <%= if Phoenix.HTML.Form.input_value(sales_line, :product_id) do %>
+                      <span class="link-to-inside-field">
+                        <.link navigate={
+                          TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                            @breadcrumbs,
+                            {"products", Phoenix.HTML.Form.input_value(sales_line, :product_id), ""},
+                            {"sales_orders", @sales_order.id, @params, ""}
+                          )
+                        }>
+                          <.icon name="hero-arrow-right" />
+                        </.link>
+                      </span>
+                    <% end %>
+                  </:inject_adjacent>
+                </.live_select>
+              </td>
               <td>
                 <.input field={sales_line[:quantity]} type="number" />
               </td>
@@ -139,17 +171,31 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
+  def handle_params(%{"id" => id} = params, _, socket) do
+    sales_order =
+      Ash.get!(TheronsErp.Sales.SalesOrder, id,
+        actor: socket.assigns.current_user,
+        load: [sales_lines: [:total_price, :product]]
+      )
+
+    default_products =
+      for line_item <- sales_order.sales_lines, into: %{} do
+        prod = line_item.product
+
+        {prod.id, [%{value: prod.id, label: prod.name, matches: []}]}
+      end
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
      |> assign(
        :sales_order,
-       Ash.get!(TheronsErp.Sales.SalesOrder, id,
-         actor: socket.assigns.current_user,
-         load: [sales_lines: [:total_price]]
-       )
+       sales_order
      )
+     |> assign(:args, params["args"])
+     |> assign(:from_args, params["from_args"])
+     |> assign(:params, params)
+     |> assign(:default_products, default_products)
      |> assign(:drop_sales, 0)
      |> assign_form()}
   end
@@ -158,14 +204,20 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   defp page_title(:edit), do: "Edit Sales order"
 
   @impl true
-  def handle_event("validate", %{"sales_order" => sales_order_params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
-    drop = length(sales_order_params["_drop_sales_lines"] || [])
+  def handle_event("validate", %{"sales_order" => sales_order_params} = params, socket) do
+    if sales_order_params["product_id"] == "create" do
+      IO.inspect(params)
+      {:noreply, socket}
+    else
+      form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
+      drop = length(sales_order_params["_drop_sales_lines"] || [])
 
-    {:noreply,
-     assign(socket, form: form)
-     |> assign(:unsaved_changes, form.source.changed? || drop > 0)
-     |> assign(:drop_sales, drop)}
+      {:noreply,
+       assign(socket, form: form)
+       |> assign(:unsaved_changes, form.source.changed? || drop > 0)
+       |> assign(:params, sales_order_params)
+       |> assign(:drop_sales, drop)}
+    end
   end
 
   def handle_event("save", %{"sales_order" => sales_order_params}, socket) do
@@ -195,7 +247,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     end
   end
 
-  defp assign_form(%{assigns: %{sales_order: sales_order}} = socket) do
+  defp assign_form(
+         %{assigns: %{sales_order: sales_order, args: args, from_args: from_args}} = socket
+       ) do
     form =
       if sales_order do
         AshPhoenix.Form.for_update(sales_order, :update,
@@ -209,8 +263,84 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         )
       end
 
+    form =
+      case {args, from_args} do
+        {nil, nil} -> form
+        {_, nil} -> AshPhoenix.Form.validate(form, args)
+        {nil, _} -> AshPhoenix.Form.validate(form, from_args)
+        _ -> AshPhoenix.Form.validate(form, Map.merge(args, from_args))
+      end
+
     socket
     |> assign(form: to_form(form))
     |> assign(:unsaved_changes, form.changed?)
+  end
+
+  defp parse_select_id!(id) do
+    [_, number] =
+      Regex.run(~r/sales_order\[sales_lines\]\[(\d+)\]_product_id_live_select_component/, id)
+
+    number
+  end
+
+  def handle_event(
+        "live_select_change",
+        %{"text" => text, "id" => id},
+        socket
+      ) do
+    opts =
+      get_products("")
+      |> prepare_matches(text)
+
+    send_update(LiveSelect.Component, id: id, options: opts)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "set-default",
+        %{"id" => id},
+        socket
+      ) do
+    number = parse_select_id!(id)
+
+    if pid =
+         socket.assigns.from_args["product_id"] && socket.assigns.from_args["line_id"] == number do
+      opts = get_initial_product_options(pid)
+
+      send_update(LiveSelect.Component,
+        options: opts,
+        id: id,
+        value: pid
+      )
+    else
+      value =
+        socket.assigns.form
+        |> Phoenix.HTML.Form.input_value(:sales_lines)
+        |> Enum.at(String.to_integer(number))
+        |> Phoenix.HTML.Form.input_value(:product_id)
+
+      if value not in [nil, ""] do
+        products = get_products(value)
+        text = Enum.find(products, &(&1.value == value)).label
+        opts = prepare_matches(products, text)
+
+        send_update(LiveSelect.Component,
+          options: opts,
+          id: id,
+          value: value
+        )
+      else
+        products = get_products("")
+
+        send_update(LiveSelect.Component,
+          options: products,
+          id: id,
+          value: nil
+        )
+      end
+    end
+
+    {:noreply, socket}
   end
 end

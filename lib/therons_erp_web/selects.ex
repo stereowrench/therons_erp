@@ -1,24 +1,32 @@
 defmodule TheronsErpWeb.Selects do
   alias TheronsErp.Inventory
 
-  def prepare_matches(categories, text) do
+  def prepare_matches(items, text) do
     matches =
-      Seqfuzz.matches(categories, text, & &1.label, filter: true, sort: true)
+      Seqfuzz.matches(items, text, & &1.label, filter: true, sort: true)
 
     (matches
-     |> Enum.map(fn {categories, c} ->
-       %{value: categories.value, label: categories.label, matches: c.matches}
+     |> Enum.map(fn {items, c} ->
+       %{value: items.value, label: items.label, matches: c.matches}
      end)
      |> Enum.take(5)) ++ additional_options()
   end
 
   def get_categories(selected) do
+    _get_list(Inventory.get_categories!(), selected, & &1.full_name)
+  end
+
+  def get_products(selected) do
+    _get_list(Inventory.get_products!(), selected, & &1.name)
+  end
+
+  defp _get_list(items, selected, mapper) do
     list =
-      Inventory.get_categories!()
-      |> Enum.map(fn cat ->
+      items
+      |> Enum.map(fn item ->
         %{
-          value: to_string(cat.id),
-          label: cat.full_name,
+          value: to_string(item.id),
+          label: mapper.(item),
           matches: []
         }
       end)
@@ -43,14 +51,35 @@ defmodule TheronsErpWeb.Selects do
     ]
   end
 
+  def additional_product_options do
+    [
+      %{
+        value: :create,
+        label: "Create New",
+        matches: []
+      }
+    ]
+  end
+
   def get_initial_options(selected) do
     (get_categories(selected) ++ additional_options()) |> Enum.uniq() |> Enum.take(5)
   end
 
+  def get_initial_product_options(selected) do
+    (get_products(selected) ++ additional_product_options()) |> Enum.uniq() |> Enum.take(5)
+  end
 
   def get_category_name(categories, id) do
     found =
       categories
+      |> Enum.find(&(to_string(&1.value) == to_string(id)))
+
+    found.label
+  end
+
+  def get_product_name(products, id) do
+    found =
+      products
       |> Enum.find(&(to_string(&1.value) == to_string(id)))
 
     found.label

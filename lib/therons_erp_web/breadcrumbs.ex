@@ -128,6 +128,8 @@ defmodule TheronsErpWeb.Breadcrumbs do
     {which, breadcrumbs}
   end
 
+  # Todo navigate back to sales_orders
+
   def navigate_to(socket, part, from) do
     socket
     |> Phoenix.LiveView.redirect(to: navigate_to_url(socket.assigns.breadcrumbs, part, from))

@@ -12,6 +12,9 @@ defmodule TheronsErp.Inventory.Product do
   actions do
     defaults [:read]
 
+    read :list do
+    end
+
     create :create do
       accept [:name, :sales_price, :type, :category_id]
     end

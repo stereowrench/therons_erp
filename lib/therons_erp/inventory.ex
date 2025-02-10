@@ -12,6 +12,7 @@ defmodule TheronsErp.Inventory do
     resource TheronsErp.Inventory.Product do
       define :create_product, args: [:name, :sales_price], action: :create
       define :update_product, args: [:name, :sales_price], action: :update
+      define :get_products, action: :list
     end
   end
 end
