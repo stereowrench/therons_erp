@@ -33,6 +33,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                      Money.div!(@sales_order.total_price, @sales_order.total_cost.amount).amount,
                      100
                    )
+                   |> Decimal.sub(100)
                    |> Decimal.to_string()) <>
                     "%",
                 else: "undefined"}
