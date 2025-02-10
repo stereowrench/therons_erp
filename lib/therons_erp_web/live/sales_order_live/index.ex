@@ -18,7 +18,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
       rows={@streams.sales_orders}
       row_click={fn {_id, sales_order} -> JS.navigate(~p"/sales_orders/#{sales_order}") end}
     >
-      <:col :let={{_id, sales_order}} label="Id">{sales_order.id}</:col>
+      <:col :let={{_id, sales_order}} label="Id">
+        {sales_order.identifier}
+        <PC.badge color="info">{sales_order.state}</PC.badge>
+      </:col>
 
       <:action :let={{_id, sales_order}}>
         <div class="sr-only">

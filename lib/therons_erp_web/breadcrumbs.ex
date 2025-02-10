@@ -4,7 +4,6 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
   def on_mount(:default, params, _session, socket) do
     socket = assign(socket, :breadcrumbs, decode_breadcrumbs(params["breadcrumbs"]))
-    socket = assign(socket, :wat, 3)
     {:cont, socket}
   end
 

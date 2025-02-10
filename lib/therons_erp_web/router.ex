@@ -47,7 +47,11 @@ defmodule TheronsErpWeb.Router do
     sign_out_route AuthController
 
     ash_authentication_live_session :authentication_optional,
-      on_mount: [{TheronsErpWeb.LiveUserAuth, :live_user_optional}, TheronsErpWeb.Breadcrumbs] do
+      on_mount: [
+        {TheronsErpWeb.LiveUserAuth, :live_user_optional},
+        TheronsErpWeb.Breadcrumbs,
+        TheronsErpWeb.Nav
+      ] do
       live "/product_categories", ProductCategoryLive.Index, :index
       live "/product_categories/new", ProductCategoryLive.Index, :new
       live "/product_categories/:id/edit", ProductCategoryLive.Index, :edit
