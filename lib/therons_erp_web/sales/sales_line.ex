@@ -14,12 +14,12 @@ defmodule TheronsErp.Sales.SalesLine do
 
     create :create do
       primary? true
-      accept [:sales_price, :unit_price, :quantity]
+      accept [:sales_price, :unit_price, :quantity, :product_id]
     end
 
     update :update do
       primary? true
-      accept [:sales_price, :unit_price, :quantity]
+      accept [:sales_price, :unit_price, :quantity, :product_id]
     end
   end
 
@@ -29,11 +29,26 @@ defmodule TheronsErp.Sales.SalesLine do
     attribute :sales_price, :money
     attribute :unit_price, :money
     attribute :quantity, :integer
+
+    attribute :total_price, :money
+
     timestamps()
   end
 
   relationships do
-    belongs_to :sales_order, TheronsErp.Sales.SalesOrder
-    belongs_to :product, TheronsErp.Inventory.Product
+    belongs_to :sales_order, TheronsErp.Sales.SalesOrder do
+      allow_nil? false
+    end
+
+    belongs_to :product, TheronsErp.Inventory.Product do
+      allow_nil? false
+    end
+  end
+
+  calculations do
+    calculate :calculated_total_price, :money, expr(sales_price * quantity)
+
+    # calculate :margin do
+    # end
   end
 end

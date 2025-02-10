@@ -34,14 +34,17 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       <table class="product-category-table">
         <thead>
           <tr>
+            <th>Product</th>
             <th>Quantity</th>
             <th>Sales Price</th>
             <th>Unit Price</th>
+            <th>Total</th>
           </tr>
         </thead>
         <tbody>
           <.inputs_for :let={sales_line} field={@form[:sales_lines]}>
             <tr>
+              <td><.input field={sales_line[:product_id]} /></td>
               <td>
                 <.input field={sales_line[:quantity]} type="number" />
               </td>
@@ -56,6 +59,16 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 <.input
                   field={sales_line[:unit_price]}
                   value={do_money(sales_line[:unit_price])}
+                  type="number"
+                />
+              </td>
+              <td>
+                <.input
+                  field={sales_line[:total_price]}
+                  value={
+                    IO.inspect(do_money(sales_line[:total_price])) ||
+                      do_money(sales_line[:calculated_total])
+                  }
                   type="number"
                 />
               </td>
@@ -134,7 +147,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
        :sales_order,
        Ash.get!(TheronsErp.Sales.SalesOrder, id,
          actor: socket.assigns.current_user,
-         load: [:sales_lines]
+         load: [sales_lines: [:total_price]]
        )
      )
      |> assign(:drop_sales, 0)
@@ -147,7 +160,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   @impl true
   def handle_event("validate", %{"sales_order" => sales_order_params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
-    drop = length(sales_order_params["_drop_sales_lines"])
+    drop = length(sales_order_params["_drop_sales_lines"] || [])
 
     {:noreply,
      assign(socket, form: form)
@@ -177,6 +190,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         {:noreply, socket}
 
       {:error, form} ->
+        IO.inspect(form)
         {:noreply, assign(socket, form: form)}
     end
   end
