@@ -32,6 +32,10 @@ defmodule TheronsErp.Sales.SalesOrder do
   attributes do
     uuid_primary_key :id
 
+    attribute :identifier, :integer do
+      generated? true
+    end
+
     timestamps()
   end
 

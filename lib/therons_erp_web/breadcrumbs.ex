@@ -123,12 +123,17 @@ defmodule TheronsErpWeb.Breadcrumbs do
           else
             ~p"/product_categories/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs)]}"
           end
+
+        {"sales_orders", id, params, _identifier} ->
+          if from_args do
+            ~p"/sales_orders/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args, params: params]}"
+          else
+            ~p"/sales_orders/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), params: params]}"
+          end
       end
 
     {which, breadcrumbs}
   end
-
-  # Todo navigate back to sales_orders
 
   def navigate_to(socket, part, from) do
     socket
@@ -170,6 +175,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
   defp name_for_crumb({"product_category", _cid, name}) do
     "#{name}"
+  end
+
+  defp name_for_crumb({"sales_orders", _sale_id, _params, serial_no}) do
+    "S#{serial_no}"
   end
 
   def stream_crumbs(list) when is_list(list) do

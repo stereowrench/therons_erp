@@ -72,6 +72,8 @@
 }
 
 .product-category-table {
+    @apply text-left;
+
     td {
         div {
             width: 100%;

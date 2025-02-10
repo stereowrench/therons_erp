@@ -69,7 +69,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                           TheronsErpWeb.Breadcrumbs.navigate_to_url(
                             @breadcrumbs,
                             {"products", Phoenix.HTML.Form.input_value(sales_line, :product_id), ""},
-                            {"sales_orders", @sales_order.id, @params, ""}
+                            {"sales_orders", @sales_order.id, @params, @sales_order.identifier}
                           )
                         }>
                           <.icon name="hero-arrow-right" />
