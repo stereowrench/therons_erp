@@ -54,3 +54,16 @@
 .pc-dropdown {
     vertical-align: middle;
 }
+
+.product-category-table {
+    @apply table-auto w-full;
+
+    td {
+        @apply border-t border-gray-200 px-4 py-2;
+        vertical-align: middle;
+
+        input {
+            @apply border-transparent hover:border-solid hover:border-zinc-300;
+        }
+    }
+}
