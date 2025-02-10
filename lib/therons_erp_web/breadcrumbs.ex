@@ -83,6 +83,9 @@ defmodule TheronsErpWeb.Breadcrumbs do
         {"product_category", "new", _product_category_id} ->
           ~p"/product_categories"
 
+        {"product_category", product_category_id, _name} ->
+          ~p"/product_categories/#{product_category_id}"
+
         {"products", "edit", product_id} ->
           ~p"/products/#{product_id}"
       end
@@ -136,6 +139,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
   def navigate_to_url(breadcrumbs, {"product_category", "new", product_id}, from) do
     ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), product_id: product_id]}"
+  end
+
+  def navigate_to_url(breadcrumbs, {"product_category", "new_cat", category_id}, from) do
+    ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), category_id: category_id]}"
   end
 
   def navigate_to_url(breadcrumbs, {"product_category", id, _full_name}, from) do

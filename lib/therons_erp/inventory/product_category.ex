@@ -31,7 +31,7 @@ defmodule TheronsErp.Inventory.ProductCategory do
     end
 
     update :update_parent do
-      accept [:product_category_id]
+      accept [:product_category_id, :name]
       require_atomic? false
 
       change &perform_full_name_update/2
