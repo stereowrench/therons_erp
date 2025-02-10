@@ -28,7 +28,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
         </:actions>
       </.header>
 
-      <%!-- <.input field={@form["name"]} label="Name" type="text" data-1p-ignore /> --%>
+      <.input field={@form[:name]} label="Name" type="text" data-1p-ignore />
 
       <%= if @live_action != :edit do %>
         <div>
@@ -269,6 +269,8 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
               :product_category,
               category
             )
+            |> assign(:initial_categories, get_initial_options(category.id))
+            |> assign(:categories, get_categories(category.id))
             |> assign_form()
 
           {:noreply, socket}

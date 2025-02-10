@@ -1,7 +1,7 @@
 defmodule TheronsErpWeb.ProductLive.FormComponent do
   use TheronsErpWeb, :live_component
   alias TheronsErpWeb.Breadcrumbs
-
+  import TheronsErpWeb.Selects
   alias TheronsErpWeb.ProductLive.Show
 
   @impl true
@@ -51,18 +51,6 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
       </.simple_form>
     </div>
     """
-  end
-
-  def get_initial_options(selected) do
-    Show.get_initial_options(selected)
-  end
-
-  def get_categories(selected) do
-    Show.get_categories(selected)
-  end
-
-  def additional_options do
-    Show.additional_options()
   end
 
   @impl true
