@@ -32,18 +32,24 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       </.list>
 
       <table class="product-category-table">
+        <thead>
+          <tr>
+            <th>Quantity</th>
+            <th>Sales Price</th>
+            <th>Unit Price</th>
+          </tr>
+        </thead>
         <tbody>
           <.inputs_for :let={sales_line} field={@form[:sales_lines]}>
             <tr>
               <td>
-                <.input field={sales_line[:quantity]} type="number" label="Quantity" />
+                <.input field={sales_line[:quantity]} type="number" />
               </td>
               <td>
                 <.input
                   field={sales_line[:sales_price]}
                   value={do_money(sales_line[:sales_price])}
                   type="number"
-                  label="Unit sale price"
                 />
               </td>
               <td>
@@ -51,7 +57,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                   field={sales_line[:unit_price]}
                   value={do_money(sales_line[:unit_price])}
                   type="number"
-                  label="Unit sale price"
                 />
               </td>
               <td>
