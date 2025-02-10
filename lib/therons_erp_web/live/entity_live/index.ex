@@ -7,7 +7,7 @@ defmodule TheronsErpWeb.EntityLive.Index do
     <.header>
       Listing Entities
       <:actions>
-        <.link patch={~p"/entities/new"}>
+        <.link patch={~p"/people/new"}>
           <.button>New Entity</.button>
         </.link>
       </:actions>
@@ -16,16 +16,16 @@ defmodule TheronsErpWeb.EntityLive.Index do
     <.table
       id="entities"
       rows={@streams.entities}
-      row_click={fn {_id, entity} -> JS.navigate(~p"/entities/#{entity}") end}
+      row_click={fn {_id, entity} -> JS.navigate(~p"/people/#{entity}") end}
     >
-      <:col :let={{_id, entity}} label="Id">{entity.id}</:col>
+      <:col :let={{_id, entity}} label="Name">{entity.name}</:col>
 
       <:action :let={{_id, entity}}>
         <div class="sr-only">
-          <.link navigate={~p"/entities/#{entity}"}>Show</.link>
+          <.link navigate={~p"/people/#{entity}"}>Show</.link>
         </div>
 
-        <.link patch={~p"/entities/#{entity}/edit"}>Edit</.link>
+        <.link patch={~p"/people/#{entity}/edit"}>Edit</.link>
       </:action>
     </.table>
 
@@ -33,7 +33,7 @@ defmodule TheronsErpWeb.EntityLive.Index do
       :if={@live_action in [:new, :edit]}
       id="entity-modal"
       show
-      on_cancel={JS.patch(~p"/entities")}
+      on_cancel={JS.patch(~p"/people")}
     >
       <.live_component
         module={TheronsErpWeb.EntityLive.FormComponent}
@@ -42,7 +42,7 @@ defmodule TheronsErpWeb.EntityLive.Index do
         current_user={@current_user}
         action={@live_action}
         entity={@entity}
-        patch={~p"/entities"}
+        patch={~p"/people"}
       />
     </.modal>
     """

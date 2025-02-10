@@ -17,7 +17,90 @@ defmodule TheronsErpWeb.EntityLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:addresses]} type="select" multiple label="Addresses" options={[]} />
+        <.input field={@form[:name]} type="text" label="Name" />
+        <.inputs_for :let={address} field={@form[:addresses]}>
+          <fieldset class="border border-solid border-gray-300 p-3">
+            <legend>
+              Address {to_string(address.index)}
+              <label>
+                <input
+                  type="checkbox"
+                  name={"#{@form.name}[_drop_addresses][]"}
+                  value={address.index}
+                  class="hidden"
+                />
+
+                <.icon name="hero-x-mark" />
+              </label>
+            </legend>
+            <.input field={address[:address]} type="text" label="Address" />
+            <.input field={address[:address2]} type="text" label="Address2" />
+            <.input field={address[:city]} type="text" label="City" />
+            <.input
+              field={address[:state]}
+              type="select"
+              label="State"
+              options={[
+                "AL",
+                "AK",
+                "AZ",
+                "AR",
+                "CA",
+                "CO",
+                "CT",
+                "DE",
+                "FL",
+                "GA",
+                "HI",
+                "ID",
+                "IL",
+                "IN",
+                "IA",
+                "KS",
+                "KY",
+                "LA",
+                "ME",
+                "MD",
+                "MA",
+                "MI",
+                "MN",
+                "MS",
+                "MO",
+                "MT",
+                "NE",
+                "NV",
+                "NH",
+                "NJ",
+                "NM",
+                "NY",
+                "NC",
+                "ND",
+                "OH",
+                "OK",
+                "OR",
+                "PA",
+                "RI",
+                "SC",
+                "SD",
+                "TN",
+                "TX",
+                "UT",
+                "VT",
+                "VA",
+                "WA",
+                "WV",
+                "WI",
+                "WY"
+              ]}
+            />
+            <.input field={address[:zip_code]} type="text" label="Zip Code" pattern="[0-9]{5}" />
+          </fieldset>
+        </.inputs_for>
+
+        <label>
+          <input type="checkbox" name={"#{@form.name}[_add_addresses]"} value="end" class="hidden" />
+          <.icon name="hero-plus" />
+        </label>
 
         <:actions>
           <.button phx-disable-with="Saving...">Save Entity</.button>
@@ -53,6 +136,7 @@ defmodule TheronsErpWeb.EntityLive.FormComponent do
         {:noreply, socket}
 
       {:error, form} ->
+        IO.inspect(form)
         {:noreply, assign(socket, form: form)}
     end
   end

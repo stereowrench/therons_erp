@@ -5,11 +5,11 @@ defmodule TheronsErpWeb.EntityLive.Show do
   def render(assigns) do
     ~H"""
     <.header>
-      Entity {@entity.id}
-      <:subtitle>This is a entity record from your database.</:subtitle>
+      Entity {@entity.name}
+      <:subtitle></:subtitle>
 
       <:actions>
-        <.link patch={~p"/entities/#{@entity}/show/edit"} phx-click={JS.push_focus()}>
+        <.link patch={~p"/people/#{@entity}/show/edit"} phx-click={JS.push_focus()}>
           <.button>Edit entity</.button>
         </.link>
       </:actions>
@@ -19,13 +19,13 @@ defmodule TheronsErpWeb.EntityLive.Show do
       <:item title="Id">{@entity.id}</:item>
     </.list>
 
-    <.back navigate={~p"/entities"}>Back to entities</.back>
+    <.back navigate={~p"/people"}>Back to entities</.back>
 
     <.modal
       :if={@live_action == :edit}
       id="entity-modal"
       show
-      on_cancel={JS.patch(~p"/entities/#{@entity}")}
+      on_cancel={JS.patch(~p"/people/#{@entity}")}
     >
       <.live_component
         module={TheronsErpWeb.EntityLive.FormComponent}
@@ -34,7 +34,7 @@ defmodule TheronsErpWeb.EntityLive.Show do
         action={@live_action}
         current_user={@current_user}
         entity={@entity}
-        patch={~p"/entities/#{@entity}"}
+        patch={~p"/people/#{@entity}"}
       />
     </.modal>
     """

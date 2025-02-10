@@ -14,6 +14,7 @@ defmodule TheronsErp.People.Entity do
 
     create :create do
       argument :addresses, {:array, :map}
+      accept [:name]
 
       change manage_relationship(:addresses, type: :create)
     end
@@ -21,6 +22,7 @@ defmodule TheronsErp.People.Entity do
     update :update do
       require_atomic? false
       argument :addresses, {:array, :map}
+      accept [:name]
 
       change manage_relationship(:addresses, type: :direct_control)
     end

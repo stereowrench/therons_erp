@@ -19,7 +19,7 @@ defmodule TheronsErpWeb.Nav do
         {pp, _} when pp in [TheronsErpWeb.EntityLive.Index, TheronsErpWeb.EntityLive.Show] ->
           :people
 
-        {a, b} ->
+        {_, _} ->
           nil
       end
 
