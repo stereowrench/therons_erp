@@ -87,6 +87,9 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
         {"products", "edit", product_id} ->
           ~p"/products/#{product_id}"
+
+        {"people", entity_id} ->
+          ~p"/people/#{entity_id}"
       end
 
     {which, []}

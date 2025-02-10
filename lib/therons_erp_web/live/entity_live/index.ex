@@ -43,6 +43,7 @@ defmodule TheronsErpWeb.EntityLive.Index do
         action={@live_action}
         entity={@entity}
         patch={~p"/people"}
+        breadcrumbs={@breadcrumbs}
       />
     </.modal>
     """

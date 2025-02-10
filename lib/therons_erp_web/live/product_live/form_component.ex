@@ -89,7 +89,6 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
   @impl true
   def handle_event("validate", %{"product" => product_params}, socket) do
     if product_params["category_id"] == "create" do
-      # TODO add breadcrumbs
       pid = if socket.assigns.product, do: socket.assigns.product.id, else: nil
 
       {:noreply,

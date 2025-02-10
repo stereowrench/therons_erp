@@ -1,5 +1,8 @@
 defmodule TheronsErpWeb.EntityLive.FormComponent do
   use TheronsErpWeb, :live_component
+  alias TheronsErpWeb.Breadcrumbs
+
+  # TODO add delete button
 
   @impl true
   def render(assigns) do
@@ -7,8 +10,21 @@ defmodule TheronsErpWeb.EntityLive.FormComponent do
     <div>
       <.header>
         {@title}
-        <:subtitle>Use this form to manage entity records in your database.</:subtitle>
+        <:subtitle></:subtitle>
       </.header>
+
+      <%!-- Delete button using POST --%>
+      <%= if @entity do %>
+        <.button
+          phx-click="delete"
+          phx-value-id={@entity.id}
+          phx-target={@myself}
+          data-confirm="Are you sure?"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Delete
+        </.button>
+      <% end %>
 
       <.simple_form
         for={@form}
@@ -131,13 +147,30 @@ defmodule TheronsErpWeb.EntityLive.FormComponent do
         socket =
           socket
           |> put_flash(:info, "Entity #{socket.assigns.form.source.type}d successfully")
-          |> push_patch(to: socket.assigns.patch)
+          |> Breadcrumbs.navigate_back({"people", entity.id}, %{customer_id: entity.id})
 
         {:noreply, socket}
 
       {:error, form} ->
         IO.inspect(form)
         {:noreply, assign(socket, form: form)}
+    end
+  end
+
+  # Delete event
+  def handle_event("delete", %{"id" => id}, socket) do
+    # TODO validate ID
+    entity = Ash.get!(TheronsErp.People.Entity, id, actor: socket.assigns.current_user)
+
+    case Ash.destroy(entity) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Entity deleted successfully.")
+         |> push_navigate(to: ~p"/people")}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
     end
   end
 

@@ -28,6 +28,7 @@ defmodule TheronsErp.People.Entity do
     end
 
     destroy :destroy do
+      primary? true
     end
   end
 

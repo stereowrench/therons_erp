@@ -1,4 +1,5 @@
 defmodule TheronsErpWeb.EntityLive.Show do
+  alias Bandit.DelegatingHandler
   use TheronsErpWeb, :live_view
 
   @impl true
@@ -35,6 +36,7 @@ defmodule TheronsErpWeb.EntityLive.Show do
         current_user={@current_user}
         entity={@entity}
         patch={~p"/people/#{@entity}"}
+        breadcrumbs={@breadcrumbs}
       />
     </.modal>
     """
