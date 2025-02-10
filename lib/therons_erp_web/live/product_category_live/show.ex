@@ -28,6 +28,8 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
         </:actions>
       </.header>
 
+      <%!-- <.input field={@form["name"]} label="Name" type="text" data-1p-ignore /> --%>
+
       <%= if @live_action != :edit do %>
         <div>
           <.live_select
@@ -257,21 +259,46 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
   end
 
   def handle_event("save", %{"product_category" => category_params}, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.form, params: category_params) do
-      {:ok, category} ->
-        socket =
-          socket
-          |> put_flash(:info, "Category #{socket.assigns.form.source.type}d successfully")
-          |> assign(
-            :product_category,
-            category
-          )
-          |> assign_form()
+    try do
+      case AshPhoenix.Form.submit(socket.assigns.form, params: category_params) do
+        {:ok, category} ->
+          socket =
+            socket
+            |> put_flash(:info, "Category #{socket.assigns.form.source.type}d successfully")
+            |> assign(
+              :product_category,
+              category
+            )
+            |> assign_form()
 
-        {:noreply, socket}
+          {:noreply, socket}
 
-      {:error, form} ->
-        {:noreply, assign(socket, form: form)}
+        {:error, form} ->
+          {:noreply, assign(socket, form: form)}
+      end
+    rescue
+      e in Ash.Error.Invalid ->
+        case e do
+          %{errors: errors} ->
+            y =
+              Enum.find(errors, fn
+                r = %Ash.Error.Changes.InvalidRelationship{} ->
+                  r.message == "Cannot create a cycle in the product category tree"
+
+                _ ->
+                  false
+              end)
+
+            if y do
+              {:noreply,
+               socket |> put_flash(:error, "Cannot create a cycle in the product category tree")}
+            else
+              raise e
+            end
+
+          _ ->
+            raise e
+        end
     end
   end
 end
