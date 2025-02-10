@@ -32,6 +32,9 @@
 }
 
 .link-to-inside-field {
+    position: absolute;
+    margin-top: 22px;
+
     span {
         position: relative;
         left: -35px;
@@ -70,7 +73,7 @@
 
 .product-category-table {
     td {
-        input {
+        div {
             width: 100%;
         }
     }
