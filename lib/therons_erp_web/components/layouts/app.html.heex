@@ -120,6 +120,17 @@
                         />
                       </li>
                     </ul>
+                    <ul class="-mx-2 space-y-1">
+                      <li>
+                        <.nav_link
+                          active={@active_tab}
+                          name={:people}
+                          path={~p"/people"}
+                          text="People"
+                          icon="hero-user-circle"
+                        />
+                      </li>
+                    </ul>
                   </li>
                 </ul>
               </nav>
@@ -173,6 +184,17 @@
                       path={~p"/products"}
                       text="Products"
                       icon="hero-document"
+                    />
+                  </li>
+                </ul>
+                <ul class="-mx-2 mt-2 space-y-1">
+                  <li>
+                    <.nav_link
+                      active={@active_tab}
+                      name={:people}
+                      path={~p"/people"}
+                      text="People"
+                      icon="hero-user-circle"
                     />
                   </li>
                 </ul>
