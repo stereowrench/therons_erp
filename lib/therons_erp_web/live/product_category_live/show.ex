@@ -16,15 +16,15 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
           </.button>
         <% end %>
 
-        <:subtitle>{@product_category.id}</:subtitle>
+        <:subtitle></:subtitle>
 
         <:actions>
-          <.link
+          <%!-- <.link
             patch={~p"/product_categories/#{@product_category}/show/edit"}
             phx-click={JS.push_focus()}
           >
             <.button>Edit product_category</.button>
-          </.link>
+          </.link> --%>
         </:actions>
       </.header>
 
@@ -67,6 +67,9 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
         </div>
       <% end %>
 
+      <div class="prose">
+        <h2>Products</h2>
+      </div>
       <.table
         id="products"
         rows={@product_category.products}
