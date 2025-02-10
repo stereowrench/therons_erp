@@ -2,7 +2,6 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
   use TheronsErpWeb, :live_component
   alias TheronsErpWeb.Breadcrumbs
   import TheronsErpWeb.Selects
-  alias TheronsErpWeb.ProductLive.Show
 
   @impl true
   def render(assigns) do
