@@ -7,7 +7,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     ~H"""
     <.simple_form for={@form} id="sales_order-form" phx-change="validate" phx-submit="save">
       <.header>
-        Sales order {@sales_order.id}
+        Sales order {@sales_order.identifier}
         <%= if @unsaved_changes do %>
           <.button phx-disable-with="Saving..." class="save-button">
             <.icon name="hero-check-circle" />
@@ -19,7 +19,26 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             </span>
           <% end %>
         <% end %>
-        <:subtitle>This is a sales_order record from your database.</:subtitle>
+        <:subtitle>
+          <math>
+            <mfrac>
+              <mn>{@sales_order.total_cost}</mn>
+              <mn>{@sales_order.total_price}</mn>
+            </mfrac>
+            <mo>=</mo>
+            <mn>
+              {if @sales_order.total_cost not in [nil, Money.new(0, :USD)],
+                do:
+                  (Decimal.mult(
+                     Money.div!(@sales_order.total_price, @sales_order.total_cost.amount).amount,
+                     100
+                   )
+                   |> Decimal.to_string()) <>
+                    "%",
+                else: "undefined"}
+            </mn>
+          </math>
+        </:subtitle>
 
         <:actions>
           <%!-- <.link patch={~p"/sales_orders/#{@sales_order}/show/edit"} phx-click={JS.push_focus()}>
@@ -172,13 +191,16 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     {:ok, socket}
   end
 
+  defp load_by_id(id, socket) do
+    Ash.get!(TheronsErp.Sales.SalesOrder, id,
+      actor: socket.assigns.current_user,
+      load: [:total_price, :total_cost, sales_lines: [:total_price, :product]]
+    )
+  end
+
   @impl true
   def handle_params(%{"id" => id} = params, _, socket) do
-    sales_order =
-      Ash.get!(TheronsErp.Sales.SalesOrder, id,
-        actor: socket.assigns.current_user,
-        load: [sales_lines: [:total_price, :product]]
-      )
+    sales_order = load_by_id(id, socket)
 
     default_products =
       for line_item <- sales_order.sales_lines, into: %{} do
@@ -233,10 +255,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           |> put_flash(:info, "Sales order #{socket.assigns.form.source.type}d successfully")
           |> assign(
             :sales_order,
-            Ash.get!(TheronsErp.Sales.SalesOrder, socket.assigns.sales_order.id,
-              actor: socket.assigns.current_user,
-              load: [:sales_lines]
-            )
+            load_by_id(socket.assigns.sales_order.id, socket)
           )
           |> assign_form()
 

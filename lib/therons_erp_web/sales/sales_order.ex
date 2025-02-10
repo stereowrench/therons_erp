@@ -44,4 +44,9 @@ defmodule TheronsErp.Sales.SalesOrder do
       destination_attribute :sales_order_id
     end
   end
+
+  aggregates do
+    sum :total_price, [:sales_lines], :active_price
+    sum :total_cost, [:sales_lines], :total_cost
+  end
 end

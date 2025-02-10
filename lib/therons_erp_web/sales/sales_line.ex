@@ -48,6 +48,9 @@ defmodule TheronsErp.Sales.SalesLine do
   calculations do
     calculate :calculated_total_price, :money, expr(sales_price * quantity)
 
+    calculate :active_price, :money, expr(total_price || calculated_total_price)
+
+    calculate :total_cost, :money, expr(unit_price * quantity)
     # calculate :margin do
     # end
   end
