@@ -164,10 +164,12 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         </tbody>
       </table>
 
-      <label>
-        <input type="checkbox" name={"#{@form.name}[_add_sales_lines]"} value="end" class="hidden" />
-        <.icon name="hero-plus" />
-      </label>
+      <%= if @sales_order.state == :draft do %>
+        <label>
+          <input type="checkbox" name={"#{@form.name}[_add_sales_lines]"} value="end" class="hidden" />
+          <.icon name="hero-plus" />
+        </label>
+      <% end %>
 
       <.back navigate={~p"/sales_orders"}>Back to sales_orders</.back>
     </.simple_form>
