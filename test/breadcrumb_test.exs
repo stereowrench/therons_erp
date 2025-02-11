@@ -1,4 +1,4 @@
-defmodule TheronsErpWeb.ProductCategoryLiveTest do
+defmodule TheronsErpWeb.BreadcrumbTest do
   use TheronsErpWeb.ConnCase
 
   import Phoenix.LiveViewTest

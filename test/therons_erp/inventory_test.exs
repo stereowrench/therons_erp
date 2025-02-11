@@ -28,9 +28,8 @@ defmodule TheronsErp.InventoryTest do
       assert Ash.get!(ProductCategory, cat2.id).full_name == "Category 3 / Category 2"
       assert Ash.get!(ProductCategory, cat3.id).full_name == "Category 3"
 
-      assert_raise Ash.Error.Invalid, fn error ->
-        IO.inspect(error)
-        Inventory.change_parent!(cat3.id, cat2.id)
+      assert_raise Ash.Error.Invalid, fn ->
+        Inventory.change_parent!(cat3, cat2.id)
       end
     end
   end
