@@ -143,7 +143,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       inline_container={true}
                     />
                     <%= if @total_price_changes[to_string(sales_line.index)] do %>
-                      <span class="revert-button">
+                      <span class="revert-button" phx-click={"revert-total-price-#{sales_line.index}"}>
                         <.icon name="hero-arrow-uturn-left" />
                       </span>
                     <% end %>
@@ -157,6 +157,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       value={total_cost_for_sales_line(sales_line)}
                       type="number"
                     />
+                    <%= if @total_cost_changes[to_string(sales_line.index)] do %>
+                      <span class="revert-button" phx-click={"revert-total-cost-#{sales_line.index}"}>
+                        <.icon name="hero-arrow-uturn-left" />
+                      </span>
+                    <% end %>
                   </span>
                 </td>
                 <td>
@@ -321,6 +326,18 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     socket
   end
 
+  def handle_event("revert-total-price-" <> index, params, socket) do
+    {:noreply,
+     socket
+     |> assign(:total_price_changes, Map.delete(socket.assigns.total_price_changes, index))}
+  end
+
+  def handle_event("revert-total-cost-" <> index, params, socket) do
+    {:noreply,
+     socket
+     |> assign(:total_cost_changes, Map.delete(socket.assigns.total_cost_changes, index))}
+  end
+
   @impl true
   def handle_event("validate", %{"sales_order" => sales_order_params} = params, socket) do
     socket =
@@ -398,6 +415,22 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
   end
 
+  defp is_active_price_persisted?(sales_line) do
+    case sales_line.source.data do
+      # In case there's no data source (e.g., new line)
+      nil -> false
+      line_data -> line_data.total_price != nil
+    end
+  end
+
+  defp is_total_cost_persisted?(sales_line) do
+    case sales_line.source.data do
+      # In case there's no data source (e.g., new line)
+      nil -> false
+      line_data -> line_data.total_cost != nil
+    end
+  end
+
   defp active_price_for_sales_line(sales_line) do
     data_total_price =
       case sales_line.source.data do
@@ -434,7 +467,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   defp total_cost_for_sales_line(sales_line) do
     unit_price = Phoenix.HTML.Form.input_value(sales_line, :unit_price)
     quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
-    IO.inspect(unit_price: unit_price, quantity: quantity)
 
     case {unit_price, quantity} do
       {nil, nil} ->
