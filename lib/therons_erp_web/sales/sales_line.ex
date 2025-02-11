@@ -20,7 +20,7 @@ defmodule TheronsErp.Sales.SalesLine do
     update :update do
       require_atomic? false
       primary? true
-      accept [:sales_price, :unit_price, :quantity, :product_id]
+      accept [:sales_price, :unit_price, :quantity, :product_id, :total_price]
     end
   end
 

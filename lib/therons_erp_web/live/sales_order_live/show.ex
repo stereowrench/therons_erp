@@ -115,7 +115,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 </td>
                 <td>
                   <span class="input-icon">
-                    <i>$</i>
+                    <i class="z-10">$</i>
                     <.input
                       field={sales_line[:sales_price]}
                       value={do_money(sales_line[:sales_price])}
@@ -125,7 +125,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 </td>
                 <td>
                   <span class="input-icon">
-                    <i>$</i>
+                    <i class="z-10">$</i>
                     <.input
                       field={sales_line[:unit_price]}
                       value={do_money(sales_line[:unit_price])}
@@ -135,17 +135,21 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 </td>
                 <td>
                   <span class="input-icon">
-                    <i>$</i>
+                    <i class="z-10">$</i>
                     <.input
                       field={sales_line[:total_price]}
                       value={active_price_for_sales_line(sales_line)}
                       type="number"
+                      inline_container={true}
                     />
+                    <span class="revert-button">
+                      <.icon name="hero-arrow-uturn-left" />
+                    </span>
                   </span>
                 </td>
                 <td>
                   <span class="input-icon">
-                    <i>$</i>
+                    <i class="z-10">$</i>
                     <.input
                       field={sales_line[:total_cost]}
                       value={total_cost_for_sales_line(sales_line)}
