@@ -11,22 +11,30 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       <.header>
         Sales order {@sales_order.identifier}
         <.status_badge state={@sales_order.state} />
-        <%= if @sales_order.state == :draft and not @unsaved_changes do %>
-          <.button phx-disable-with="Saving..." phx-click="set-ready">
-            Ready
-          </.button>
-        <% end %>
-        <%= if @unsaved_changes do %>
-          <.button phx-disable-with="Saving..." class="save-button">
-            <.icon name="hero-check-circle" />
-          </.button>
 
-          <%= if @drop_sales > 0 do %>
-            <span class="text-sm">
-              Delete {@drop_sales} items.
-            </span>
+        <:actions>
+          <%= if @sales_order.state == :draft and not @unsaved_changes do %>
+            <.button phx-disable-with="Saving..." phx-click="set-ready">
+              Ready
+            </.button>
           <% end %>
-        <% end %>
+          <%= if @sales_order.state == :ready do %>
+            <.button phx-disable-with="Saving..." phx-click="set-draft">
+              Return to draft
+            </.button>
+          <% end %>
+          <%= if @unsaved_changes do %>
+            <.button phx-disable-with="Saving..." class="save-button">
+              <.icon name="hero-check-circle" />
+            </.button>
+
+            <%= if @drop_sales > 0 do %>
+              <span class="text-sm">
+                Delete {@drop_sales} items.
+              </span>
+            <% end %>
+          <% end %>
+        </:actions>
         <:subtitle>
           <math>
             <mfrac>
@@ -48,8 +56,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             </mn>
           </math>
         </:subtitle>
-
-        <:actions></:actions>
       </.header>
 
       <table class="product-category-table">
@@ -315,6 +321,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   def handle_event("set-ready", _, socket) do
     Ash.Changeset.for_update(socket.assigns.sales_order, :ready) |> Ash.update!()
+    {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
+  end
+
+  def handle_event("set-draft", _, socket) do
+    Ash.Changeset.for_update(socket.assigns.sales_order, :revive) |> Ash.update!()
     {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
   end
 

@@ -17,7 +17,7 @@ defmodule TheronsErp.Sales.SalesOrder do
     transitions do
       transition(:ready, from: :draft, to: [:ready, :cancelled])
       transition(:cancel, from: [:draft, :ready], to: :cancelled)
-      transition(:revive, from: :cancelled, to: [:draft, :ready])
+      transition(:revive, from: [:cancelled, :ready], to: [:draft, :ready])
       transition(:complete, from: [:draft, :ready], to: :complete)
     end
   end
