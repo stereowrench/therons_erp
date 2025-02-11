@@ -326,13 +326,13 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     socket
   end
 
-  def handle_event("revert-total-price-" <> index, params, socket) do
+  def handle_event("revert-total-price-" <> index, _params, socket) do
     {:noreply,
      socket
      |> assign(:total_price_changes, Map.delete(socket.assigns.total_price_changes, index))}
   end
 
-  def handle_event("revert-total-cost-" <> index, params, socket) do
+  def handle_event("revert-total-cost-" <> index, _params, socket) do
     {:noreply,
      socket
      |> assign(:total_cost_changes, Map.delete(socket.assigns.total_cost_changes, index))}
