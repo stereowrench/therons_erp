@@ -12,10 +12,16 @@ defmodule TheronsErpWeb.ProductLive.Show do
         <span class="product-name-field">
           <.input field={@form[:name]} label="" data-1p-ignore />
         </span>
-        <%= if @unsaved_changes do %>
+        <%= if @line_id do %>
           <.button phx-disable-with="Saving..." class="save-button">
-            <.icon name="hero-check-circle" />
+            <.icon name="hero-check-circle" /> Return to Sales Order
           </.button>
+        <% else %>
+          <%= if @unsaved_changes do %>
+            <.button phx-disable-with="Saving..." class="save-button">
+              <.icon name="hero-check-circle" />
+            </.button>
+          <% end %>
         <% end %>
         <:subtitle>
           [{@product.identifier}]
@@ -112,6 +118,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
      |> assign(:from_args, params["from_args"])
      |> assign(:set_category, %{text: nil, value: nil})
      |> assign(:unsaved_changes, false)
+     |> assign(:line_id, params["line_id"])
      |> assign_form()}
   end
 
@@ -191,7 +198,10 @@ defmodule TheronsErpWeb.ProductLive.Show do
         socket =
           socket
           |> put_flash(:info, "Product #{socket.assigns.form.source.type}d successfully")
-          |> Breadcrumbs.navigate_back({"products", "edit", product.id})
+          |> Breadcrumbs.navigate_back({"products", "edit", product.id}, %{
+            line_id: socket.assigns.line_id,
+            product_id: product.id
+          })
 
         {:noreply, socket}
 

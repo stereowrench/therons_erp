@@ -128,9 +128,9 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
         {"sales_orders", id, params, _identifier} ->
           if from_args do
-            ~p"/sales_orders/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args, params: params]}"
+            ~p"/sales_orders/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args, args: params]}"
           else
-            ~p"/sales_orders/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), params: params]}"
+            ~p"/sales_orders/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: params]}"
           end
       end
 
@@ -156,6 +156,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
   def navigate_to_url(breadcrumbs, {"product_category", id, _full_name}, from) do
     ~p"/product_categories/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
+  end
+
+  def navigate_to_url(breadcrumbs, {"products", "new", line_id}, from) do
+    ~p"/products/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), line_id: line_id]}"
   end
 
   def navigate_to_url(breadcrumbs, {"products", id, _name}, from) do

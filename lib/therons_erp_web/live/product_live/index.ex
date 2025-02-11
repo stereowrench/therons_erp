@@ -92,13 +92,16 @@ defmodule TheronsErpWeb.ProductLive.Index do
     )
   end
 
-  defp apply_action(socket, :new, _params) do
+  defp apply_action(socket, :new, params) do
     product = TheronsErp.Inventory.create_product_stub!()
 
     socket
     |> assign(:page_title, "New Product")
     |> assign(:product, nil)
-    |> push_navigate(to: ~p"/products/#{product}")
+    |> push_navigate(
+      to:
+        ~p"/products/#{product}?#{[breadcrumbs: params["breadcrumbs"], line_id: params["line_id"]]}"
+    )
   end
 
   defp apply_action(socket, :index, _params) do

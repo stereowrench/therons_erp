@@ -1,4 +1,5 @@
 defmodule TheronsErpWeb.SalesOrderLive.Show do
+  alias TheronsErpWeb.Breadcrumbs
   use TheronsErpWeb, :live_view
   import TheronsErpWeb.Selects
 
@@ -42,16 +43,12 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           </math>
         </:subtitle>
 
-        <:actions>
-          <%!-- <.link patch={~p"/sales_orders/#{@sales_order}/show/edit"} phx-click={JS.push_focus()}>
-            <.button>Edit sales_order</.button>
-          </.link> --%>
-        </:actions>
+        <:actions></:actions>
       </.header>
 
-      <.list>
+      <%!-- <.list>
         <:item title="Id">{@sales_order.id}</:item>
-      </.list>
+      </.list> --%>
 
       <table class="product-category-table">
         <thead>
@@ -64,7 +61,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           </tr>
         </thead>
         <tbody>
-          <.inputs_for :let={sales_line} field={@form[:sales_lines]}>
+          <.inputs_for :let={sales_line} field={IO.inspect(@form[:sales_lines])}>
             <tr>
               <td>
                 <.live_select
@@ -120,10 +117,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               <td>
                 <.input
                   field={sales_line[:total_price]}
-                  value={
-                    IO.inspect(do_money(sales_line[:total_price])) ||
-                      do_money(sales_line[:calculated_total])
-                  }
+                  value={do_money(sales_line[:active_price])}
                   type="number"
                 />
               </td>
@@ -196,7 +190,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   defp load_by_id(id, socket) do
     Ash.get!(TheronsErp.Sales.SalesOrder, id,
       actor: socket.assigns.current_user,
-      load: [:total_price, :total_cost, sales_lines: [:total_price, :product]]
+      load: [
+        :total_price,
+        :total_cost,
+        sales_lines: [:total_price, :product, :active_price, :calculated_total_price]
+      ]
     )
   end
 
@@ -231,10 +229,27 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   @impl true
   def handle_event("validate", %{"sales_order" => sales_order_params} = params, socket) do
-    if sales_order_params["product_id"] == "create" do
-      # TODO implement create
-      IO.inspect(params)
-      {:noreply, socket}
+    output =
+      (sales_order_params["sales_lines"] || [])
+      |> Enum.map(fn {id, val} ->
+        {id, val["product_id"]}
+      end)
+      |> Enum.find(fn {_id, val} -> val == "create" end)
+
+    has_create =
+      case output do
+        {id, "create"} -> id
+        _ -> nil
+      end
+
+    if has_create do
+      {:noreply,
+       socket
+       |> Breadcrumbs.navigate_to(
+         {"products", "new", has_create},
+         {"sales_orders", socket.assigns.sales_order.id, params,
+          socket.assigns.sales_order.identifier}
+       )}
     else
       form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
       drop = length(sales_order_params["_drop_sales_lines"] || [])
@@ -288,11 +303,34 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
     form =
       case {args, from_args} do
-        {nil, nil} -> form
-        {_, nil} -> AshPhoenix.Form.validate(form, args)
-        {nil, _} -> AshPhoenix.Form.validate(form, from_args)
-        _ -> AshPhoenix.Form.validate(form, Map.merge(args, from_args))
+        {nil, nil} ->
+          form
+
+        {_, nil} ->
+          AshPhoenix.Form.validate(form, args)
+
+        {nil, _} ->
+          new_args =
+            put_in(
+              from_args,
+              ["sales_order", "sales_lines", from_args["line_id"], "product_id"],
+              from_args["product_id"]
+            )
+
+          AshPhoenix.Form.validate(form, new_args)
+
+        _ ->
+          new_args =
+            put_in(
+              Map.merge(args, from_args),
+              ["sales_order", "sales_lines", from_args["line_id"], "product_id"],
+              from_args["product_id"]
+            )
+
+          AshPhoenix.Form.validate(form, new_args)
       end
+
+    # AshPhoenix.Form.params(form) |> IO.inspect()
 
     socket
     |> assign(form: to_form(form))
@@ -345,9 +383,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         |> Phoenix.HTML.Form.input_value(:product_id)
 
       if value not in [nil, ""] do
-        products = get_products(value)
-        text = Enum.find(products, &(&1.value == value)).label
-        opts = prepare_matches(products, text)
+        opts = get_initial_product_options(value)
 
         send_update(LiveSelect.Component,
           options: opts,
@@ -355,10 +391,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           value: value
         )
       else
-        products = get_products("")
+        opts = get_initial_product_options(nil)
 
         send_update(LiveSelect.Component,
-          options: products,
+          options: opts,
           id: id,
           value: nil
         )

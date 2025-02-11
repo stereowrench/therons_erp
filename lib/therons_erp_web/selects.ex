@@ -62,11 +62,13 @@ defmodule TheronsErpWeb.Selects do
   end
 
   def get_initial_options(selected) do
-    (get_categories(selected) ++ additional_options()) |> Enum.uniq() |> Enum.take(5)
+    (get_categories(selected) |> Enum.uniq() |> Enum.take(4)) ++ additional_options()
   end
 
   def get_initial_product_options(selected) do
-    (get_products(selected) ++ additional_product_options()) |> Enum.uniq() |> Enum.take(5)
+    (get_products(selected)
+     |> Enum.uniq()
+     |> Enum.take(4)) ++ additional_product_options()
   end
 
   def get_category_name(categories, id) do
