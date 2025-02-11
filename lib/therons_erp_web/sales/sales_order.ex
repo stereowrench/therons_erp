@@ -48,6 +48,7 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     create :create do
+      primary? true
       argument :sales_lines, {:array, :map}
 
       change manage_relationship(:sales_lines, type: :create),
