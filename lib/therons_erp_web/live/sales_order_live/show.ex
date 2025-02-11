@@ -127,7 +127,14 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 <td>
                   <.input
                     field={sales_line[:total_price]}
-                    value={do_money(sales_line[:active_price])}
+                    value={active_price_for_sales_line(sales_line)}
+                    type="number"
+                  />
+                </td>
+                <td>
+                  <.input
+                    field={sales_line[:total_cost]}
+                    value={total_cost_for_sales_line(sales_line)}
                     type="number"
                   />
                 </td>
@@ -327,6 +334,29 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   def handle_event("set-draft", _, socket) do
     Ash.Changeset.for_update(socket.assigns.sales_order, :revive) |> Ash.update!()
     {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
+  end
+
+  defp active_price_for_sales_line(sales_line) do
+    total_price =
+      Phoenix.HTML.Form.input_value(sales_line, :total_price)
+      |> case do
+        "" -> nil
+        el -> el
+      end
+
+    sales_price = Phoenix.HTML.Form.input_value(sales_line, :sales_price)
+    quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
+
+    total_price ||
+      Money.mult!(sales_price, quantity)
+      |> Money.to_decimal()
+      |> Decimal.to_string()
+  end
+
+  defp total_cost_for_sales_line(sales_line) do
+    unit_price = Phoenix.HTML.Form.input_value(sales_line, :unit_price)
+    quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
+    Money.mult!(unit_price, quantity)
   end
 
   defp assign_form(
