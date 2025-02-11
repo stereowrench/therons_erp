@@ -175,6 +175,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
     "Edit #{pid}"
   end
 
+  defp name_for_crumb({"products", "edit", pid, _}) do
+    "Edit #{pid}"
+  end
+
   defp name_for_crumb({"products", _pid, identifier}) do
     "#{identifier}"
   end
