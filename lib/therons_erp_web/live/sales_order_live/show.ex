@@ -146,7 +146,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               </tr>
             </.inputs_for>
           <% else %>
-            <%= for sales_line <- IO.inspect(@sales_order.sales_lines) do %>
+            <%= for sales_line <- @sales_order.sales_lines do %>
               <tr>
                 what
                 <td>
