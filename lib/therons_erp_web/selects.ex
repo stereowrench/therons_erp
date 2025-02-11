@@ -76,7 +76,11 @@ defmodule TheronsErpWeb.Selects do
       categories
       |> Enum.find(&(to_string(&1.value) == to_string(id)))
 
-    found.label
+    if found do
+      found.label
+    else
+      nil
+    end
   end
 
   def get_product_name(products, id) do

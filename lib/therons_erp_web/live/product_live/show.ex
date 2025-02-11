@@ -48,7 +48,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
               <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
             </:option>
             <:inject_adjacent>
-              <%= if Phoenix.HTML.Form.input_value(@form, :category_id) do %>
+              <%= if Phoenix.HTML.Form.input_value(@form, :category_id) not in ["create", nil] do %>
                 <span class="link-to-inside-field">
                   <.link navigate={
                     TheronsErpWeb.Breadcrumbs.navigate_to_url(
