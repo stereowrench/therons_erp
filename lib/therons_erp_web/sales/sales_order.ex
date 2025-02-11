@@ -50,7 +50,8 @@ defmodule TheronsErp.Sales.SalesOrder do
     create :create do
       argument :sales_lines, {:array, :map}
 
-      change manage_relationship(:sales_lines, type: :create)
+      change manage_relationship(:sales_lines, type: :create),
+        where: [attribute_equals(:state, :draft)]
     end
 
     update :update do
