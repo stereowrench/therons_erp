@@ -142,9 +142,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       type="number"
                       inline_container={true}
                     />
-                    <span class="revert-button">
-                      <.icon name="hero-arrow-uturn-left" />
-                    </span>
+                    <%= if @total_price_changes[to_string(sales_line.index)] do %>
+                      <span class="revert-button">
+                        <.icon name="hero-arrow-uturn-left" />
+                      </span>
+                    <% end %>
                   </span>
                 </td>
                 <td>
@@ -281,14 +283,51 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:params, params)
      |> assign(:default_products, default_products)
      |> assign(:drop_sales, 0)
+     |> assign(:total_price_changes, %{})
+     |> assign(:total_cost_changes, %{})
      |> assign_form()}
   end
 
   defp page_title(:show), do: "Show Sales order"
   defp page_title(:edit), do: "Edit Sales order"
 
+  defp record_total_price_change(
+         socket,
+         ["sales_order", "sales_lines", index, "total_price"]
+       ) do
+    changes = socket.assigns.total_price_changes
+    changes = put_in(changes[index], true)
+
+    socket
+    |> assign(:total_price_changes, changes)
+  end
+
+  defp record_total_price_change(socket, _) do
+    socket
+  end
+
+  defp record_total_cost_change(
+         socket,
+         ["sales_order", "sales_lines", index, "total_cost"]
+       ) do
+    changes = socket.assigns.total_cost_changes
+    changes = put_in(changes[index], true)
+
+    socket
+    |> assign(:total_cost_changes, changes)
+  end
+
+  defp record_total_cost_change(socket, _) do
+    socket
+  end
+
   @impl true
   def handle_event("validate", %{"sales_order" => sales_order_params} = params, socket) do
+    socket =
+      socket
+      |> record_total_price_change(params["_target"])
+      |> record_total_cost_change(params["_target"])
+
     output =
       (sales_order_params["sales_lines"] || [])
       |> Enum.map(fn {id, val} ->
