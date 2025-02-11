@@ -416,6 +416,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               from_args["product_id"]
             )
 
+          update_live_forms(new_args)
           AshPhoenix.Form.validate(form, new_args)
 
         _ ->
@@ -426,28 +427,33 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               from_args["product_id"]
             )
 
+          update_live_forms(new_args)
           AshPhoenix.Form.validate(form, new_args)
       end
-
-    pid =
-      from_args["product_id"]
-
-    if pid not in [nil, ""] do
-      opts = get_initial_product_options(pid)
-
-      id =
-        "sales_order[sales_lines][#{from_args["line_id"]}]_product_id_live_select_component"
-
-      send_update(LiveSelect.Component,
-        options: opts,
-        id: id,
-        value: pid
-      )
-    end
 
     socket
     |> assign(form: to_form(form))
     |> assign(:unsaved_changes, form.changed?)
+  end
+
+  defp update_live_forms(new_args) do
+    for {line_no, line} <- new_args["sales_lines"] do
+      pid =
+        line["product_id"]
+
+      if pid not in [nil, ""] do
+        opts = get_initial_product_options(pid)
+
+        id =
+          "sales_order[sales_lines][#{line_no}]_product_id_live_select_component"
+
+        send_update(LiveSelect.Component,
+          options: opts,
+          id: id,
+          value: pid
+        )
+      end
+    end
   end
 
   defp parse_select_id!(id) do
