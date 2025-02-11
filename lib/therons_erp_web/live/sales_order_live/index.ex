@@ -1,5 +1,6 @@
 defmodule TheronsErpWeb.SalesOrderLive.Index do
   use TheronsErpWeb, :live_view
+  import TheronsErpWeb.Layouts
 
   @impl true
   def render(assigns) do
@@ -20,7 +21,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
     >
       <:col :let={{_id, sales_order}} label="Id">
         {sales_order.identifier}
-        <PC.badge color="info">{sales_order.state}</PC.badge>
+        <.status_badge state={sales_order.state} />
       </:col>
 
       <:col :let={{_id, sales_order}} label="Customer">

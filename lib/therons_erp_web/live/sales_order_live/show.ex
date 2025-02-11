@@ -2,6 +2,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   alias TheronsErpWeb.Breadcrumbs
   use TheronsErpWeb, :live_view
   import TheronsErpWeb.Selects
+  import TheronsErpWeb.Layouts
 
   @impl true
   def render(assigns) do
@@ -9,7 +10,12 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     <.simple_form for={@form} id="sales_order-form" phx-change="validate" phx-submit="save">
       <.header>
         Sales order {@sales_order.identifier}
-        <PC.badge color="info">{@sales_order.state}</PC.badge>
+        <.status_badge state={@sales_order.state} />
+        <%= if @sales_order.state == :draft and not @unsaved_changes do %>
+          <.button phx-disable-with="Saving..." phx-click="set-ready">
+            Ready
+          </.button>
+        <% end %>
         <%= if @unsaved_changes do %>
           <.button phx-disable-with="Saving..." class="save-button">
             <.icon name="hero-check-circle" />
@@ -46,10 +52,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         <:actions></:actions>
       </.header>
 
-      <%!-- <.list>
-        <:item title="Id">{@sales_order.id}</:item>
-      </.list> --%>
-
       <table class="product-category-table">
         <thead>
           <tr>
@@ -61,80 +63,104 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           </tr>
         </thead>
         <tbody>
-          <.inputs_for :let={sales_line} field={IO.inspect(@form[:sales_lines])}>
-            <tr>
-              <td>
-                <.live_select
-                  field={sales_line[:product_id]}
-                  options={
-                    @default_products[Phoenix.HTML.Form.input_value(sales_line, :product_id)] || []
-                  }
-                  inline={true}
-                  update_min_len={0}
-                  phx-focus="set-default"
-                  container_class="inline-container"
-                  text_input_class="inline-text-input"
-                  dropdown_class="inline-dropdown"
-                  label=""
-                >
-                  <:option :let={opt}>
-                    <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
-                  </:option>
-                  <:inject_adjacent>
-                    <%= if Phoenix.HTML.Form.input_value(sales_line, :product_id) do %>
-                      <span class="link-to-inside-field">
-                        <.link navigate={
-                          TheronsErpWeb.Breadcrumbs.navigate_to_url(
-                            @breadcrumbs,
-                            {"products", Phoenix.HTML.Form.input_value(sales_line, :product_id), ""},
-                            {"sales_orders", @sales_order.id, @params, @sales_order.identifier}
-                          )
-                        }>
-                          <.icon name="hero-arrow-right" />
-                        </.link>
-                      </span>
-                    <% end %>
-                  </:inject_adjacent>
-                </.live_select>
-              </td>
-              <td>
-                <.input field={sales_line[:quantity]} type="number" />
-              </td>
-              <td>
-                <.input
-                  field={sales_line[:sales_price]}
-                  value={do_money(sales_line[:sales_price])}
-                  type="number"
-                />
-              </td>
-              <td>
-                <.input
-                  field={sales_line[:unit_price]}
-                  value={do_money(sales_line[:unit_price])}
-                  type="number"
-                />
-              </td>
-              <td>
-                <.input
-                  field={sales_line[:total_price]}
-                  value={do_money(sales_line[:active_price])}
-                  type="number"
-                />
-              </td>
-              <td>
-                <label>
-                  <input
-                    type="checkbox"
-                    name={"#{@form.name}[_drop_sales_lines][]"}
-                    value={sales_line.index}
-                    class="hidden"
+          <%= if @sales_order.state == :draft do %>
+            <.inputs_for :let={sales_line} field={@form[:sales_lines]}>
+              <tr>
+                <td>
+                  <.live_select
+                    field={sales_line[:product_id]}
+                    options={
+                      @default_products[Phoenix.HTML.Form.input_value(sales_line, :product_id)] || []
+                    }
+                    inline={true}
+                    update_min_len={0}
+                    phx-focus="set-default"
+                    container_class="inline-container"
+                    text_input_class="inline-text-input"
+                    dropdown_class="inline-dropdown"
+                    label=""
+                  >
+                    <:option :let={opt}>
+                      <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
+                    </:option>
+                    <:inject_adjacent>
+                      <%= if Phoenix.HTML.Form.input_value(sales_line, :product_id) do %>
+                        <span class="link-to-inside-field">
+                          <.link navigate={
+                            TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                              @breadcrumbs,
+                              {"products", Phoenix.HTML.Form.input_value(sales_line, :product_id),
+                               ""},
+                              {"sales_orders", @sales_order.id, @params, @sales_order.identifier}
+                            )
+                          }>
+                            <.icon name="hero-arrow-right" />
+                          </.link>
+                        </span>
+                      <% end %>
+                    </:inject_adjacent>
+                  </.live_select>
+                </td>
+                <td>
+                  <.input field={sales_line[:quantity]} type="number" />
+                </td>
+                <td>
+                  <.input
+                    field={sales_line[:sales_price]}
+                    value={do_money(sales_line[:sales_price])}
+                    type="number"
                   />
+                </td>
+                <td>
+                  <.input
+                    field={sales_line[:unit_price]}
+                    value={do_money(sales_line[:unit_price])}
+                    type="number"
+                  />
+                </td>
+                <td>
+                  <.input
+                    field={sales_line[:total_price]}
+                    value={do_money(sales_line[:active_price])}
+                    type="number"
+                  />
+                </td>
+                <td>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name={"#{@form.name}[_drop_sales_lines][]"}
+                      value={sales_line.index}
+                      class="hidden"
+                    />
 
-                  <.icon name="hero-x-mark" />
-                </label>
-              </td>
-            </tr>
-          </.inputs_for>
+                    <.icon name="hero-x-mark" />
+                  </label>
+                </td>
+              </tr>
+            </.inputs_for>
+          <% else %>
+            <%= for sales_line <- IO.inspect(@sales_order.sales_lines) do %>
+              <tr>
+                what
+                <td>
+                  {sales_line.product.name}
+                </td>
+                <td>
+                  {sales_line.quantity}
+                </td>
+                <td>
+                  {sales_line.sales_price.amount |> Decimal.to_float()}
+                </td>
+                <td>
+                  {sales_line.unit_price.amount |> Decimal.to_float()}
+                </td>
+                <td>
+                  {sales_line.active_price.amount |> Decimal.to_float()}
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
         </tbody>
       </table>
 
@@ -193,7 +219,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       load: [
         :total_price,
         :total_cost,
-        sales_lines: [:total_price, :product, :active_price, :calculated_total_price]
+        sales_lines: [:total_price, :product, :active_price, :calculated_total_price, :total_cost]
       ]
     )
   end
@@ -283,6 +309,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       {:error, form} ->
         {:noreply, assign(socket, form: form)}
     end
+  end
+
+  def handle_event("set-ready", _, socket) do
+    Ash.Changeset.for_update(socket.assigns.sales_order, :ready) |> Ash.update!()
+    {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
   end
 
   defp assign_form(

@@ -39,7 +39,10 @@ defmodule TheronsErp.Sales.SalesOrder do
       change transition_state(:complete)
     end
 
-    defaults [:read]
+    read :read do
+      primary? true
+      prepare build(sort: [identifier: :desc])
+    end
 
     destroy :destroy do
     end
@@ -54,7 +57,8 @@ defmodule TheronsErp.Sales.SalesOrder do
       require_atomic? false
       argument :sales_lines, {:array, :map}
 
-      change manage_relationship(:sales_lines, type: :direct_control)
+      change manage_relationship(:sales_lines, type: :direct_control),
+        where: [attribute_equals(:state, :draft)]
     end
   end
 

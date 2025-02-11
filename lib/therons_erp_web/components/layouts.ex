@@ -35,4 +35,33 @@ defmodule TheronsErpWeb.Layouts do
     </.link>
     """
   end
+
+  def status_badge(assigns) do
+    case assigns.state do
+      :draft ->
+        ~H"""
+        <PC.badge color="warning">Draft</PC.badge>
+        """
+
+      :ready ->
+        ~H"""
+        <PC.badge color="success">Ready</PC.badge>
+        """
+
+      :sent ->
+        ~H"""
+        <PC.badge color="success">Sent</PC.badge>
+        """
+
+      :canceled ->
+        ~H"""
+        <PC.badge color="danger">Canceled</PC.badge>
+        """
+
+      _ ->
+        ~H"""
+        <PC.badge color="info">{assigns.state}</PC.badge>
+        """
+    end
+  end
 end
