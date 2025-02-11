@@ -288,7 +288,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
        socket
        |> Breadcrumbs.navigate_to(
          {"products", "new", has_create},
-         {"sales_orders", socket.assigns.sales_order.id, params,
+         {"sales_orders", socket.assigns.sales_order.id, sales_order_params,
           socket.assigns.sales_order.identifier}
        )}
     else
@@ -347,16 +347,41 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     sales_price = Phoenix.HTML.Form.input_value(sales_line, :sales_price)
     quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
 
-    total_price ||
-      Money.mult!(sales_price, quantity)
-      |> Money.to_decimal()
-      |> Decimal.to_string()
+    case {sales_price, quantity} do
+      {nil, nil} ->
+        ""
+
+      {_, nil} ->
+        ""
+
+      {nil, _} ->
+        ""
+
+      {_, _} ->
+        total_price ||
+          Money.mult!(sales_price, quantity)
+          |> Money.to_decimal()
+          |> Decimal.to_string()
+    end
   end
 
   defp total_cost_for_sales_line(sales_line) do
     unit_price = Phoenix.HTML.Form.input_value(sales_line, :unit_price)
     quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
-    Money.mult!(unit_price, quantity)
+
+    case {unit_price, quantity} do
+      {nil, nil} ->
+        ""
+
+      {_, nil} ->
+        ""
+
+      {nil, _} ->
+        ""
+
+      {_, _} ->
+        Money.mult!(unit_price, quantity)
+    end
   end
 
   defp assign_form(
@@ -387,7 +412,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           new_args =
             put_in(
               from_args,
-              ["sales_order", "sales_lines", from_args["line_id"], "product_id"],
+              ["sales_lines", from_args["line_id"], "product_id"],
               from_args["product_id"]
             )
 
@@ -397,14 +422,28 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           new_args =
             put_in(
               Map.merge(args, from_args),
-              ["sales_order", "sales_lines", from_args["line_id"], "product_id"],
+              ["sales_lines", from_args["line_id"], "product_id"],
               from_args["product_id"]
             )
 
           AshPhoenix.Form.validate(form, new_args)
       end
 
-    # AshPhoenix.Form.params(form) |> IO.inspect()
+    pid =
+      from_args["product_id"]
+
+    if pid not in [nil, ""] do
+      opts = get_initial_product_options(pid)
+
+      id =
+        "sales_order[sales_lines][#{from_args["line_id"]}]_product_id_live_select_component"
+
+      send_update(LiveSelect.Component,
+        options: opts,
+        id: id,
+        value: pid
+      )
+    end
 
     socket
     |> assign(form: to_form(form))
@@ -440,8 +479,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       ) do
     number = parse_select_id!(id)
 
-    if pid =
-         socket.assigns.from_args["product_id"] && socket.assigns.from_args["line_id"] == number do
+    pid = socket.assigns.from_args["product_id"]
+
+    if socket.assigns.from_args["product_id"] &&
+         socket.assigns.from_args["line_id"] == to_string(number) do
       opts = get_initial_product_options(pid)
 
       send_update(LiveSelect.Component,
