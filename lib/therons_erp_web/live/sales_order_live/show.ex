@@ -11,6 +11,17 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       <.header>
         Sales order {@sales_order.identifier}
         <.status_badge state={@sales_order.state} />
+        <%= if @unsaved_changes do %>
+          <.button phx-disable-with="Saving..." class="save-button">
+            <.icon name="hero-check-circle" />
+          </.button>
+
+          <%= if @drop_sales > 0 do %>
+            <span class="text-sm">
+              Delete {@drop_sales} items.
+            </span>
+          <% end %>
+        <% end %>
 
         <:actions>
           <%= if @sales_order.state == :draft and not @unsaved_changes do %>
@@ -23,19 +34,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               Return to draft
             </.button>
           <% end %>
-          <%= if @unsaved_changes do %>
-            <.button phx-disable-with="Saving..." class="save-button">
-              <.icon name="hero-check-circle" />
-            </.button>
-
-            <%= if @drop_sales > 0 do %>
-              <span class="text-sm">
-                Delete {@drop_sales} items.
-              </span>
-            <% end %>
-          <% end %>
         </:actions>
         <:subtitle>
+          Margin:
           <math>
             <mfrac>
               <mn>{@sales_order.total_cost}</mn>
@@ -43,16 +44,17 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             </mfrac>
             <mo>=</mo>
             <mn>
-              {if @sales_order.total_cost not in [nil, Money.new(0, :USD)],
-                do:
-                  (Decimal.mult(
-                     Money.div!(@sales_order.total_price, @sales_order.total_cost.amount).amount,
-                     100
-                   )
-                   |> Decimal.sub(100)
-                   |> Decimal.to_string()) <>
-                    "%",
-                else: "undefined"}
+              {if @sales_order.total_cost != nil and
+                    not Money.equal?(@sales_order.total_cost, Money.new(0, :USD)),
+                  do:
+                    (Decimal.mult(
+                       Money.div!(@sales_order.total_price, @sales_order.total_cost.amount).amount,
+                       100
+                     )
+                     |> Decimal.sub(100)
+                     |> Decimal.to_string()) <>
+                      "%",
+                  else: "undefined"}
             </mn>
           </math>
         </:subtitle>
@@ -65,7 +67,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             <th>Quantity</th>
             <th>Sales Price</th>
             <th>Unit Price</th>
-            <th>Total</th>
+            <th>Total Price</th>
+            <th>Total Cost</th>
           </tr>
         </thead>
         <tbody>
@@ -111,32 +114,44 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                   <.input field={sales_line[:quantity]} type="number" />
                 </td>
                 <td>
-                  <.input
-                    field={sales_line[:sales_price]}
-                    value={do_money(sales_line[:sales_price])}
-                    type="number"
-                  />
+                  <span class="input-icon">
+                    <i>$</i>
+                    <.input
+                      field={sales_line[:sales_price]}
+                      value={do_money(sales_line[:sales_price])}
+                      type="number"
+                    />
+                  </span>
                 </td>
                 <td>
-                  <.input
-                    field={sales_line[:unit_price]}
-                    value={do_money(sales_line[:unit_price])}
-                    type="number"
-                  />
+                  <span class="input-icon">
+                    <i>$</i>
+                    <.input
+                      field={sales_line[:unit_price]}
+                      value={do_money(sales_line[:unit_price])}
+                      type="number"
+                    />
+                  </span>
                 </td>
                 <td>
-                  <.input
-                    field={sales_line[:total_price]}
-                    value={active_price_for_sales_line(sales_line)}
-                    type="number"
-                  />
+                  <span class="input-icon">
+                    <i>$</i>
+                    <.input
+                      field={sales_line[:total_price]}
+                      value={active_price_for_sales_line(sales_line)}
+                      type="number"
+                    />
+                  </span>
                 </td>
                 <td>
-                  <.input
-                    field={sales_line[:total_cost]}
-                    value={total_cost_for_sales_line(sales_line)}
-                    type="number"
-                  />
+                  <span class="input-icon">
+                    <i>$</i>
+                    <.input
+                      field={sales_line[:total_cost]}
+                      value={total_cost_for_sales_line(sales_line)}
+                      type="number"
+                    />
+                  </span>
                 </td>
                 <td>
                   <label>
@@ -316,6 +331,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             load_by_id(socket.assigns.sales_order.id, socket)
           )
           |> assign_form()
+          |> push_patch(
+            to:
+              ~p"/sales_orders/#{sales_order.id}?#{[breadcrumbs: Breadcrumbs.encode_breadcrumbs(socket.assigns.breadcrumbs)]}"
+          )
 
         # |> push_patch(to: socket.assigns.patch)
 
@@ -337,37 +356,42 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   defp active_price_for_sales_line(sales_line) do
-    total_price =
-      Phoenix.HTML.Form.input_value(sales_line, :total_price)
-      |> case do
-        "" -> nil
-        el -> el
+    data_total_price =
+      case sales_line.source.data do
+        # In case there's no data source (e.g., new line)
+        nil -> nil
+        line_data -> line_data.total_price
       end
 
-    sales_price = Phoenix.HTML.Form.input_value(sales_line, :sales_price)
-    quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
+    if data_total_price do
+      data_total_price.amount
+      |> Decimal.to_string()
+    else
+      sales_price = Phoenix.HTML.Form.input_value(sales_line, :sales_price)
+      quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
 
-    case {sales_price, quantity} do
-      {nil, nil} ->
-        ""
+      case {sales_price, quantity} do
+        {nil, nil} ->
+          ""
 
-      {_, nil} ->
-        ""
+        {_, nil} ->
+          ""
 
-      {nil, _} ->
-        ""
+        {nil, _} ->
+          ""
 
-      {_, _} ->
-        total_price ||
+        {_, _} ->
           Money.mult!(sales_price, quantity)
           |> Money.to_decimal()
           |> Decimal.to_string()
+      end
     end
   end
 
   defp total_cost_for_sales_line(sales_line) do
     unit_price = Phoenix.HTML.Form.input_value(sales_line, :unit_price)
     quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
+    IO.inspect(unit_price: unit_price, quantity: quantity)
 
     case {unit_price, quantity} do
       {nil, nil} ->
@@ -380,7 +404,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         ""
 
       {_, _} ->
-        Money.mult!(unit_price, quantity)
+        Money.mult!(unit_price, quantity) |> Money.to_decimal() |> Decimal.to_string()
     end
   end
 
