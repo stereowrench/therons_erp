@@ -48,7 +48,10 @@
 
 .revert-button {
     position: absolute;
-    margin-top: 22px;
+    /* margin-top: 22px; */
+    color: black;
+    @apply border-transparent bg-transparent;
+    @apply hover:bg-transparent !important;
 
     span {
         position: relative;

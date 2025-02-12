@@ -143,9 +143,14 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       inline_container={true}
                     />
                     <%= if @total_price_changes[to_string(sales_line.index)] || is_active_price_persisted?(sales_line) do %>
-                      <span class="revert-button" phx-click={"revert-total-price-#{sales_line.index}"}>
+                      <.button
+                        phx-disable-with="Saving..."
+                        class="revert-button"
+                        name="revert"
+                        value={"revert-total-price-#{sales_line.index}"}
+                      >
                         <.icon name="hero-arrow-uturn-left" />
-                      </span>
+                      </.button>
                     <% end %>
                   </span>
                 </td>
@@ -159,9 +164,14 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       inline_container={true}
                     />
                     <%= if @total_cost_changes[to_string(sales_line.index)] || is_total_cost_persisted?(sales_line) do %>
-                      <span class="revert-button" phx-click={"revert-total-cost-#{sales_line.index}"}>
+                      <.button
+                        phx-disable-with="Saving..."
+                        class="revert-button"
+                        name="revert"
+                        value={"revert-total-cost-#{sales_line.index}"}
+                      >
                         <.icon name="hero-arrow-uturn-left" />
-                      </span>
+                      </.button>
                     <% end %>
                   </span>
                 </td>
@@ -327,10 +337,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     socket
   end
 
-  def handle_event("revert-total-price-" <> index, _params, socket) do
-    # IO.inspect(socket.assigns.form)
-    params = AshPhoenix.Form.params(socket.assigns.form)
-    # IO.inspect(params)
+  def handle_event(
+        "save",
+        %{"revert" => "revert-total-price-" <> index, "sales_order" => params},
+        socket
+      ) do
     new_params = put_in(params, ["sales_lines", index, "total_price"], nil)
 
     form =
@@ -343,16 +354,21 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:total_price_changes, Map.delete(socket.assigns.total_price_changes, index))}
   end
 
-  def handle_event("revert-total-cost-" <> index, _params, socket) do
-    new_params = put_in(socket.assigns.params, ["sales_lines", index, "total_cost"], nil)
+  def handle_event(
+        "save",
+        %{"revert" => "revert-total-cost-" <> index, "sales_order" => params},
+        socket
+      ) do
+    new_params = put_in(params, ["sales_lines", index, "total_cost"], nil)
 
-    form = AshPhoenix.Form.validate(socket.assigns.form, new_params)
+    form =
+      AshPhoenix.Form.validate(socket.assigns.form, new_params)
 
     {:noreply,
      socket
      |> assign(:form, form)
      |> assign(:params, new_params)
-     |> assign(:total_cost_changes, Map.delete(socket.assigns.total_price_changes, index))}
+     |> assign(:total_cost_changes, Map.delete(socket.assigns.total_cost_changes, index))}
   end
 
   @impl true
