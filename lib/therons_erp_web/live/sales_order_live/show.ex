@@ -193,7 +193,18 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             <%= for sales_line <- @sales_order.sales_lines do %>
               <tr>
                 <td>
-                  {sales_line.product.name}
+                  <.link
+                    navigate={
+                      TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                        @breadcrumbs,
+                        {"products", sales_line.product.id, ""},
+                        {"sales_orders", @sales_order.id, @params, @sales_order.identifier}
+                      )
+                    }
+                    class="text-blue-600"
+                  >
+                    {sales_line.product.name}
+                  </.link>
                 </td>
                 <td>
                   {sales_line.quantity}
