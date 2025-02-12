@@ -371,8 +371,46 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:total_cost_changes, Map.delete(socket.assigns.total_cost_changes, index))}
   end
 
+  def erase_total_price_changes(sales_order_params, price_changes) do
+    new_lines =
+      for {id, line} <- sales_order_params["sales_lines"], into: %{} do
+        if price_changes[id] do
+          {id, line}
+        else
+          new_line = put_in(line["total_price"], nil)
+          {id, new_line}
+        end
+      end
+
+    put_in(sales_order_params["sales_lines"], new_lines)
+  end
+
+  def erase_total_cost_changes(sales_order_params, cost_changes) do
+    new_lines =
+      for {id, line} <- sales_order_params["sales_lines"], into: %{} do
+        if cost_changes[id] do
+          {id, line}
+        else
+          new_line = put_in(line["total_cost"], nil)
+          {id, new_line}
+        end
+      end
+
+    put_in(sales_order_params["sales_lines"], new_lines)
+  end
+
+  def process_modifications(sales_order_params, socket) do
+    sales_order_params =
+      erase_total_price_changes(sales_order_params, socket.assigns.total_price_changes)
+
+    sales_order_params =
+      erase_total_cost_changes(sales_order_params, socket.assigns.total_cost_changes)
+  end
+
   @impl true
   def handle_event("validate", %{"sales_order" => sales_order_params} = params, socket) do
+    sales_order_params = process_modifications(sales_order_params, socket)
+
     socket =
       socket
       |> record_total_price_change(params["_target"])
@@ -411,20 +449,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     end
   end
 
-  def erase_total_price_changes(sales_order_params, price_changes) do
-    sales_order_params
-  end
-
-  def erase_total_cost_changes(sales_order_params, price_changes) do
-    sales_order_params
-  end
-
   def handle_event("save", %{"sales_order" => sales_order_params}, socket) do
-    sales_order_params =
-      erase_total_price_changes(sales_order_params, socket.assigns.total_price_changes)
-
-    sales_order_params =
-      erase_total_cost_changes(sales_order_params, socket.assigns.total_cost_changes)
+    sales_order_params = process_modifications(sales_order_params, socket)
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: sales_order_params) do
       {:ok, sales_order} ->
