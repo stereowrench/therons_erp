@@ -223,6 +223,20 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         </label>
       <% end %>
 
+      <div class="cost-summary">
+        <div class="total-price">
+          <span>(Subtotal) $</span> {@sales_order.total_price.amount |> Decimal.to_float()}
+        </div>
+        <div class="total-cost">
+          <span>(Cost) $</span> {@sales_order.total_cost.amount |> Decimal.to_float()}
+        </div>
+        <hr />
+        <div class="total-subtotal">
+          <span>(Net) $</span> {Money.sub!(@sales_order.total_price, @sales_order.total_cost).amount
+          |> Decimal.to_float()}
+        </div>
+      </div>
+
       <.back navigate={~p"/sales_orders"}>Back to sales_orders</.back>
     </.simple_form>
 

@@ -125,3 +125,16 @@
     padding-left: 25px;
     padding-right: 0;
 }
+
+.cost-summary {
+    width: 200px;
+    float: right;
+
+    div {
+        text-align: right;
+
+        span {
+            float: left;
+        }
+    }
+}
