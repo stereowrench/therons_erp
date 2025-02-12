@@ -422,7 +422,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             load_by_id(socket.assigns.sales_order.id, socket)
           )
           |> assign_form()
-          |> push_patch(
+          |> push_navigate(
             to:
               ~p"/sales_orders/#{sales_order.id}?#{[breadcrumbs: Breadcrumbs.encode_breadcrumbs(socket.assigns.breadcrumbs)]}"
           )
