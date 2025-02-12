@@ -192,7 +192,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           <% else %>
             <%= for sales_line <- @sales_order.sales_lines do %>
               <tr>
-                what
                 <td>
                   {sales_line.product.name}
                 </td>
@@ -200,13 +199,16 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                   {sales_line.quantity}
                 </td>
                 <td>
-                  {sales_line.sales_price.amount |> Decimal.to_float()}
+                  $ {sales_line.sales_price.amount |> Decimal.to_float()}
                 </td>
                 <td>
-                  {sales_line.unit_price.amount |> Decimal.to_float()}
+                  $ {sales_line.unit_price.amount |> Decimal.to_float()}
                 </td>
                 <td>
-                  {sales_line.active_price.amount |> Decimal.to_float()}
+                  $ {sales_line.active_price.amount |> Decimal.to_float()}
+                </td>
+                <td>
+                  $ {sales_line.total_cost.amount |> Decimal.to_float()}
                 </td>
               </tr>
             <% end %>
