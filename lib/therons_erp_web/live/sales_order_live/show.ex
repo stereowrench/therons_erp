@@ -142,7 +142,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       type="number"
                       inline_container={true}
                     />
-                    <%= if @total_price_changes[to_string(sales_line.index)] || is_active_price_persisted?(sales_line) do %>
+                    <%= if (@total_price_changes[to_string(sales_line.index)] == true) || is_active_price_persisted?(sales_line, sales_line.index, @total_price_changes) do %>
                       <.button
                         phx-disable-with="Saving..."
                         class="revert-button"
@@ -163,7 +163,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       type="number"
                       inline_container={true}
                     />
-                    <%= if @total_cost_changes[to_string(sales_line.index)] || is_total_cost_persisted?(sales_line) do %>
+                    <%= if (@total_cost_changes[to_string(sales_line.index)] == true) || is_total_cost_persisted?(sales_line, sales_line.index, @total_cost_changes) do %>
                       <.button
                         phx-disable-with="Saving..."
                         class="revert-button"
@@ -349,9 +349,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
     {:noreply,
      socket
-     |> assign(:form, form)
+     |> assign(:form, to_form(form))
      |> assign(:params, new_params)
-     |> assign(:total_price_changes, Map.delete(socket.assigns.total_price_changes, index))}
+     |> assign(:unsaved_changes, form.source.changed?)
+     |> assign(:total_price_changes, Map.put(socket.assigns.total_price_changes, index, false))}
   end
 
   def handle_event(
@@ -366,9 +367,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
     {:noreply,
      socket
-     |> assign(:form, form)
+     |> assign(:form, to_form(form))
      |> assign(:params, new_params)
-     |> assign(:total_cost_changes, Map.delete(socket.assigns.total_cost_changes, index))}
+     |> assign(:unsaved_changes, form.source.changed?)
+     |> assign(:total_cost_changes, Map.put(socket.assigns.total_cost_changes, index, false))}
   end
 
   def erase_total_price_changes(sales_order_params, price_changes) do
@@ -488,26 +490,35 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
   end
 
-  defp is_active_price_persisted?(sales_line) do
-    case sales_line.source.data do
-      # In case there's no data source (e.g., new line)
-      nil ->
-        false
+  defp is_active_price_persisted?(sales_line, index, total_price_changes) do
+    if total_price_changes[to_string(index)] == false do
+      false
+    else
+      case sales_line.source.data do
+        # In case there's no data source (e.g., new line)
+        nil ->
+          false
 
-      line_data ->
-        line_data.total_price != nil and
-          not Money.equal?(line_data.total_cost, Money.new(0, :USD))
+        line_data ->
+          line_data.total_price != nil and
+            not Money.equal?(line_data.total_price, Money.new(0, :USD))
+      end
     end
   end
 
-  defp is_total_cost_persisted?(sales_line) do
-    case sales_line.source.data do
-      # In case there's no data source (e.g., new line)
-      nil ->
-        false
+  defp is_total_cost_persisted?(sales_line, index, total_cost_changes) do
+    if total_cost_changes[to_string(index)] == false do
+      false
+    else
+      case sales_line.source.data do
+        # In case there's no data source (e.g., new line)
+        nil ->
+          false
 
-      line_data ->
-        line_data.total_cost != nil and not Money.equal?(line_data.total_cost, Money.new(0, :USD))
+        line_data ->
+          line_data.total_cost != nil and
+            not Money.equal?(line_data.total_cost, Money.new(0, :USD))
+      end
     end
   end
 
