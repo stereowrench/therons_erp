@@ -142,7 +142,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       type="number"
                       inline_container={true}
                     />
-                    <%= if @total_price_changes[to_string(sales_line.index)] do %>
+                    <%= if @total_price_changes[to_string(sales_line.index)] || is_active_price_persisted?(sales_line) do %>
                       <span class="revert-button" phx-click={"revert-total-price-#{sales_line.index}"}>
                         <.icon name="hero-arrow-uturn-left" />
                       </span>
@@ -156,8 +156,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       field={sales_line[:total_cost]}
                       value={total_cost_for_sales_line(sales_line)}
                       type="number"
+                      inline_container={true}
                     />
-                    <%= if @total_cost_changes[to_string(sales_line.index)] do %>
+                    <%= if @total_cost_changes[to_string(sales_line.index)] || is_total_cost_persisted?(sales_line) do %>
                       <span class="revert-button" phx-click={"revert-total-cost-#{sales_line.index}"}>
                         <.icon name="hero-arrow-uturn-left" />
                       </span>
@@ -327,15 +328,31 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   def handle_event("revert-total-price-" <> index, _params, socket) do
+    # IO.inspect(socket.assigns.form)
+    params = AshPhoenix.Form.params(socket.assigns.form)
+    # IO.inspect(params)
+    new_params = put_in(params, ["sales_lines", index, "total_price"], nil)
+
+    form =
+      AshPhoenix.Form.validate(socket.assigns.form, new_params)
+
     {:noreply,
      socket
+     |> assign(:form, form)
+     |> assign(:params, new_params)
      |> assign(:total_price_changes, Map.delete(socket.assigns.total_price_changes, index))}
   end
 
   def handle_event("revert-total-cost-" <> index, _params, socket) do
+    new_params = put_in(socket.assigns.params, ["sales_lines", index, "total_cost"], nil)
+
+    form = AshPhoenix.Form.validate(socket.assigns.form, new_params)
+
     {:noreply,
      socket
-     |> assign(:total_cost_changes, Map.delete(socket.assigns.total_cost_changes, index))}
+     |> assign(:form, form)
+     |> assign(:params, new_params)
+     |> assign(:total_cost_changes, Map.delete(socket.assigns.total_price_changes, index))}
   end
 
   @impl true
@@ -378,7 +395,21 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     end
   end
 
+  def erase_total_price_changes(sales_order_params, price_changes) do
+    sales_order_params
+  end
+
+  def erase_total_cost_changes(sales_order_params, price_changes) do
+    sales_order_params
+  end
+
   def handle_event("save", %{"sales_order" => sales_order_params}, socket) do
+    sales_order_params =
+      erase_total_price_changes(sales_order_params, socket.assigns.total_price_changes)
+
+    sales_order_params =
+      erase_total_cost_changes(sales_order_params, socket.assigns.total_cost_changes)
+
     case AshPhoenix.Form.submit(socket.assigns.form, params: sales_order_params) do
       {:ok, sales_order} ->
         # notify_parent({:saved, sales_order})
@@ -418,30 +449,42 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   defp is_active_price_persisted?(sales_line) do
     case sales_line.source.data do
       # In case there's no data source (e.g., new line)
-      nil -> false
-      line_data -> line_data.total_price != nil
+      nil ->
+        false
+
+      line_data ->
+        line_data.total_price != nil and
+          not Money.equal?(line_data.total_cost, Money.new(0, :USD))
     end
   end
 
   defp is_total_cost_persisted?(sales_line) do
     case sales_line.source.data do
       # In case there's no data source (e.g., new line)
-      nil -> false
-      line_data -> line_data.total_cost != nil
+      nil ->
+        false
+
+      line_data ->
+        line_data.total_cost != nil and not Money.equal?(line_data.total_cost, Money.new(0, :USD))
     end
   end
 
   defp active_price_for_sales_line(sales_line) do
     data_total_price =
-      case sales_line.source.data do
+      case Phoenix.HTML.Form.input_value(sales_line, :total_price) do
         # In case there's no data source (e.g., new line)
         nil -> nil
-        line_data -> line_data.total_price
+        total_price -> total_price
       end
 
     if data_total_price do
-      data_total_price.amount
-      |> Decimal.to_string()
+      case data_total_price do
+        %Money{} ->
+          data_total_price.amount |> Decimal.to_string()
+
+        _ ->
+          data_total_price
+      end
     else
       sales_price = Phoenix.HTML.Form.input_value(sales_line, :sales_price)
       quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
@@ -465,21 +508,38 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   defp total_cost_for_sales_line(sales_line) do
-    unit_price = Phoenix.HTML.Form.input_value(sales_line, :unit_price)
-    quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
+    data_total_cost =
+      case Phoenix.HTML.Form.input_value(sales_line, :total_cost) do
+        # In case there's no data source (e.g., new line)
+        nil -> nil
+        total_cost -> total_cost
+      end
 
-    case {unit_price, quantity} do
-      {nil, nil} ->
-        ""
+    if data_total_cost do
+      case data_total_cost do
+        %Money{} ->
+          data_total_cost.amount |> Decimal.to_string()
 
-      {_, nil} ->
-        ""
+        _ ->
+          data_total_cost
+      end
+    else
+      unit_price = Phoenix.HTML.Form.input_value(sales_line, :unit_price)
+      quantity = Phoenix.HTML.Form.input_value(sales_line, :quantity)
 
-      {nil, _} ->
-        ""
+      case {unit_price, quantity} do
+        {nil, nil} ->
+          ""
 
-      {_, _} ->
-        Money.mult!(unit_price, quantity) |> Money.to_decimal() |> Decimal.to_string()
+        {_, nil} ->
+          ""
+
+        {nil, _} ->
+          ""
+
+        {_, _} ->
+          Money.mult!(unit_price, quantity) |> Money.to_decimal() |> Decimal.to_string()
+      end
     end
   end
 
