@@ -376,7 +376,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   def erase_total_price_changes(sales_order_params, price_changes) do
     new_lines =
       for {id, line} <- sales_order_params["sales_lines"], into: %{} do
-        if price_changes[id] do
+        if price_changes[id] != false do
           {id, line}
         else
           new_line = put_in(line["total_price"], nil)
@@ -390,7 +390,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   def erase_total_cost_changes(sales_order_params, cost_changes) do
     new_lines =
       for {id, line} <- sales_order_params["sales_lines"], into: %{} do
-        if cost_changes[id] do
+        if cost_changes[id] != false do
           {id, line}
         else
           new_line = put_in(line["total_cost"], nil)
