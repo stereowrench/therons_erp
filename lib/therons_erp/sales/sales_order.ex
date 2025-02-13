@@ -53,6 +53,11 @@ defmodule TheronsErp.Sales.SalesOrder do
 
       change manage_relationship(:sales_lines, type: :create),
         where: [attribute_equals(:state, :draft)]
+
+      argument :customer_id, :uuid
+      argument :address, {:array, :string}
+
+      change &update_customer/2, where: [attribute_equals(:state, :draft)]
     end
 
     update :update do
@@ -61,7 +66,16 @@ defmodule TheronsErp.Sales.SalesOrder do
 
       change manage_relationship(:sales_lines, type: :direct_control),
         where: [attribute_equals(:state, :draft)]
+
+      argument :customer_id, :uuid
+      argument :address, {:array, :string}
+
+      change &update_customer/2, where: [attribute_equals(:state, :draft)]
     end
+  end
+
+  def update_customer(changeset, context) do
+    IO.inspect({changeset, context})
   end
 
   attributes do
@@ -81,6 +95,7 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     belongs_to :customer, TheronsErp.People.Entity
+    belongs_to :address, TheronsErp.People.Address
   end
 
   aggregates do
