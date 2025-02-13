@@ -60,6 +60,20 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         </:subtitle>
       </.header>
 
+      <div class="prose">
+        <h2>Customer</h2>
+
+        <%!-- <.input
+          field={@form[:customer_id]}
+          type="select"
+          options={
+            for customer <- @customers do
+              {customer.name, customer.id}
+            end
+          }
+        /> --%>
+      </div>
+
       <table class="product-category-table">
         <thead>
           <tr>
@@ -236,14 +250,21 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
       <div class="cost-summary">
         <div class="total-price">
-          <span>(Subtotal) $</span> {@sales_order.total_price.amount |> Decimal.to_float()}
+          <span>(Subtotal) $</span> {if @sales_order.total_price,
+            do: @sales_order.total_price.amount |> Decimal.to_float(),
+            else: 0}
         </div>
         <div class="total-cost">
-          <span>(Cost) $</span> {@sales_order.total_cost.amount |> Decimal.to_float()}
+          <span>(Cost) $</span> {if @sales_order.total_cost,
+            do: @sales_order.total_cost.amount |> Decimal.to_float(),
+            else: 0}
         </div>
         <hr />
         <div class="total-subtotal">
-          <span>(Net) $</span> {Money.sub!(@sales_order.total_price, @sales_order.total_cost).amount
+          <span>(Net) $</span> {Money.sub!(
+            @sales_order.total_price || Money.new(0, :USD),
+            @sales_order.total_cost || Money.new(0, :USD)
+          ).amount
           |> Decimal.to_float()}
         </div>
       </div>
@@ -298,7 +319,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       load: [
         :total_price,
         :total_cost,
-        sales_lines: [:total_price, :product, :active_price, :calculated_total_price, :total_cost]
+        sales_lines: [:total_price, :product, :active_price, :calculated_total_price, :total_cost],
+        customer: [:addresses]
       ]
     )
   end
@@ -328,6 +350,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:drop_sales, 0)
      |> assign(:total_price_changes, %{})
      |> assign(:total_cost_changes, %{})
+     |> assign(:customers, TheronsErp.People.list_people!())
      |> assign_form()}
   end
 

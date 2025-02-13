@@ -76,6 +76,7 @@ defmodule TheronsErp.Sales.SalesOrder do
 
   def update_customer(changeset, context) do
     IO.inspect({changeset, context})
+    changeset
   end
 
   attributes do
