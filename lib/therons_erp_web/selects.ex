@@ -66,8 +66,22 @@ defmodule TheronsErpWeb.Selects do
     ]
   end
 
+  def additional_customer_options do
+    [
+      %{
+        value: :create,
+        label: "Create New",
+        matches: []
+      }
+    ]
+  end
+
   def get_initial_options(selected) do
     (get_categories(selected) |> Enum.uniq() |> Enum.take(4)) ++ additional_options()
+  end
+
+  def get_initial_customer_options(selected) do
+    (get_customers(selected) |> Enum.uniq() |> Enum.take(4)) ++ additional_customer_options()
   end
 
   def get_initial_product_options(selected) do

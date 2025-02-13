@@ -346,10 +346,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     )
   end
 
-  defp get_initial_customer_options(selected) do
-    get_customers(selected)
-  end
-
   @impl true
   def handle_params(%{"id" => id} = params, _, socket) do
     sales_order = load_by_id(id, socket)
@@ -729,15 +725,29 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           AshPhoenix.Form.validate(form, new_args)
 
         _ ->
-          new_args =
-            put_in(
-              Map.merge(args, from_args),
-              ["sales_lines", from_args["line_id"], "product_id"],
-              from_args["product_id"]
-            )
+          cond do
+            from_args["line_id"] ->
+              new_args =
+                put_in(
+                  Map.merge(args, from_args),
+                  ["sales_lines", from_args["line_id"], "product_id"],
+                  from_args["product_id"]
+                )
 
-          update_live_forms(new_args)
-          AshPhoenix.Form.validate(form, new_args)
+              update_live_forms(new_args)
+              AshPhoenix.Form.validate(form, new_args)
+
+            from_args["customer_id"] ->
+              new_args =
+                put_in(
+                  Map.merge(args, from_args),
+                  ["customer_id"],
+                  from_args["customer_id"]
+                )
+
+              update_live_forms(new_args)
+              AshPhoenix.Form.validate(form, new_args)
+          end
       end
 
     socket
@@ -774,11 +784,25 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   def handle_event(
         "live_select_change",
-        %{"text" => text, "id" => id},
+        %{"text" => text, "id" => "sales_order[sales_lines]" <> _ = id},
         socket
       ) do
     opts =
       get_products("")
+      |> prepare_matches(text)
+
+    send_update(LiveSelect.Component, id: id, options: opts)
+
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "live_select_change",
+        %{"text" => text, "id" => "sales_order_customer_id" <> _ = id},
+        socket
+      ) do
+    opts =
+      get_customers("")
       |> prepare_matches(text)
 
     send_update(LiveSelect.Component, id: id, options: opts)
