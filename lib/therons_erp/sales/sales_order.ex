@@ -48,35 +48,26 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     create :create do
+      accept [:customer_id, :address_id]
       primary? true
       argument :sales_lines, {:array, :map}
 
       change manage_relationship(:sales_lines, type: :create),
         where: [attribute_equals(:state, :draft)]
 
-      argument :customer_id, :uuid
-      argument :address, {:array, :string}
-
-      change &update_customer/2, where: [attribute_equals(:state, :draft)]
+      # TODO validate address belongs to customer
     end
 
     update :update do
+      accept [:customer_id, :address_id]
       require_atomic? false
       argument :sales_lines, {:array, :map}
 
       change manage_relationship(:sales_lines, type: :direct_control),
         where: [attribute_equals(:state, :draft)]
 
-      argument :customer_id, :uuid
-      argument :address, {:array, :string}
-
-      change &update_customer/2, where: [attribute_equals(:state, :draft)]
+      # TODO validate address belongs to customer
     end
-  end
-
-  def update_customer(changeset, context) do
-    IO.inspect({changeset, context})
-    changeset
   end
 
   attributes do

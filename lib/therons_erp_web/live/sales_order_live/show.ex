@@ -63,15 +63,36 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       <div class="prose">
         <h2>Customer</h2>
 
-        <%!-- <.input
+        <.live_select
           field={@form[:customer_id]}
-          type="select"
-          options={
-            for customer <- @customers do
-              {customer.name, customer.id}
-            end
-          }
-        /> --%>
+          options={@default_customers}
+          inline={true}
+          update_min_len={0}
+          phx-focus="set-default-customers"
+          container_class="inline-container"
+          text_input_class="inline-text-input"
+          dropdown_class="inline-dropdown"
+          label=""
+        >
+          <:option :let={opt}>
+            <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
+          </:option>
+          <:inject_adjacent>
+            <%= if Phoenix.HTML.Form.input_value(@form, :customer_id) do %>
+              <span class="link-to-inside-field">
+                <.link navigate={
+                  TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                    @breadcrumbs,
+                    {"entities", Phoenix.HTML.Form.input_value(@form, :customer_id), ""},
+                    {"sales_orders", @sales_order.id, @params, @sales_order.identifier}
+                  )
+                }>
+                  <.icon name="hero-arrow-right" />
+                </.link>
+              </span>
+            <% end %>
+          </:inject_adjacent>
+        </.live_select>
       </div>
 
       <table class="product-category-table">
@@ -325,6 +346,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     )
   end
 
+  defp get_initial_customer_options(selected) do
+    get_customers(selected)
+  end
+
   @impl true
   def handle_params(%{"id" => id} = params, _, socket) do
     sales_order = load_by_id(id, socket)
@@ -350,7 +375,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:drop_sales, 0)
      |> assign(:total_price_changes, %{})
      |> assign(:total_cost_changes, %{})
-     |> assign(:customers, TheronsErp.People.list_people!())
+     |> assign(:set_customer, %{text: nil, value: nil})
+     |> assign(:default_customers, get_initial_customer_options(sales_order.customer_id))
      |> assign_form()}
   end
 
@@ -490,14 +516,35 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           socket.assigns.sales_order.identifier}
        )}
     else
-      form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
-      drop = length(sales_order_params["_drop_sales_lines"] || [])
+      if sales_order_params["customer_id"] == "create" do
+        sid = socket.assigns.sales_order.id
 
-      {:noreply,
-       assign(socket, form: form)
-       |> assign(:unsaved_changes, form.source.changed? || drop > 0)
-       |> assign(:params, sales_order_params)
-       |> assign(:drop_sales, drop)}
+        {:noreply,
+         socket
+         |> Breadcrumbs.navigate_to(
+           {"entities", "new", sid},
+           {"sales_orders", socket.assigns.sales_order.id, sales_order_params,
+            socket.assigns.sales_order.identifier}
+         )}
+      else
+        set_customer =
+          socket.assigns.default_customers
+          |> Enum.find(fn c -> c.value == sales_order_params["customer_id"] end)
+          |> case do
+            nil -> %{text: nil, value: nil}
+            c -> %{text: c.label, value: c.value}
+          end
+
+        form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
+        drop = length(sales_order_params["_drop_sales_lines"] || [])
+
+        {:noreply,
+         assign(socket, form: form)
+         |> assign(:unsaved_changes, form.source.changed? || drop > 0)
+         |> assign(:set_customer, set_customer)
+         |> assign(:params, sales_order_params)
+         |> assign(:drop_sales, drop)}
+      end
     end
   end
 
@@ -735,6 +782,32 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       |> prepare_matches(text)
 
     send_update(LiveSelect.Component, id: id, options: opts)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "set-default-customers",
+        %{
+          "id" => id
+        },
+        socket
+      ) do
+    if cid = socket.assigns.from_args["customer_id"] do
+      opts = get_initial_customer_options(cid)
+      send_update(LiveSelect.Component, options: opts, id: id, value: cid)
+    else
+      text =
+        socket.assigns.set_customer.text ||
+          (socket.assigns.sales_order.customer && socket.assigns.sales_order.customer.name) || ""
+
+      value = socket.assigns.set_customer.value || socket.assigns.sales_order.customer_id
+
+      opts = prepare_matches(socket.assigns.default_customers, text)
+
+      send_update(LiveSelect.Component, options: opts, id: id, value: value)
+    end
 
     {:noreply, socket}
   end

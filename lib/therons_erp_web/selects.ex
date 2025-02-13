@@ -1,4 +1,5 @@
 defmodule TheronsErpWeb.Selects do
+  alias TheronsErp.People
   alias TheronsErp.Inventory
 
   def prepare_matches(items, text) do
@@ -18,6 +19,10 @@ defmodule TheronsErpWeb.Selects do
 
   def get_products(selected) do
     _get_list(Inventory.get_products!(), selected, & &1.name)
+  end
+
+  def get_customers(selected) do
+    _get_list(People.list_people!(), selected, & &1.name)
   end
 
   defp _get_list(items, selected, mapper) do
