@@ -103,9 +103,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               field={@form[:address_id]}
               type="select"
               label="Address"
-              class="address-select"
               options={
-                Enum.map(@sales_order.customer.addresses, &{&1.address, &1.id}) ++
+                [{"Unselected", nil}] ++
+                  Enum.map(@addresses, &{&1.address, &1.id}) ++
                   [{"Create new", "create"}]
               }
             />
@@ -402,6 +402,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:total_price_changes, %{})
      |> assign(:total_cost_changes, %{})
      |> assign(:set_customer, %{text: nil, value: nil})
+     |> assign(:addresses, sales_order.customer.addresses)
      |> assign(:default_customers, get_initial_customer_options(sales_order.customer_id))
      |> assign_form()}
   end
@@ -512,7 +513,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   @impl true
-  def handle_event("validate", %{"sales_order" => sales_order_params} = params, socket) do
+  def handle_event(
+        "validate",
+        %{"sales_order" => sales_order_params, "_target" => target} = params,
+        socket
+      ) do
     sales_order_params = process_modifications(sales_order_params, socket)
 
     socket =
@@ -534,7 +539,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       end
 
     if sales_order_params["address_id"] == "create" and
-         sales_order_params["customer_id"] not in [nil, "create"] do
+         sales_order_params["customer_id"] not in [nil, "create"] and
+         target != ["sales_order", "customer_id"] do
       {:noreply,
        socket
        |> Breadcrumbs.navigate_to(
@@ -571,6 +577,13 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               c -> %{text: c.label, value: c.value}
             end
 
+          # If address_id not in customer addresses we want to reset the sales_order_params["address_id"] to nil
+          # Load the customer by sales_order_params["customer_id"]
+          customer =
+            Ash.get!(TheronsErp.People.Entity, sales_order_params["customer_id"],
+              load: [:addresses]
+            )
+
           form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
           drop = length(sales_order_params["_drop_sales_lines"] || [])
 
@@ -578,6 +591,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
            assign(socket, form: form)
            |> assign(:unsaved_changes, form.source.changed? || drop > 0)
            |> assign(:set_customer, set_customer)
+           |> assign(:addresses, customer.addresses)
            |> assign(:params, sales_order_params)
            |> assign(:drop_sales, drop)}
         end
