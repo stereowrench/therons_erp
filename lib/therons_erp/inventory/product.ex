@@ -15,8 +15,12 @@ defmodule TheronsErp.Inventory.Product do
     read :list do
     end
 
+    read :list_saleable do
+      filter expr(saleable == true)
+    end
+
     create :create do
-      accept [:name, :sales_price, :type, :category_id]
+      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable]
     end
 
     create :create_stub do
@@ -28,7 +32,7 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     update :update do
-      accept [:name, :sales_price, :type, :category_id]
+      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable]
     end
 
     destroy :destroy do
@@ -50,6 +54,14 @@ defmodule TheronsErp.Inventory.Product do
 
     attribute :type, TheronsErp.Inventory.Product.Types do
       default :goods
+    end
+
+    attribute :saleable, :boolean do
+      default true
+    end
+
+    attribute :purchaseable, :boolean do
+      default false
     end
 
     timestamps()

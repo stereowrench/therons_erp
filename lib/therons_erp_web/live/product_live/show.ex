@@ -33,6 +33,8 @@ defmodule TheronsErpWeb.ProductLive.Show do
 
       <%= if @live_action != :edit do %>
         <div>
+          <.input field={@form[:saleable]} type="checkbox" label="Saleable" />
+          <.input field={@form[:purchaseable]} type="checkbox" label="Purchaseable" />
           <.live_select
             field={@form[:category_id]}
             label="Category"

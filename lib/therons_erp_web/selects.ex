@@ -18,7 +18,7 @@ defmodule TheronsErpWeb.Selects do
   end
 
   def get_products(selected) do
-    _get_list(Inventory.get_products!(), selected, & &1.name)
+    _get_list(Inventory.get_saleable_products!(), selected, & &1.name)
   end
 
   def get_customers(selected) do

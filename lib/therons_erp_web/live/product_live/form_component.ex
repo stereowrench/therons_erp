@@ -25,11 +25,6 @@ defmodule TheronsErpWeb.ProductLive.FormComponent do
           type="text"
           label="Type"
         />
-        <%!-- <.input
-          field={@form[:category_id]}
-          type="text"
-          label="Category"
-        /> --%>
 
         <.live_select
           field={@form[:category_id]}

@@ -13,6 +13,7 @@ defmodule TheronsErp.Inventory do
       define :create_product, args: [:name, :sales_price], action: :create
       define :update_product, args: [:name, :sales_price], action: :update
       define :create_product_stub, action: :create_stub
+      define :get_saleable_products, action: :list_saleable
       define :get_products, action: :list
     end
   end
