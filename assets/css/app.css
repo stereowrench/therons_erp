@@ -46,6 +46,12 @@
     }
 }
 
+.link-to-inside-field.address-link {
+    span {
+        left: -135px;
+    }
+}
+
 .revert-button {
     position: absolute;
     /* margin-top: 22px; */
@@ -144,7 +150,32 @@
     width: 400px;
 }
 
+.address div {
+    height: 1.5em;
+}
+
 .address-container div select {
     display: inline-block;
     width: 200px;
+}
+
+.fieldsetlike {
+    width: 500px;
+    overflow-x: scroll;
+    padding: 20px;
+    border: 1px solid lightgray;
+}
+
+.fieldsetlikelabel {
+    position: relative;
+    top: 14px; /* change this how you need */
+    left: 20px; /* change this how you need */
+    background-color: white;
+    display: inline-block;
+}
+
+.address-city-state-zip {
+    div {
+        display: inline-block;
+    }
 }

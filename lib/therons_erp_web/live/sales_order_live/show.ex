@@ -110,7 +110,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               }
             />
           </div>
-          <span class="link-to-inside-field">
+          <span class="link-to-inside-field address-link">
             <.link navigate={
               TheronsErpWeb.Breadcrumbs.navigate_to_url(
                 @breadcrumbs,
@@ -121,6 +121,54 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               <.icon name="hero-arrow-right" />
             </.link>
           </span>
+        <% end %>
+
+        <%!-- Render address --%>
+        <%= if get_address(@form, @addresses) do %>
+          <div>
+            <label class="fieldsetlikelabel">Address</label>
+            <div class="fieldsetlike">
+              <div class="address">
+                <%!-- Address 1 --%>
+                <div class="address-line">
+                  <span>
+                    <%!-- Address label --%>
+                    <span class="text-xs">Address</span>
+                    {get_address(@form, @addresses).address}
+                  </span>
+                </div>
+                <%!-- Address 2 --%>
+                <div class="address2-line">
+                  <span>
+                    <span class="text-xs">Address 2</span>
+                    {get_address(@form, @addresses).address2}
+                  </span>
+                </div>
+                <div class="address-city-state-zip">
+                  <%!-- City --%>
+                  <div class="city-line">
+                    <span class="text-xs">City</span>
+                    {get_address(@form, @addresses).city}
+                  </div>
+                  <%!-- State --%>
+                  <div class="state-line">
+                    <span class="text-xs">State</span>
+                    {get_address(@form, @addresses).state}
+                  </div>
+                  <%!-- Zip Code --%>
+                  <div class="zip-line">
+                    <span class="text-xs">Zip Code</span>
+                    {get_address(@form, @addresses).zip_code}
+                  </div>
+                </div>
+                <%!-- Phone number --%>
+                <div class="phone-line">
+                  <span class="text-xs">Phone Number</span>
+                  {get_address(@form, @addresses).phone}
+                </div>
+              </div>
+            </div>
+          </div>
         <% end %>
       </div>
 
@@ -940,5 +988,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     end
 
     {:noreply, socket}
+  end
+
+  defp get_address(form, addresses) do
+    id = Phoenix.HTML.Form.input_value(form, :address_id)
+    Enum.find(addresses, &(&1.id == id))
   end
 end
