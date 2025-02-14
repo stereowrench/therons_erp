@@ -4,6 +4,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   import TheronsErpWeb.Selects
   import TheronsErpWeb.Layouts
 
+  # TODO address should be selectable when customer is changed but not persisted
+  # TODO address should be reset when customer changed
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -93,6 +96,14 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             <% end %>
           </:inject_adjacent>
         </.live_select>
+
+        <%= if Phoenix.HTML.Form.input_value(@form, :customer_id) do %>
+          <.input
+            field={@form[:address_id]}
+            type="select"
+            options={Enum.map(@sales_order.customer.addresses, &{&1.address, &1.id})}
+          />
+        <% end %>
       </div>
 
       <table class="product-category-table">
@@ -340,6 +351,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       load: [
         :total_price,
         :total_cost,
+        :address,
         sales_lines: [:total_price, :product, :active_price, :calculated_total_price, :total_cost],
         customer: [:addresses]
       ]
