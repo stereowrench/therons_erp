@@ -76,7 +76,8 @@ defmodule TheronsErp.MixProject do
       {:live_select, "~> 1.0"},
       {:seqfuzz, "~> 0.2.0"},
       {:igniter, "~> 0.5", only: [:dev, :test]},
-      {:petal_components, "~> 2.8"}
+      {:petal_components, "~> 2.8"},
+      {:credo, "~> 1.7"}
     ]
   end
 
