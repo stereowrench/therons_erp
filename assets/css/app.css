@@ -138,3 +138,13 @@
         }
     }
 }
+
+.address-container {
+    display: inline-block;
+    width: 400px;
+}
+
+.address-container div select {
+    display: inline-block;
+    width: 200px;
+}

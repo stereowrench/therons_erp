@@ -75,7 +75,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           container_class="inline-container"
           text_input_class="inline-text-input"
           dropdown_class="inline-dropdown"
-          label=""
+          label="Customer"
         >
           <:option :let={opt}>
             <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
@@ -98,14 +98,29 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         </.live_select>
 
         <%= if Phoenix.HTML.Form.input_value(@form, :customer_id) do %>
-          <.input
-            field={@form[:address_id]}
-            type="select"
-            options={
-              Enum.map(@sales_order.customer.addresses, &{&1.address, &1.id}) ++
-                [{"Create new", "create"}]
-            }
-          />
+          <div class="inline-container address-container">
+            <.input
+              field={@form[:address_id]}
+              type="select"
+              label="Address"
+              class="address-select"
+              options={
+                Enum.map(@sales_order.customer.addresses, &{&1.address, &1.id}) ++
+                  [{"Create new", "create"}]
+              }
+            />
+          </div>
+          <span class="link-to-inside-field">
+            <.link navigate={
+              TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                @breadcrumbs,
+                {"entities", Phoenix.HTML.Form.input_value(@form, :customer_id), ""},
+                {"sales_orders", @sales_order.id, @params, @sales_order.identifier}
+              )
+            }>
+              <.icon name="hero-arrow-right" />
+            </.link>
+          </span>
         <% end %>
       </div>
 
