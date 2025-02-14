@@ -16,9 +16,55 @@ defmodule TheronsErpWeb.EntityLive.Show do
       </:actions>
     </.header>
 
-    <.list>
-      <:item title="Id">{@entity.id}</:item>
-    </.list>
+    <div class="prose">
+      <h2>Addresses</h2>
+    </div>
+    <%= for address <- @entity.addresses do %>
+      <div>
+        <label class="fieldsetlikelabel">Address</label>
+        <div class="fieldsetlike">
+          <div class="address">
+            <%!-- Address 1 --%>
+            <div class="address-line">
+              <span>
+                <%!-- Address label --%>
+                <span class="text-xs">Address</span>
+                {address.address}
+              </span>
+            </div>
+            <%!-- Address 2 --%>
+            <div class="address2-line">
+              <span>
+                <span class="text-xs">Address 2</span>
+                {address.address2}
+              </span>
+            </div>
+            <div class="address-city-state-zip">
+              <%!-- City --%>
+              <div class="city-line">
+                <span class="text-xs">City</span>
+                {address.city}
+              </div>
+              <%!-- State --%>
+              <div class="state-line">
+                <span class="text-xs">State</span>
+                {address.state}
+              </div>
+              <%!-- Zip Code --%>
+              <div class="zip-line">
+                <span class="text-xs">Zip Code</span>
+                {address.zip_code}
+              </div>
+            </div>
+            <%!-- Phone number --%>
+            <div class="phone-line">
+              <span class="text-xs">Phone Number</span>
+              {address.phone}
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
 
     <.back navigate={~p"/people"}>Back to entities</.back>
 
@@ -86,7 +132,10 @@ defmodule TheronsErpWeb.EntityLive.Show do
      |> assign(:page_title, page_title(socket.assigns.live_action))
      |> assign(
        :entity,
-       Ash.get!(TheronsErp.People.Entity, id, actor: socket.assigns.current_user)
+       Ash.get!(TheronsErp.People.Entity, id,
+         actor: socket.assigns.current_user,
+         load: [:addresses]
+       )
      )}
   end
 
