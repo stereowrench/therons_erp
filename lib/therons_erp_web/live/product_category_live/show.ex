@@ -295,11 +295,11 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
               {:noreply,
                socket |> put_flash(:error, "Cannot create a cycle in the product category tree")}
             else
-              raise e
+              reraise(e)
             end
 
           _ ->
-            raise e
+            reraise(e)
         end
     end
   end
