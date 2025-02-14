@@ -27,8 +27,6 @@ defmodule TheronsErpWeb.ProductLive.Index do
         <div class="sr-only">
           <.link navigate={~p"/products/#{product}"}>Show</.link>
         </div>
-
-        <.link patch={~p"/products/#{product}/edit"}>Edit</.link>
       </:action>
 
       <:action :let={{id, product}}>
@@ -40,26 +38,6 @@ defmodule TheronsErpWeb.ProductLive.Index do
         </.link>
       </:action>
     </.table>
-
-    <.modal
-      :if={@live_action in [:new, :edit]}
-      id="product-modal"
-      show
-      on_cancel={JS.navigate(~p"/products")}
-    >
-      <.live_component
-        module={TheronsErpWeb.ProductLive.FormComponent}
-        id={(@product && @product.id) || :new}
-        title={@page_title}
-        current_user={@current_user}
-        action={@live_action}
-        breadcrumbs={@breadcrumbs}
-        product={@product}
-        args={@args}
-        from_args={@from_args}
-        patch={~p"/products"}
-      />
-    </.modal>
     """
   end
 

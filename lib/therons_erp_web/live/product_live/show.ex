@@ -73,25 +73,6 @@ defmodule TheronsErpWeb.ProductLive.Show do
       <% end %>
       <.back navigate={~p"/products"}>Back to products</.back>
     </.simple_form>
-    <.modal
-      :if={@live_action == :edit}
-      id="product-modal"
-      show
-      on_cancel={JS.patch(~p"/products/#{@product}")}
-    >
-      <.live_component
-        module={TheronsErpWeb.ProductLive.FormComponent}
-        id={@product.id}
-        title={@page_title}
-        action={@live_action}
-        current_user={@current_user}
-        breadcrumbs={@breadcrumbs}
-        product={@product}
-        args={@args}
-        from_args={@from_args}
-        patch={~p"/products/#{@product}"}
-      />
-    </.modal>
     """
   end
 
