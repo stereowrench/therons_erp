@@ -152,7 +152,6 @@ defmodule TheronsErpWeb.EntityLive.FormComponent do
         {:noreply, socket}
 
       {:error, form} ->
-        IO.inspect(form)
         {:noreply, assign(socket, form: form)}
     end
   end
