@@ -23,6 +23,14 @@ defmodule TheronsErpWeb.ProductLive.Index do
         {(product.category && product.category.full_name) || ""}
       </:col>
 
+      <:col :let={{_id, product}} label="Saleable">
+        <input type="checkbox" checked={product.saleable} onclick="return false;" />
+      </:col>
+
+      <:col :let={{_id, product}} label="Purchaseable">
+        <input type="checkbox" checked={product.purchaseable} onclick="return false;" />
+      </:col>
+
       <:action :let={{_id, product}}>
         <div class="sr-only">
           <.link navigate={~p"/products/#{product}"}>Show</.link>
