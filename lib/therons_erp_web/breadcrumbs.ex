@@ -98,6 +98,13 @@ defmodule TheronsErpWeb.Breadcrumbs do
   defp _navigate_back([breadcrumb | breadcrumbs], _from, from_args) do
     which =
       case breadcrumb do
+        {"people", args, id} ->
+          if from_args do
+            ~p"/people/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args, from_args: from_args]}"
+          else
+            ~p"/people/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args]}"
+          end
+
         {"products", "new", args} ->
           if from_args do
             ~p"/products/new?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args, from_args: from_args]}"
@@ -168,6 +175,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
   def navigate_to_url(breadcrumbs, {"entities", id, _name}, from) do
     ~p"/people/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
+  end
+
+  def navigate_to_url(breadcrumbs, {"addresses", "new", customer_id}, from) do
+    ~p"/people/#{customer_id}/new_address?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
   end
 
   defp append_and_encode(breadcrumbs, breadcrumb) do

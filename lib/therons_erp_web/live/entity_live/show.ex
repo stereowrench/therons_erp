@@ -26,10 +26,42 @@ defmodule TheronsErpWeb.EntityLive.Show do
       :if={@live_action == :edit}
       id="entity-modal"
       show
-      on_cancel={JS.patch(~p"/people/#{@entity}")}
+      on_cancel={
+        JS.navigate(
+          TheronsErpWeb.Breadcrumbs.get_previous_path(
+            @breadcrumbs,
+            {"people", @entity.id}
+          )
+        )
+      }
     >
       <.live_component
         module={TheronsErpWeb.EntityLive.FormComponent}
+        id={@entity.id}
+        title={@page_title}
+        action={@live_action}
+        current_user={@current_user}
+        entity={@entity}
+        patch={~p"/people/#{@entity}"}
+        breadcrumbs={@breadcrumbs}
+      />
+    </.modal>
+
+    <.modal
+      :if={@live_action == :new_address}
+      id="entity-modal"
+      show
+      on_cancel={
+        JS.navigate(
+          TheronsErpWeb.Breadcrumbs.get_previous_path(
+            @breadcrumbs,
+            {"people", @entity.id}
+          )
+        )
+      }
+    >
+      <.live_component
+        module={TheronsErpWeb.EntityLive.NewAddressFormComponent}
         id={@entity.id}
         title={@page_title}
         action={@live_action}
@@ -60,4 +92,5 @@ defmodule TheronsErpWeb.EntityLive.Show do
 
   defp page_title(:show), do: "Show Entity"
   defp page_title(:edit), do: "Edit Entity"
+  defp page_title(:new_address), do: "New Address"
 end

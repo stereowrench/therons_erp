@@ -101,7 +101,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           <.input
             field={@form[:address_id]}
             type="select"
-            options={Enum.map(@sales_order.customer.addresses, &{&1.address, &1.id})}
+            options={
+              Enum.map(@sales_order.customer.addresses, &{&1.address, &1.id}) ++
+                [{"Create new", "create"}]
+            }
           />
         <% end %>
       </div>
@@ -515,43 +518,54 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         _ -> nil
       end
 
-    if has_create do
+    if sales_order_params["address_id"] == "create" and
+         sales_order_params["customer_id"] not in [nil, "create"] do
       {:noreply,
        socket
        |> Breadcrumbs.navigate_to(
-         {"products", "new", has_create},
+         {"addresses", "new", sales_order_params["customer_id"]},
          {"sales_orders", socket.assigns.sales_order.id, sales_order_params,
           socket.assigns.sales_order.identifier}
        )}
     else
-      if sales_order_params["customer_id"] == "create" do
-        sid = socket.assigns.sales_order.id
-
+      if has_create do
         {:noreply,
          socket
          |> Breadcrumbs.navigate_to(
-           {"entities", "new", sid},
+           {"products", "new", has_create},
            {"sales_orders", socket.assigns.sales_order.id, sales_order_params,
             socket.assigns.sales_order.identifier}
          )}
       else
-        set_customer =
-          socket.assigns.default_customers
-          |> Enum.find(fn c -> c.value == sales_order_params["customer_id"] end)
-          |> case do
-            nil -> %{text: nil, value: nil}
-            c -> %{text: c.label, value: c.value}
-          end
+        if sales_order_params["customer_id"] == "create" do
+          sid = socket.assigns.sales_order.id
 
-        form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
-        drop = length(sales_order_params["_drop_sales_lines"] || [])
+          {:noreply,
+           socket
+           |> Breadcrumbs.navigate_to(
+             {"entities", "new", sid},
+             {"sales_orders", socket.assigns.sales_order.id, sales_order_params,
+              socket.assigns.sales_order.identifier}
+           )}
+        else
+          set_customer =
+            socket.assigns.default_customers
+            |> Enum.find(fn c -> c.value == sales_order_params["customer_id"] end)
+            |> case do
+              nil -> %{text: nil, value: nil}
+              c -> %{text: c.label, value: c.value}
+            end
 
-        {:noreply,
-         assign(socket, form: form)
-         |> assign(:unsaved_changes, form.source.changed? || drop > 0)
-         |> assign(:set_customer, set_customer)
-         |> assign(:params, sales_order_params)
-         |> assign(:drop_sales, drop)}
+          form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
+          drop = length(sales_order_params["_drop_sales_lines"] || [])
+
+          {:noreply,
+           assign(socket, form: form)
+           |> assign(:unsaved_changes, form.source.changed? || drop > 0)
+           |> assign(:set_customer, set_customer)
+           |> assign(:params, sales_order_params)
+           |> assign(:drop_sales, drop)}
+        end
       end
     end
   end
@@ -751,11 +765,14 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
             from_args["customer_id"] ->
               new_args =
-                put_in(
-                  Map.merge(args, from_args),
-                  ["customer_id"],
-                  from_args["customer_id"]
-                )
+                Map.merge(args, from_args)
+
+              update_live_forms(new_args)
+              AshPhoenix.Form.validate(form, new_args)
+
+            from_args["address_id"] ->
+              new_args =
+                Map.merge(args, from_args)
 
               update_live_forms(new_args)
               AshPhoenix.Form.validate(form, new_args)

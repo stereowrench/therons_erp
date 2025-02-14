@@ -1,8 +1,7 @@
 defmodule TheronsErpWeb.EntityLive.FormComponent do
+  # I don't think this is used because the new action creates
   use TheronsErpWeb, :live_component
   alias TheronsErpWeb.Breadcrumbs
-
-  # TODO add delete button
 
   @impl true
   def render(assigns) do
@@ -13,7 +12,6 @@ defmodule TheronsErpWeb.EntityLive.FormComponent do
         <:subtitle></:subtitle>
       </.header>
 
-      <%!-- Delete button using POST --%>
       <%= if @entity do %>
         <.button
           phx-click="delete"
@@ -56,60 +54,10 @@ defmodule TheronsErpWeb.EntityLive.FormComponent do
               field={address[:state]}
               type="select"
               label="State"
-              options={[
-                "AL",
-                "AK",
-                "AZ",
-                "AR",
-                "CA",
-                "CO",
-                "CT",
-                "DE",
-                "FL",
-                "GA",
-                "HI",
-                "ID",
-                "IL",
-                "IN",
-                "IA",
-                "KS",
-                "KY",
-                "LA",
-                "ME",
-                "MD",
-                "MA",
-                "MI",
-                "MN",
-                "MS",
-                "MO",
-                "MT",
-                "NE",
-                "NV",
-                "NH",
-                "NJ",
-                "NM",
-                "NY",
-                "NC",
-                "ND",
-                "OH",
-                "OK",
-                "OR",
-                "PA",
-                "RI",
-                "SC",
-                "SD",
-                "TN",
-                "TX",
-                "UT",
-                "VT",
-                "VA",
-                "WA",
-                "WV",
-                "WI",
-                "WY"
-              ]}
+              options={TheronsErp.People.Address.state_options()}
             />
             <.input field={address[:zip_code]} type="text" label="Zip Code" pattern="[0-9]{5}" />
+            <.input field={address[:phone]} type="text" label="Phone" />
           </fieldset>
         </.inputs_for>
 

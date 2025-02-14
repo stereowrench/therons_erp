@@ -78,6 +78,7 @@ defmodule TheronsErpWeb.Router do
       live "/people/:id/edit", EntityLive.Index, :edit
 
       live "/people/:id", EntityLive.Show, :show
+      live "/people/:id/new_address", EntityLive.Show, :new_address
       live "/people/:id/show/edit", EntityLive.Show, :edit
     end
 
