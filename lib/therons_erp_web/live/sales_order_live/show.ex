@@ -756,6 +756,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     end
   end
 
+  # TODO consider using Ash.calculate!/2
   defp total_cost_for_sales_line(sales_line) do
     data_total_cost =
       case Phoenix.HTML.Form.input_value(sales_line, :total_cost) do
