@@ -747,7 +747,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           ""
 
         {_, _} ->
-          Money.mult!(sales_price, quantity)
+          Ash.calculate!(TheronsErp.Sales.SalesLine, :calculated_total_price,
+            refs: %{sales_price: sales_price, quantity: quantity}
+          )
           |> Money.to_decimal()
           |> Decimal.to_string()
       end
@@ -786,7 +788,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           ""
 
         {_, _} ->
-          Money.mult!(unit_price, quantity) |> Money.to_decimal() |> Decimal.to_string()
+          Ash.calculate!(TheronsErp.Sales.SalesLine, :total_cost,
+            refs: %{unit_price: unit_price, quantity: quantity}
+          )
+          |> Money.to_decimal()
+          |> Decimal.to_string()
       end
     end
   end
