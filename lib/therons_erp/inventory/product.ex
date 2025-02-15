@@ -13,10 +13,13 @@ defmodule TheronsErp.Inventory.Product do
     defaults [:read]
 
     read :list do
+      primary? true
+      prepare build(sort: [identifier: :desc])
     end
 
     read :list_saleable do
       filter expr(saleable == true)
+      prepare build(sort: [identifier: :desc])
     end
 
     create :create do

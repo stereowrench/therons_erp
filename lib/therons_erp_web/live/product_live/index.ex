@@ -18,6 +18,7 @@ defmodule TheronsErpWeb.ProductLive.Index do
       rows={@streams.products}
       row_click={fn {_id, product} -> JS.navigate(~p"/products/#{product}") end}
     >
+      <:col :let={{_id, product}} label="Identifier">{product.identifier}</:col>
       <:col :let={{_id, product}} label="Name">{product.name}</:col>
       <:col :let={{_id, product}} label="Category">
         {(product.category && product.category.full_name) || ""}
@@ -55,8 +56,7 @@ defmodule TheronsErpWeb.ProductLive.Index do
      socket
      |> stream(
        :products,
-       Ash.read!(TheronsErp.Inventory.Product, actor: socket.assigns[:current_user])
-       |> Ash.load!(:category)
+       TheronsErp.Inventory.get_products!(actor: socket.assigns[:current_user], load: [:category])
      )
      |> assign_new(:current_user, fn -> nil end)}
   end
