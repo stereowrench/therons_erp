@@ -250,7 +250,13 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                     <i class="z-10">$</i>
                     <.input
                       field={sales_line[:total_price]}
-                      value={active_price_for_sales_line(sales_line)}
+                      value={
+                        active_price_for_sales_line(
+                          sales_line,
+                          sales_line.index,
+                          @total_price_changes
+                        )
+                      }
                       type="number"
                       inline_container={true}
                     />
@@ -271,7 +277,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                     <i class="z-10">$</i>
                     <.input
                       field={sales_line[:total_cost]}
-                      value={total_cost_for_sales_line(sales_line)}
+                      value={
+                        total_cost_for_sales_line(sales_line, sales_line.index, @total_cost_changes)
+                      }
                       type="number"
                       inline_container={true}
                     />
@@ -716,7 +724,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     end
   end
 
-  defp active_price_for_sales_line(sales_line) do
+  defp active_price_for_sales_line(sales_line, index, total_price_changes) do
     data_total_price =
       case Phoenix.HTML.Form.input_value(sales_line, :total_price) do
         # In case there's no data source (e.g., new line)
@@ -724,7 +732,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         total_price -> total_price
       end
 
-    if data_total_price do
+    if (data_total_price && is_active_price_persisted?(sales_line, index, total_price_changes)) ||
+         total_price_changes[to_string(index)] do
       case data_total_price do
         %Money{} ->
           data_total_price.amount |> Decimal.to_string()
@@ -757,7 +766,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   # TODO consider using Ash.calculate!/2
-  defp total_cost_for_sales_line(sales_line) do
+  defp total_cost_for_sales_line(sales_line, index, total_cost_changes) do
     data_total_cost =
       case Phoenix.HTML.Form.input_value(sales_line, :total_cost) do
         # In case there's no data source (e.g., new line)
@@ -765,7 +774,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         total_cost -> total_cost
       end
 
-    if data_total_cost do
+    if (data_total_cost && is_total_cost_persisted?(sales_line, index, total_cost_changes)) ||
+         total_cost_changes[to_string(index)] do
       case data_total_cost do
         %Money{} ->
           data_total_cost.amount |> Decimal.to_string()
