@@ -34,7 +34,18 @@ defmodule TheronsErpWeb.ProductLive.Show do
       <%= if @live_action != :edit do %>
         <div>
           <.input field={@form[:saleable]} type="checkbox" label="Saleable" />
+
           <.input field={@form[:purchaseable]} type="checkbox" label="Purchaseable" />
+
+          <.input field={@form[:cost]} value={do_money(@form[:cost])} type="number" label="Cost" />
+
+          <.input
+            field={@form[:sales_price]}
+            value={do_money(@form[:sales_price])}
+            type="number"
+            label="Sales Price"
+          />
+
           <.live_select
             field={@form[:category_id]}
             label="Category"
@@ -234,5 +245,22 @@ defmodule TheronsErpWeb.ProductLive.Show do
     end
 
     {:noreply, socket}
+  end
+
+  defp do_money(field) do
+    case field.value do
+      nil ->
+        ""
+
+      "" ->
+        ""
+
+      %Money{} = money ->
+        money.amount
+        |> Decimal.to_float()
+
+      el ->
+        el
+    end
   end
 end

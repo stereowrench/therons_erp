@@ -20,7 +20,7 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     create :create do
-      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable]
+      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable, :cost]
     end
 
     create :create_stub do
@@ -32,7 +32,7 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     update :update do
-      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable]
+      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable, :cost]
     end
 
     destroy :destroy do
@@ -51,6 +51,7 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     attribute :sales_price, :money
+    attribute :cost, :money
 
     attribute :type, TheronsErp.Inventory.Product.Types do
       default :goods
