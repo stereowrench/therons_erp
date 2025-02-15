@@ -696,8 +696,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           false
 
         line_data ->
-          line_data.total_price != nil and
-            not Money.equal?(line_data.total_price, Money.new(0, :USD))
+          line_data.total_price != nil
       end
     end
   end
@@ -712,8 +711,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           false
 
         line_data ->
-          line_data.total_cost != nil and
-            not Money.equal?(line_data.total_cost, Money.new(0, :USD))
+          line_data.total_cost != nil
       end
     end
   end
