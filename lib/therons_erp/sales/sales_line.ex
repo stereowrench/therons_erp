@@ -15,6 +15,20 @@ defmodule TheronsErp.Sales.SalesLine do
     create :create do
       primary? true
       accept [:sales_price, :unit_price, :quantity, :product_id]
+
+      # Set unit_price and sales_price based on product price and cost
+      change fn changeset, _ ->
+        # Load the product if it exists
+        if product_id = Ash.Changeset.get_attribute(changeset, :product_id) do
+          product = Ash.get!(TheronsErp.Inventory.Product, product_id)
+
+          changeset
+          |> Ash.Changeset.change_attribute(:unit_price, product.cost)
+          |> Ash.Changeset.change_attribute(:sales_price, product.sales_price)
+        else
+          changeset
+        end
+      end
     end
 
     update :update do
@@ -29,7 +43,10 @@ defmodule TheronsErp.Sales.SalesLine do
 
     attribute :sales_price, :money
     attribute :unit_price, :money
-    attribute :quantity, :integer
+
+    attribute :quantity, :integer do
+      default 1
+    end
 
     attribute :total_price, :money
 
@@ -52,6 +69,10 @@ defmodule TheronsErp.Sales.SalesLine do
     calculate :active_price, :money, expr(total_price || calculated_total_price)
 
     calculate :total_cost, :money, expr(unit_price * quantity)
+
+    calculate :product_cost, :money, expr(product.cost)
+    calculate :product_price, :money, expr(product.price)
+
     # calculate :margin do
     # end
   end
