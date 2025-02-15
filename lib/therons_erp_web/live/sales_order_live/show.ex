@@ -232,17 +232,39 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       field={sales_line[:sales_price]}
                       value={do_money(sales_line[:sales_price])}
                       type="number"
+                      inline_container={true}
                     />
+                    <%= if to_string(Phoenix.HTML.Form.input_value(sales_line, :sales_price)) != (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: to_string(p.sales_price), else: "")do %>
+                      <.button
+                        phx-disable-with="Saving..."
+                        class="revert-button"
+                        name="revert"
+                        value={"revert-price-#{sales_line.index}"}
+                      >
+                        <.icon name="hero-arrow-uturn-left" />
+                      </.button>
+                    <% end %>
                   </span>
                 </td>
                 <td>
                   <span class="input-icon">
                     <i class="z-10">$</i>
                     <.input
-                      field={sales_line[:unit_price]}
-                      value={do_money(sales_line[:unit_price])}
+                      field={sales_line[:unit_cost]}
+                      value={do_money(sales_line[:unit_cost])}
                       type="number"
+                      inline_container={true}
                     />
+                    <%= if to_string(Phoenix.HTML.Form.input_value(sales_line, :unit_cost)) != (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: to_string(p.cost), else: "")do %>
+                      <.button
+                        phx-disable-with="Saving..."
+                        class="revert-button"
+                        name="revert"
+                        value={"revert-cost-#{sales_line.index}"}
+                      >
+                        <.icon name="hero-arrow-uturn-left" />
+                      </.button>
+                    <% end %>
                   </span>
                 </td>
                 <td>
@@ -494,6 +516,42 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   defp record_total_cost_change(socket, _) do
     socket
+  end
+
+  def handle_event(
+        "save",
+        %{"revert" => "revert-cost-" <> index, "sales_order" => params},
+        socket
+      ) do
+    new_params = put_in(params, ["sales_lines", index, "unit_cost"], nil)
+
+    form =
+      AshPhoenix.Form.validate(socket.assigns.form, new_params)
+
+    {:noreply,
+     socket
+     |> assign(:form, to_form(form))
+     |> assign(:params, new_params)
+     |> assign(:unsaved_changes, form.source.changed?)
+     |> assign(:total_price_changes, Map.put(socket.assigns.total_price_changes, index, false))}
+  end
+
+  def handle_event(
+        "save",
+        %{"revert" => "revert-price-" <> index, "sales_order" => params},
+        socket
+      ) do
+    new_params = put_in(params, ["sales_lines", index, "sales_price"], nil)
+
+    form =
+      AshPhoenix.Form.validate(socket.assigns.form, new_params)
+
+    {:noreply,
+     socket
+     |> assign(:form, to_form(form))
+     |> assign(:params, new_params)
+     |> assign(:unsaved_changes, form.source.changed?)
+     |> assign(:total_price_changes, Map.put(socket.assigns.total_price_changes, index, false))}
   end
 
   def handle_event(
