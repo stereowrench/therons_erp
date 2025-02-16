@@ -36,10 +36,25 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             <.button phx-disable-with="Saving..." phx-click="set-draft">
               Return to draft
             </.button>
+            <.button phx-disable-with="Saving..." phx-click="set-invoice">
+              Generate invoice
+            </.button>
           <% end %>
         </:actions>
         <:subtitle></:subtitle>
       </.header>
+
+      <%= if @sales_order.state == :invoiced do %>
+        <.link navigate={
+          TheronsErpWeb.Breadcrumbs.navigate_to_url(
+            @breadcrumbs,
+            {"invoices", @sales_order.invoice.id, @sales_order.invoice.identifier},
+            {"sales_orders", @sales_order.id, @params, @sales_order.identifier}
+          )
+        }>
+          <.button>View invoice</.button>
+        </.link>
+      <% end %>
 
       <div class="prose">
         <h2>Customer</h2>
@@ -439,6 +454,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         :total_price,
         :total_cost,
         :address,
+        :invoice,
         sales_lines: [:total_price, :product, :active_price, :calculated_total_price, :total_cost],
         customer: [:addresses]
       ]
@@ -753,6 +769,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   def handle_event("set-draft", _, socket) do
     Ash.Changeset.for_update(socket.assigns.sales_order, :revive) |> Ash.update!()
+    {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
+  end
+
+  def handle_event("set-invoice", _, socket) do
+    Ash.Changeset.for_update(socket.assigns.sales_order, :invoice) |> Ash.update!()
     {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
   end
 

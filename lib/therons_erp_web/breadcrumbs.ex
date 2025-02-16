@@ -181,6 +181,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
     ~p"/people/#{customer_id}/new_address?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
   end
 
+  def navigate_to_url(breadcrumbs, {"invoices", id, _identifier}, from) do
+    ~p"/invoices/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
+  end
+
   defp append_and_encode(breadcrumbs, breadcrumb) do
     [breadcrumb | breadcrumbs]
     |> encode_breadcrumbs()

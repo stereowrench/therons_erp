@@ -3,7 +3,10 @@ defmodule TheronsErp.Sales.SalesOrder do
     otp_app: :therons_erp,
     domain: TheronsErp.Sales,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshStateMachine]
+    extensions: [AshStateMachine],
+    primary_read_warning?: false
+
+  alias TheronsErp.Invoices.Invoice
 
   postgres do
     table "sales_orders"
@@ -16,13 +19,40 @@ defmodule TheronsErp.Sales.SalesOrder do
 
     transitions do
       transition(:ready, from: :draft, to: [:ready, :cancelled])
+      transition(:invoice, from: :ready, to: [:invoiced])
       transition(:cancel, from: [:draft, :ready], to: :cancelled)
+      transition(:cancel_invoice, from: [:invoiced], to: :cancelled)
       transition(:revive, from: [:cancelled, :ready], to: [:draft, :ready])
-      transition(:complete, from: [:draft, :ready], to: :complete)
+      transition(:complete, from: [:draft, :ready, :invoiced], to: :complete)
     end
   end
 
   actions do
+    update :invoice do
+      require_atomic? false
+      change transition_state(:invoiced)
+
+      change fn changeset, result ->
+        Ash.Changeset.after_action(changeset, fn changeset, result ->
+          IO.inspect(result)
+
+          Invoice
+          |> Ash.Changeset.for_create(:create, %{
+            sales_order_id: result.id,
+            sales_lines: result.sales_lines
+          })
+          |> Ash.create!()
+
+          {:ok, result}
+        end)
+      end
+    end
+
+    update :cancel_invoice do
+      # TODO cancel the invoice here
+      change transition_state(:cancelled)
+    end
+
     update :ready do
       change transition_state(:ready)
     end
@@ -88,6 +118,10 @@ defmodule TheronsErp.Sales.SalesOrder do
 
     belongs_to :customer, TheronsErp.People.Entity
     belongs_to :address, TheronsErp.People.Address
+
+    has_one :invoice, TheronsErp.Invoices.Invoice do
+      destination_attribute :sales_order_id
+    end
   end
 
   aggregates do
