@@ -181,6 +181,6 @@
 }
 
 .empty-field {
-    @apply border-red-500 border-solid border-1;
+    @apply border-red-500 border-solid border-2;
     box-sizing: border-box;
 }
