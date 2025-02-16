@@ -21,5 +21,9 @@ defmodule TheronsErp.Invoices.LineItem do
     belongs_to :invoice, TheronsErp.Invoices.Invoice do
       allow_nil? false
     end
+
+    belongs_to :product, TheronsErp.Inventory.Product do
+      allow_nil? false
+    end
   end
 end

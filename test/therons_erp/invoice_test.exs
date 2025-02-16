@@ -11,6 +11,6 @@ defmodule TheronsErp.InvoiceTest do
 
     invoice = Ash.create!(Invoice, %{sales_order_id: sales_order.id, sales_lines: [sales_line]})
 
-    # assert invoice.line_items == []
+    [line_item] = invoice.line_items
   end
 end
