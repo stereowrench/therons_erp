@@ -234,7 +234,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                       type="number"
                       inline_container={true}
                     />
-                    <%= if to_string(Phoenix.HTML.Form.input_value(sales_line, :sales_price)) != (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: to_string(p.sales_price), else: "")do %>
+                    <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :sales_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.sales_price, else: "")) do %>
                       <.button
                         phx-disable-with="Saving..."
                         class="revert-button"
@@ -250,12 +250,12 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                   <span class="input-icon">
                     <i class="z-10">$</i>
                     <.input
-                      field={sales_line[:unit_cost]}
-                      value={do_money(sales_line[:unit_cost])}
+                      field={sales_line[:unit_price]}
+                      value={do_money(sales_line[:unit_price])}
                       type="number"
                       inline_container={true}
                     />
-                    <%= if to_string(Phoenix.HTML.Form.input_value(sales_line, :unit_cost)) != (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: to_string(p.cost), else: "")do %>
+                    <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :unit_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.cost, else: "")) do %>
                       <.button
                         phx-disable-with="Saving..."
                         class="revert-button"
@@ -523,7 +523,12 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         %{"revert" => "revert-cost-" <> index, "sales_order" => params},
         socket
       ) do
-    new_params = put_in(params, ["sales_lines", index, "unit_cost"], nil)
+    new_cost =
+      socket.assigns.form.source.data.sales_lines
+      |> Enum.at(String.to_integer(index))
+      |> (&if(&1.product.cost, do: &1.product.cost.amount |> Decimal.to_string(), else: "")).()
+
+    new_params = put_in(params, ["sales_lines", index, "unit_price"], new_cost)
 
     form =
       AshPhoenix.Form.validate(socket.assigns.form, new_params)
@@ -541,7 +546,15 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         %{"revert" => "revert-price-" <> index, "sales_order" => params},
         socket
       ) do
-    new_params = put_in(params, ["sales_lines", index, "sales_price"], nil)
+    new_price =
+      socket.assigns.form.source.data.sales_lines
+      |> Enum.at(String.to_integer(index))
+      |> (&if(&1.product.sales_price,
+            do: &1.product.sales_price.amount |> Decimal.to_string(),
+            else: ""
+          )).()
+
+    new_params = put_in(params, ["sales_lines", index, "sales_price"], new_price)
 
     form =
       AshPhoenix.Form.validate(socket.assigns.form, new_params)
@@ -1066,5 +1079,15 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   defp get_address(form, addresses) do
     id = Phoenix.HTML.Form.input_value(form, :address_id)
     Enum.find(addresses, &(&1.id == id))
+  end
+
+  defp compare_monies_neq(a, b) do
+    case {a, b} do
+      {nil, nil} ->
+        false
+
+      _ ->
+        not Money.equal?(a, b)
+    end
   end
 end
