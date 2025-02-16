@@ -39,5 +39,6 @@ defmodule TheronsErp.Invoices.Invoice do
 
   relationships do
     belongs_to :customer, TheronsErp.People.Entity
+    has_many :line_items, TheronsErp.Invoices.LineItem
   end
 end

@@ -4,5 +4,6 @@ defmodule TheronsErp.Invoices do
 
   resources do
     resource TheronsErp.Invoices.Invoice
+    resource TheronsErp.Invoices.LineItem
   end
 end
