@@ -38,29 +38,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             </.button>
           <% end %>
         </:actions>
-        <:subtitle>
-          Margin:
-          <math>
-            <mfrac>
-              <mn>{@sales_order.total_cost}</mn>
-              <mn>{@sales_order.total_price}</mn>
-            </mfrac>
-            <mo>=</mo>
-            <mn>
-              {if @sales_order.total_cost != nil and
-                    not Money.equal?(@sales_order.total_cost, Money.new(0, :USD)),
-                  do:
-                    (Decimal.mult(
-                       Money.div!(@sales_order.total_price, @sales_order.total_cost.amount).amount,
-                       100
-                     )
-                     |> Decimal.sub(100)
-                     |> Decimal.to_string()) <>
-                      "%",
-                  else: "undefined"}
-            </mn>
-          </math>
-        </:subtitle>
+        <:subtitle></:subtitle>
       </.header>
 
       <div class="prose">
