@@ -5,6 +5,8 @@ defmodule TheronsErp.Invoices.Invoice do
     data_layer: AshPostgres.DataLayer,
     extensions: [AshStateMachine]
 
+  alias TheronsErp.Invoices.LineItem
+
   postgres do
     table "invoices"
     repo TheronsErp.Repo
@@ -34,8 +36,20 @@ defmodule TheronsErp.Invoices.Invoice do
       argument :sales_lines, {:array, :map}
 
       change fn changeset, context ->
-        IO.inspect(changeset)
-        changeset
+        Ash.Changeset.after_action(changeset, fn changeset, result ->
+          sales_lines = Ash.Changeset.get_argument(changeset, :sales_lines)
+
+          for line <- sales_lines do
+            LineItem.create(%{
+              price: line.sales_price,
+              quantity: line.quantity,
+              invoice_id: result.id,
+              product_id: line.product_id
+            })
+          end
+
+          {:ok, result}
+        end)
       end
     end
   end

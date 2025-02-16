@@ -9,8 +9,16 @@ defmodule TheronsErp.Invoices.LineItem do
     repo TheronsErp.Repo
   end
 
+  code_interface do
+    define :create, args: []
+  end
+
   actions do
     defaults [:read]
+
+    create :create do
+      accept [:price, :quantity, :invoice_id, :product_id]
+    end
   end
 
   attributes do
