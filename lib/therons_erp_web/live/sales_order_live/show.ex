@@ -228,70 +228,83 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 <td>
                   <span class="input-icon">
                     <i class="z-10">$</i>
-                    <.input
-                      field={sales_line[:sales_price]}
-                      value={do_money(sales_line[:sales_price])}
-                      type="number"
-                      inline_container={true}
-                    />
-                    <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :sales_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.sales_price, else: "")) do %>
-                      <.button
-                        phx-disable-with="Saving..."
-                        class="revert-button"
-                        name="revert"
-                        value={"revert-price-#{sales_line.index}"}
-                      >
-                        <.icon name="hero-arrow-uturn-left" />
-                      </.button>
-                    <% end %>
+                    <div class={if do_money(sales_line[:sales_price]) == "", do: "empty-field"}>
+                      <.input
+                        field={sales_line[:sales_price]}
+                        value={do_money(sales_line[:sales_price])}
+                        type="number"
+                        inline_container={true}
+                      />
+                      <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :sales_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.sales_price, else: "")) do %>
+                        <.button
+                          phx-disable-with="Saving..."
+                          class="revert-button"
+                          name="revert"
+                          value={"revert-price-#{sales_line.index}"}
+                        >
+                          <.icon name="hero-arrow-uturn-left" />
+                        </.button>
+                      <% end %>
+                    </div>
                   </span>
                 </td>
                 <td>
                   <span class="input-icon">
                     <i class="z-10">$</i>
-                    <.input
-                      field={sales_line[:unit_price]}
-                      value={do_money(sales_line[:unit_price])}
-                      type="number"
-                      inline_container={true}
-                    />
-                    <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :unit_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.cost, else: "")) do %>
-                      <.button
-                        phx-disable-with="Saving..."
-                        class="revert-button"
-                        name="revert"
-                        value={"revert-cost-#{sales_line.index}"}
-                      >
-                        <.icon name="hero-arrow-uturn-left" />
-                      </.button>
-                    <% end %>
+                    <div class={if do_money(sales_line[:unit_price]) == "", do: "empty-field"}>
+                      <.input
+                        field={sales_line[:unit_price]}
+                        value={do_money(sales_line[:unit_price])}
+                        type="number"
+                        inline_container={true}
+                      />
+                      <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :unit_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.cost, else: "")) do %>
+                        <.button
+                          phx-disable-with="Saving..."
+                          class="revert-button"
+                          name="revert"
+                          value={"revert-cost-#{sales_line.index}"}
+                        >
+                          <.icon name="hero-arrow-uturn-left" />
+                        </.button>
+                      <% end %>
+                    </div>
                   </span>
                 </td>
                 <td>
                   <span class="input-icon">
                     <i class="z-10">$</i>
-                    <.input
-                      field={sales_line[:total_price]}
-                      value={
-                        active_price_for_sales_line(
-                          sales_line,
-                          sales_line.index,
-                          @total_price_changes
-                        )
-                      }
-                      type="number"
-                      inline_container={true}
-                    />
-                    <%= if (@total_price_changes[to_string(sales_line.index)] == true) || is_active_price_persisted?(sales_line, sales_line.index, @total_price_changes) do %>
-                      <.button
-                        phx-disable-with="Saving..."
-                        class="revert-button"
-                        name="revert"
-                        value={"revert-total-price-#{sales_line.index}"}
-                      >
-                        <.icon name="hero-arrow-uturn-left" />
-                      </.button>
-                    <% end %>
+                    <div class={
+                      if active_price_for_sales_line(
+                           sales_line,
+                           sales_line.index,
+                           @total_price_changes
+                         ) in [nil, ""],
+                         do: "empty-field"
+                    }>
+                      <.input
+                        field={sales_line[:total_price]}
+                        value={
+                          active_price_for_sales_line(
+                            sales_line,
+                            sales_line.index,
+                            @total_price_changes
+                          )
+                        }
+                        type="number"
+                        inline_container={true}
+                      />
+                      <%= if (@total_price_changes[to_string(sales_line.index)] == true) || is_active_price_persisted?(sales_line, sales_line.index, @total_price_changes) do %>
+                        <.button
+                          phx-disable-with="Saving..."
+                          class="revert-button"
+                          name="revert"
+                          value={"revert-total-price-#{sales_line.index}"}
+                        >
+                          <.icon name="hero-arrow-uturn-left" />
+                        </.button>
+                      <% end %>
+                    </div>
                   </span>
                 </td>
                 <td>

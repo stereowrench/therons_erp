@@ -179,3 +179,8 @@
         display: inline-block;
     }
 }
+
+.empty-field {
+    @apply border-red-500 border-solid border-1;
+    box-sizing: border-box;
+}
