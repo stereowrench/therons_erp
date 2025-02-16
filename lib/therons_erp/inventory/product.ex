@@ -2,7 +2,8 @@ defmodule TheronsErp.Inventory.Product do
   use Ash.Resource,
     otp_app: :therons_erp,
     data_layer: AshPostgres.DataLayer,
-    domain: TheronsErp.Inventory
+    domain: TheronsErp.Inventory,
+    primary_read_warning?: false
 
   postgres do
     table "products"
