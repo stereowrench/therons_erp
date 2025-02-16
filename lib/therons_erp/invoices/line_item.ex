@@ -9,6 +9,10 @@ defmodule TheronsErp.Invoices.LineItem do
     repo TheronsErp.Repo
   end
 
+  actions do
+    defaults [:read]
+  end
+
   attributes do
     uuid_primary_key :id
 

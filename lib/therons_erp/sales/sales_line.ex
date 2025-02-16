@@ -14,7 +14,7 @@ defmodule TheronsErp.Sales.SalesLine do
 
     create :create do
       primary? true
-      accept [:sales_price, :unit_price, :quantity, :product_id]
+      accept [:sales_price, :unit_price, :quantity, :product_id, :sales_order_id]
 
       # Set unit_price and sales_price based on product price and cost
       change fn changeset, _ ->
@@ -34,7 +34,7 @@ defmodule TheronsErp.Sales.SalesLine do
     update :update do
       require_atomic? false
       primary? true
-      accept [:sales_price, :unit_price, :quantity, :product_id, :total_price]
+      accept [:sales_price, :unit_price, :quantity, :product_id, :total_price, :sales_order_id]
     end
   end
 

@@ -20,10 +20,23 @@ defmodule TheronsErp.Invoices.Invoice do
   end
 
   actions do
-    defaults [:read, create: [], update: []]
+    defaults [
+      :read,
+      update: [:customer_id, :sales_order_id]
+    ]
 
     update :send do
       change transition_state(:sent)
+    end
+
+    create :create do
+      accept [:customer_id, :sales_order_id]
+      argument :sales_lines, {:array, :map}
+
+      change fn changeset, context ->
+        IO.inspect(changeset)
+        changeset
+      end
     end
   end
 
@@ -39,6 +52,7 @@ defmodule TheronsErp.Invoices.Invoice do
 
   relationships do
     belongs_to :customer, TheronsErp.People.Entity
+    belongs_to :sales_order, TheronsErp.Sales.SalesOrder
     has_many :line_items, TheronsErp.Invoices.LineItem
   end
 end
