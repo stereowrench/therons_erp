@@ -17,6 +17,9 @@ defmodule TheronsErpWeb.ProductLiveTest do
     product_category_parent =
       generate(product_category(product_category_id: product_category.id))
 
+    IO.inspect(product_category, label: "pc")
+    IO.inspect(product_category_parent, label: "pcp")
+
     %{product: product, product_category: product_category}
   end
 
@@ -77,27 +80,33 @@ defmodule TheronsErpWeb.ProductLiveTest do
       assert html =~ product.name
     end
 
-    test "updates product within modal", %{conn: conn, product: product} do
+    test "updates product inline", %{
+      conn: conn,
+      product: product,
+      product_category: product_category
+    } do
       {:ok, show_live, _html} = live(conn, ~p"/products/#{product}")
 
-      assert show_live |> element("a", "Edit") |> render_click() =~
-               "Edit Product"
-
-      assert_patch(show_live, ~p"/products/#{product}/show/edit")
-
       assert show_live
-             |> form("#product-form", product: @invalid_attrs)
-             |> render_change() =~ "can&#39;t be blank"
+             |> form("#product-inline-form", product: @invalid_attrs)
+             |> render_change() =~ "is required"
 
-      assert show_live
-             |> form("#product-form", product: @update_attrs)
-             |> render_submit()
+      assert {:error, {:redirect, %{to: path}}} =
+               result =
+               show_live
+               |> form("#product-inline-form", product: @update_attrs)
+               |> render_submit(%{product: %{category_id: product_category.id}})
 
-      assert_patch(show_live, ~p"/products/#{product}")
+      {path, _flash} = assert_redirect(show_live)
+      assert path =~ ~r"\/products\/#{product.id}.*"
+      {:ok, conn} = follow_redirect(result, conn)
 
-      html = render(show_live)
+      html =
+        html_response(conn, 200)
+
       assert html =~ "Product updated successfully"
       assert html =~ "some updated name"
+      assert html =~ product_category.name
     end
   end
 end
