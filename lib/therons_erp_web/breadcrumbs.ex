@@ -80,7 +80,7 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
   defp _navigate_back(_breadcrumbs, _from, args \\ nil)
 
-  defp _navigate_back([], from, args) do
+  defp _navigate_back([], from, _args) do
     which =
       case from do
         {"product_category", "new", _product_category_id} ->

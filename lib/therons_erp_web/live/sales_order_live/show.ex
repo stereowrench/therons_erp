@@ -610,42 +610,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:total_cost_changes, Map.put(socket.assigns.total_cost_changes, index, false))}
   end
 
-  def erase_total_price_changes(sales_order_params, price_changes) do
-    new_lines =
-      for {id, line} <- sales_order_params["sales_lines"], into: %{} do
-        if price_changes[id] != false do
-          {id, line}
-        else
-          new_line = put_in(line["total_price"], nil)
-          {id, new_line}
-        end
-      end
-
-    put_in(sales_order_params["sales_lines"], new_lines)
-  end
-
-  def erase_total_cost_changes(sales_order_params, cost_changes) do
-    new_lines =
-      for {id, line} <- sales_order_params["sales_lines"], into: %{} do
-        if cost_changes[id] != false do
-          {id, line}
-        else
-          new_line = put_in(line["total_cost"], nil)
-          {id, new_line}
-        end
-      end
-
-    put_in(sales_order_params["sales_lines"], new_lines)
-  end
-
-  def process_modifications(sales_order_params, socket) do
-    sales_order_params =
-      erase_total_price_changes(sales_order_params, socket.assigns.total_price_changes)
-
-    sales_order_params =
-      erase_total_cost_changes(sales_order_params, socket.assigns.total_cost_changes)
-  end
-
   @impl true
   def handle_event(
         "validate",
@@ -775,6 +739,157 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   def handle_event("set-invoice", _, socket) do
     Ash.Changeset.for_update(socket.assigns.sales_order, :invoice) |> Ash.update!()
     {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
+  end
+
+  def handle_event(
+        "live_select_change",
+        %{"text" => text, "id" => "sales_order[sales_lines]" <> _ = id},
+        socket
+      ) do
+    opts =
+      get_products("")
+      |> prepare_matches(text)
+
+    send_update(LiveSelect.Component, id: id, options: opts)
+
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "live_select_change",
+        %{"text" => text, "id" => "sales_order_customer_id" <> _ = id},
+        socket
+      ) do
+    opts =
+      get_customers("")
+      |> prepare_matches(text)
+
+    send_update(LiveSelect.Component, id: id, options: opts)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "set-default-customers",
+        %{
+          "id" => id
+        },
+        socket
+      ) do
+    if cid = socket.assigns.from_args["customer_id"] do
+      opts = get_initial_customer_options(cid)
+      send_update(LiveSelect.Component, options: opts, id: id, value: cid)
+    else
+      text =
+        socket.assigns.set_customer.text ||
+          (socket.assigns.sales_order.customer && socket.assigns.sales_order.customer.name) || ""
+
+      value = socket.assigns.set_customer.value || socket.assigns.sales_order.customer_id
+
+      opts = prepare_matches(socket.assigns.default_customers, text)
+
+      send_update(LiveSelect.Component, options: opts, id: id, value: value)
+    end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "set-default",
+        %{"id" => id},
+        socket
+      ) do
+    number = parse_select_id!(id)
+
+    pid = socket.assigns.from_args["product_id"]
+
+    if socket.assigns.from_args["product_id"] &&
+         socket.assigns.from_args["line_id"] == to_string(number) do
+      opts = get_initial_product_options(pid)
+
+      send_update(LiveSelect.Component,
+        options: opts,
+        id: id,
+        value: pid
+      )
+    else
+      value =
+        socket.assigns.form
+        |> Phoenix.HTML.Form.input_value(:sales_lines)
+        |> Enum.at(String.to_integer(number))
+        |> Phoenix.HTML.Form.input_value(:product_id)
+
+      if value not in [nil, ""] do
+        opts = get_initial_product_options(value)
+
+        send_update(LiveSelect.Component,
+          options: opts,
+          id: id,
+          value: value
+        )
+      else
+        opts = get_initial_product_options(nil)
+
+        send_update(LiveSelect.Component,
+          options: opts,
+          id: id,
+          value: nil
+        )
+      end
+    end
+
+    {:noreply, socket}
+  end
+
+  defp get_address(form, addresses) do
+    id = Phoenix.HTML.Form.input_value(form, :address_id)
+    Enum.find(addresses, &(&1.id == id))
+  end
+
+  defp compare_monies_neq(a, b) do
+    case {a, b} do
+      {nil, nil} ->
+        false
+
+      _ ->
+        not Money.equal?(a, b)
+    end
+  end
+
+  def erase_total_price_changes(sales_order_params, price_changes) do
+    new_lines =
+      for {id, line} <- sales_order_params["sales_lines"], into: %{} do
+        if price_changes[id] != false do
+          {id, line}
+        else
+          new_line = put_in(line["total_price"], nil)
+          {id, new_line}
+        end
+      end
+
+    put_in(sales_order_params["sales_lines"], new_lines)
+  end
+
+  def erase_total_cost_changes(sales_order_params, cost_changes) do
+    new_lines =
+      for {id, line} <- sales_order_params["sales_lines"], into: %{} do
+        if cost_changes[id] != false do
+          {id, line}
+        else
+          new_line = put_in(line["total_cost"], nil)
+          {id, new_line}
+        end
+      end
+
+    put_in(sales_order_params["sales_lines"], new_lines)
+  end
+
+  def process_modifications(sales_order_params, socket) do
+    sales_order_params
+    |> erase_total_price_changes(socket.assigns.total_price_changes)
+    |> erase_total_cost_changes(socket.assigns.total_cost_changes)
   end
 
   defp is_active_price_persisted?(sales_line, index, total_price_changes) do
@@ -984,122 +1099,5 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       Regex.run(~r/sales_order\[sales_lines\]\[(\d+)\]_product_id_live_select_component/, id)
 
     number
-  end
-
-  def handle_event(
-        "live_select_change",
-        %{"text" => text, "id" => "sales_order[sales_lines]" <> _ = id},
-        socket
-      ) do
-    opts =
-      get_products("")
-      |> prepare_matches(text)
-
-    send_update(LiveSelect.Component, id: id, options: opts)
-
-    {:noreply, socket}
-  end
-
-  def handle_event(
-        "live_select_change",
-        %{"text" => text, "id" => "sales_order_customer_id" <> _ = id},
-        socket
-      ) do
-    opts =
-      get_customers("")
-      |> prepare_matches(text)
-
-    send_update(LiveSelect.Component, id: id, options: opts)
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event(
-        "set-default-customers",
-        %{
-          "id" => id
-        },
-        socket
-      ) do
-    if cid = socket.assigns.from_args["customer_id"] do
-      opts = get_initial_customer_options(cid)
-      send_update(LiveSelect.Component, options: opts, id: id, value: cid)
-    else
-      text =
-        socket.assigns.set_customer.text ||
-          (socket.assigns.sales_order.customer && socket.assigns.sales_order.customer.name) || ""
-
-      value = socket.assigns.set_customer.value || socket.assigns.sales_order.customer_id
-
-      opts = prepare_matches(socket.assigns.default_customers, text)
-
-      send_update(LiveSelect.Component, options: opts, id: id, value: value)
-    end
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event(
-        "set-default",
-        %{"id" => id},
-        socket
-      ) do
-    number = parse_select_id!(id)
-
-    pid = socket.assigns.from_args["product_id"]
-
-    if socket.assigns.from_args["product_id"] &&
-         socket.assigns.from_args["line_id"] == to_string(number) do
-      opts = get_initial_product_options(pid)
-
-      send_update(LiveSelect.Component,
-        options: opts,
-        id: id,
-        value: pid
-      )
-    else
-      value =
-        socket.assigns.form
-        |> Phoenix.HTML.Form.input_value(:sales_lines)
-        |> Enum.at(String.to_integer(number))
-        |> Phoenix.HTML.Form.input_value(:product_id)
-
-      if value not in [nil, ""] do
-        opts = get_initial_product_options(value)
-
-        send_update(LiveSelect.Component,
-          options: opts,
-          id: id,
-          value: value
-        )
-      else
-        opts = get_initial_product_options(nil)
-
-        send_update(LiveSelect.Component,
-          options: opts,
-          id: id,
-          value: nil
-        )
-      end
-    end
-
-    {:noreply, socket}
-  end
-
-  defp get_address(form, addresses) do
-    id = Phoenix.HTML.Form.input_value(form, :address_id)
-    Enum.find(addresses, &(&1.id == id))
-  end
-
-  defp compare_monies_neq(a, b) do
-    case {a, b} do
-      {nil, nil} ->
-        false
-
-      _ ->
-        not Money.equal?(a, b)
-    end
   end
 end

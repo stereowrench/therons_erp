@@ -21,8 +21,6 @@ defmodule TheronsErpWeb.SalesOrderLive.FormComponent do
      |> assign_form()}
   end
 
-  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
-
   defp assign_form(%{assigns: %{sales_order: sales_order}} = socket) do
     form =
       if sales_order do

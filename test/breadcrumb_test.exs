@@ -1,8 +1,6 @@
 defmodule TheronsErpWeb.BreadcrumbTest do
   use TheronsErpWeb.ConnCase
 
-  import Phoenix.LiveViewTest
-
   test "stream_crumbs" do
     out =
       [1, 2, 3]

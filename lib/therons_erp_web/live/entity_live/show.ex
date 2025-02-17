@@ -1,5 +1,4 @@
 defmodule TheronsErpWeb.EntityLive.Show do
-  alias Bandit.DelegatingHandler
   use TheronsErpWeb, :live_view
 
   @impl true
