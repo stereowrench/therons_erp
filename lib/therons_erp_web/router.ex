@@ -55,7 +55,6 @@ defmodule TheronsErpWeb.Router do
       ] do
       live "/product_categories", ProductCategoryLive.Index, :index
       live "/product_categories/new", ProductCategoryLive.Index, :new
-      live "/product_categories/:id/edit", ProductCategoryLive.Index, :edit
 
       live "/product_categories/:id", ProductCategoryLive.Show, :show
       live "/product_categories/:id/show/edit", ProductCategoryLive.Show, :edit

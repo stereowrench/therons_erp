@@ -26,8 +26,6 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
         <div class="sr-only">
           <.link navigate={~p"/product_categories/#{product_category}"}>Show</.link>
         </div>
-
-        <.link patch={~p"/product_categories/#{product_category}/edit"}>Edit</.link>
       </:action>
 
       <:action :let={{id, product_category}}>
@@ -81,15 +79,6 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
   @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
-  end
-
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, "Edit Product category")
-    |> assign(
-      :product_category,
-      Ash.get!(TheronsErp.Inventory.ProductCategory, id, actor: socket.assigns.current_user)
-    )
   end
 
   defp apply_action(socket, :new, _params) do
