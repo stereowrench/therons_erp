@@ -16,14 +16,17 @@ defmodule TheronsErp.Generator do
     )
   end
 
-  def product_category_factory() do
-    %TheronsErp.Inventory.ProductCategory{
-      id: Faker.UUID.v4(),
-      name: Faker.Commerce.En.product_name(),
-      product_category_id: Faker.UUID.v4(),
-      full_name: Faker.Commerce.En.product_name(),
-      inserted_at: Faker.DateTime.backward(7),
-      updated_at: Faker.DateTime.backward(7)
-    }
+  def product_category(opts \\ []) do
+    seed_generator(
+      %TheronsErp.Inventory.ProductCategory{
+        id: Faker.UUID.v4(),
+        name: Faker.Commerce.En.product_name(),
+        product_category_id: Faker.UUID.v4(),
+        full_name: Faker.Commerce.En.product_name(),
+        inserted_at: Faker.DateTime.backward(7),
+        updated_at: Faker.DateTime.backward(7)
+      },
+      overrides: opts
+    )
   end
 end
