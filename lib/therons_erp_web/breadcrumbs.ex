@@ -81,7 +81,7 @@ defmodule TheronsErpWeb.Breadcrumbs do
     breadcrumbs =
       socket.assigns.breadcrumbs
 
-    {path, _breadcrumbs} = _navigate_back(breadcrumbs, from, args)
+    {path, breadcrumbs} = _navigate_back(breadcrumbs, from, args)
 
     socket
     |> assign(:breadcrumbs, encode_breadcrumbs(breadcrumbs))

@@ -23,12 +23,12 @@ defmodule TheronsErpWeb.ConnCase do
       @endpoint TheronsErpWeb.Endpoint
 
       use TheronsErpWeb, :verified_routes
-      import PhoenixTest
 
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
       import TheronsErpWeb.ConnCase
+      import PhoenixTest
     end
   end
 

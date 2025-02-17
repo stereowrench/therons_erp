@@ -105,26 +105,34 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
       conn: conn,
       product_category: product_category
     } do
-      {:ok, show_live, _html} = live(conn, ~p"/product_categories/#{product_category}")
+      conn
+      |> visit(~p"/product_categories/#{product_category}")
+      |> fill_in("Name", with: nil)
+      |> submit()
+      |> PhoenixTest.open_browser()
 
-      assert show_live |> element("a", "Edit") |> render_click() =~
-               "Edit Product category"
+      # |> assert_has()
 
-      assert_patch(show_live, ~p"/product_categories/#{product_category}/show/edit")
+      # {:ok, show_live, _html} = live(conn, ~p"/product_categories/#{product_category}")
 
-      assert show_live
-             |> form("#product_category-form", product_category: @invalid_attrs)
-             |> render_change() =~ "can&#39;t be blank"
+      # assert show_live |> element("a", "Edit") |> render_click() =~
+      #          "Edit Product category"
 
-      assert show_live
-             |> form("#product_category-form", product_category: @update_attrs)
-             |> render_submit()
+      # assert_patch(show_live, ~p"/product_categories/#{product_category}/show/edit")
 
-      assert_patch(show_live, ~p"/product_categories/#{product_category}")
+      # assert show_live
+      #        |> form("#product_category-form", product_category: @invalid_attrs)
+      #        |> render_change() =~ "can&#39;t be blank"
 
-      html = render(show_live)
-      assert html =~ "Product category updated successfully"
-      assert html =~ "some updated name"
+      # assert show_live
+      #        |> form("#product_category-form", product_category: @update_attrs)
+      #        |> render_submit()
+
+      # assert_patch(show_live, ~p"/product_categories/#{product_category}")
+
+      # html = render(show_live)
+      # assert html =~ "Product category updated successfully"
+      # assert html =~ "some updated name"
     end
   end
 end

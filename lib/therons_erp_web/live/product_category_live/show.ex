@@ -63,7 +63,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
                          @categories,
                          Phoenix.HTML.Form.input_value(@form, :product_category_id)
                        )},
-                      {"product_category", @product_category.id, @product_category.full_name}
+                      {"product_category", @product_category.id, %{}, @product_category.full_name}
                     )
                   }>
                     <.icon name="hero-arrow-right" />
@@ -279,7 +279,11 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
             else
               socket
               |> put_flash(:info, "Category #{socket.assigns.form.source.type}d successfully")
-              |> push_patch(to: ~p"/product_categories/#{category.id}", replace: true)
+              |> push_patch(
+                to:
+                  ~p"/product_categories/#{category.id}?#{[breadcrumbs: Breadcrumbs.encode_breadcrumbs(socket.assigns.breadcrumbs)]}",
+                replace: true
+              )
             end
 
           {:noreply, socket}
