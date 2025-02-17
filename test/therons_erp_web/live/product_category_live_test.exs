@@ -2,7 +2,7 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
   use TheronsErpWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import TheronsErp.Factory
+  import TheronsErp.Generator
   import TheronsErp.InventoryFixtures
 
   @create_attrs %{name: "some name"}

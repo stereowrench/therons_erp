@@ -1,5 +1,5 @@
-defmodule TheronsErp.Factory do
-  use ExMachina
+defmodule TheronsErp.Generator do
+  use Ash.Generator
 
   def product_factory() do
     %TheronsErp.Inventory.Product{

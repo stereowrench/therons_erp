@@ -2,7 +2,7 @@ defmodule TheronsErpWeb.ProductLiveTest do
   use TheronsErpWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import TheronsErp.Factory
+  import TheronsErp.Generator
   import TheronsErp.InventoryFixtures
 
   @create_attrs %{name: "some name", tags: ["option1", "option2"]}
@@ -18,7 +18,9 @@ defmodule TheronsErpWeb.ProductLiveTest do
     setup [:create_product]
 
     test "lists all products", %{conn: conn, product: product} do
-      {:ok, _index_live, html} = live(conn, ~p"/products")
+      {:ok, index_live, html} = live(conn, ~p"/products")
+
+      open_browser(index_live)
 
       assert html =~ "Listing Products"
       assert html =~ product.name
