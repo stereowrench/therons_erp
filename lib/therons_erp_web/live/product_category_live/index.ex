@@ -107,7 +107,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     |> assign(:page_title, "New Product category")
     |> assign(:product_category, nil)
     |> Breadcrumbs.navigate_to(
-      {"product_category", "new_stub", product_category.id},
+      {"product_category", "new_stub", product_category.id, params},
       {"product_categories"}
     )
   end

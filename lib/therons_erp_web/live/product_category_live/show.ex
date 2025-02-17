@@ -58,6 +58,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
                     TheronsErpWeb.Breadcrumbs.navigate_to_url(
                       @breadcrumbs,
                       {"product_category", Phoenix.HTML.Form.input_value(@form, :product_category_id),
+                       %{},
                        get_category_name(
                          @categories,
                          Phoenix.HTML.Form.input_value(@form, :product_category_id)
@@ -86,7 +87,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
               TheronsErpWeb.Breadcrumbs.navigate_to_url(
                 @breadcrumbs,
                 {"products", product.id, product.name},
-                {"product_category", @product_category.id, @product_category.full_name}
+                {"product_category", @product_category.id, %{}, @product_category.full_name}
               )
             )
           end
@@ -171,8 +172,8 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
       end
 
     initial_categories =
-      if from_args["category_id"] do
-        get_initial_options(from_args["category_id"])
+      if from_args["product_category_id"] do
+        get_initial_options(from_args["product_category_id"])
       else
         socket.assigns.initial_categories
       end
@@ -185,14 +186,14 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
 
   @impl true
   def handle_event("validate", %{"product_category" => category_params}, socket) do
-    if category_params["category_id"] == "create" do
+    if category_params["product_category_id"] == "create" do
       cid = socket.assigns.product_category.id
 
       {:noreply,
        socket
        |> Breadcrumbs.navigate_to(
          {"product_category", "new_cat", cid},
-         {"product_category", cid, category_params}
+         {"product_category", cid, category_params, socket.assigns.product_category.full_name}
        )}
     else
       id = category_params["product_category_id"]
@@ -273,7 +274,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
               socket
               |> put_flash(:info, "Category #{socket.assigns.form.source.type}d successfully")
               |> Breadcrumbs.navigate_back({"product_categories", "edit", category.id}, %{
-                category_id: category.id
+                product_category_id: category.id
               })
             else
               socket

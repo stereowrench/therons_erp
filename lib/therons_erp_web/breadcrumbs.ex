@@ -31,6 +31,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
     true
   end
 
+  defp to_json_map({route}) do
+    %{route: route}
+  end
+
   defp to_json_map({route, action}) do
     %{route: route, action: action}
   end
@@ -55,6 +59,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
     {route, action}
   end
 
+  defp from_json_map(%{"route" => route}) do
+    {route}
+  end
+
   def encode_breadcrumbs(breadcrumbs) do
     breadcrumbs
     |> Enum.map(&to_json_map/1)
@@ -70,7 +78,9 @@ defmodule TheronsErpWeb.Breadcrumbs do
   end
 
   def navigate_back(socket, from, args \\ nil) do
-    breadcrumbs = socket.assigns.breadcrumbs
+    breadcrumbs =
+      socket.assigns.breadcrumbs
+
     {path, _breadcrumbs} = _navigate_back(breadcrumbs, from, args)
 
     socket
@@ -86,11 +96,14 @@ defmodule TheronsErpWeb.Breadcrumbs do
         {"product_category", "new", _product_category_id} ->
           ~p"/product_categories"
 
-        {"product_category", product_category_id, _name} ->
+        {"product_category", product_category_id, _params, _name} ->
           ~p"/product_categories/#{product_category_id}"
 
         {"products", "edit", product_id} ->
           ~p"/products/#{product_id}"
+
+        {"product_categories", "edit", product_category_id} ->
+          ~p"/product_categories/#{product_category_id}"
 
         {"people", entity_id} ->
           ~p"/people/#{entity_id}"
@@ -102,6 +115,9 @@ defmodule TheronsErpWeb.Breadcrumbs do
   defp _navigate_back([breadcrumb | breadcrumbs], _from, from_args) do
     which =
       case breadcrumb do
+        {"product_categories"} ->
+          ~p"/product_categories?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs)]}"
+
         {"people", args, id} ->
           if from_args do
             ~p"/people/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: args, from_args: from_args]}"
@@ -130,11 +146,11 @@ defmodule TheronsErpWeb.Breadcrumbs do
             ~p"/products/#{pid}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs)]}"
           end
 
-        {"product_category", id, _name} ->
+        {"product_category", id, params, _name} ->
           if from_args do
-            ~p"/product_categories/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args]}"
+            ~p"/product_categories/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: params, from_args: from_args]}"
           else
-            ~p"/product_categories/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs)]}"
+            ~p"/product_categories/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: params]}"
           end
 
         {"sales_orders", id, params, _identifier} ->
@@ -157,16 +173,24 @@ defmodule TheronsErpWeb.Breadcrumbs do
     ~p"/product_categories?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
   end
 
+  def navigate_to_url(breadcrumbs, {"product_categories", "edit", id}, from) do
+    ~p"/product_categories/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
+  end
+
+  def navigate_to_url(breadcrumbs, {"product_category", "new_stub", id, params}, _from) do
+    ~p"/product_categories/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), new: true, args: params]}"
+  end
+
   def navigate_to_url(breadcrumbs, {"product_category", "new", product_id}, from) do
-    ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), product_id: product_id]}"
+    ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), product_id: product_id, new: true]}"
   end
 
   def navigate_to_url(breadcrumbs, {"product_category", "new_cat", category_id}, from) do
-    ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), category_id: category_id]}"
+    ~p"/product_categories/new?#{[breadcrumbs: append_and_encode(breadcrumbs, from), category_id: category_id, new: true]}"
   end
 
-  def navigate_to_url(breadcrumbs, {"product_category", id, _full_name}, from) do
-    ~p"/product_categories/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from)]}"
+  def navigate_to_url(breadcrumbs, {"product_category", id, params, _full_name}, from) do
+    ~p"/product_categories/#{id}?#{[breadcrumbs: append_and_encode(breadcrumbs, from), args: params]}"
   end
 
   def navigate_to_url(breadcrumbs, {"products", "new", line_id}, from) do
@@ -206,12 +230,20 @@ defmodule TheronsErpWeb.Breadcrumbs do
     "#{identifier}"
   end
 
-  defp name_for_crumb({"product_category", _cid, name}) do
+  defp name_for_crumb({"product_category", "new cat", _cid}) do
+    "New category"
+  end
+
+  defp name_for_crumb({"product_category", _cid, params, name}) do
     "#{name}"
   end
 
   defp name_for_crumb({"sales_orders", _sale_id, _params, serial_no}) do
     "S#{serial_no}"
+  end
+
+  defp name_for_crumb({"product_categories"}) do
+    "Product Categories"
   end
 
   def stream_crumbs(list) when is_list(list) do
