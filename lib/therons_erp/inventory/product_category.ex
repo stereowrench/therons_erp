@@ -6,7 +6,8 @@ defmodule TheronsErp.Inventory.ProductCategory do
     otp_app: :therons_erp,
     domain: TheronsErp.Inventory,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshArchival.Resource]
+    extensions: [AshArchival.Resource],
+    primary_read_warning?: false
 
   require Ash.Query
 
@@ -19,6 +20,8 @@ defmodule TheronsErp.Inventory.ProductCategory do
     defaults [:read]
 
     read :list do
+      primary? true
+      prepare build(sort: [id: :desc])
     end
 
     destroy :delete do
