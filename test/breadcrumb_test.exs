@@ -9,6 +9,6 @@ defmodule TheronsErpWeb.BreadcrumbTest do
       |> TheronsErpWeb.Breadcrumbs.stream_crumbs()
       |> Enum.to_list()
 
-    assert out = [[1, 2, 3], [2, 3], [3]]
+    assert ^out = [[1, 2, 3], [2, 3], [3]]
   end
 end
