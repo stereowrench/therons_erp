@@ -1,5 +1,5 @@
 defmodule TheronsErp.Factory do
-  use ExMachina
+  use ExMachina.Ecto, repo: TheronsErp.Repo
 
   def product_factory() do
     %TheronsErp.Inventory.Product{
@@ -11,6 +11,7 @@ defmodule TheronsErp.Factory do
       inserted_at: Faker.DateTime.backward(7),
       updated_at: Faker.DateTime.backward(7)
     }
+    |> AshPostgres.DataLayer.to_ecto()
   end
 
   def product_category_factory() do

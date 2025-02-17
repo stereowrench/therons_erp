@@ -10,14 +10,14 @@ defmodule TheronsErpWeb.ProductLiveTest do
   @invalid_attrs %{name: nil, tags: []}
 
   defp create_product(_) do
-    product = build(:product)
+    product = insert(:product)
     %{product: product}
   end
 
   describe "Index" do
     setup [:create_product]
 
-    test "lists all products", %{conn: conn, product: product} do
+    test "shows product page", %{conn: conn, product: product} do
       {:ok, _index_live, html} = live(conn, ~p"/products")
 
       assert html =~ "Listing Products"
@@ -25,7 +25,9 @@ defmodule TheronsErpWeb.ProductLiveTest do
     end
 
     test "saves new product", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, ~p"/products")
+      {:ok, index_live, html} = live(conn, ~p"/products")
+
+      dbg(html)
 
       assert index_live |> element("a", "New Product") |> render_click() =~
                "New Product"
