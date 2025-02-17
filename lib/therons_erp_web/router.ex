@@ -47,7 +47,11 @@ defmodule TheronsErpWeb.Router do
     sign_out_route AuthController
 
     ash_authentication_live_session :authentication_optional,
-      on_mount: [{TheronsErpWeb.LiveUserAuth, :live_user_optional}, TheronsErpWeb.Breadcrumbs] do
+      on_mount: [
+        {TheronsErpWeb.LiveUserAuth, :live_user_optional},
+        TheronsErpWeb.Breadcrumbs,
+        TheronsErpWeb.Nav
+      ] do
       live "/product_categories", ProductCategoryLive.Index, :index
       live "/product_categories/new", ProductCategoryLive.Index, :new
       live "/product_categories/:id/edit", ProductCategoryLive.Index, :edit
@@ -57,17 +61,22 @@ defmodule TheronsErpWeb.Router do
 
       live "/products", ProductLive.Index, :index
       live "/products/new", ProductLive.Index, :new
-      live "/products/:id/edit", ProductLive.Index, :edit
 
       live "/products/:id", ProductLive.Show, :show
-      live "/products/:id/show/edit", ProductLive.Show, :edit
 
       live "/sales_orders", SalesOrderLive.Index, :index
-      live "/sales_orders/new", SalesOrderLive.Index, :new
       live "/sales_orders/:id/edit", SalesOrderLive.Index, :edit
 
       live "/sales_orders/:id", SalesOrderLive.Show, :show
       live "/sales_orders/:id/show/edit", SalesOrderLive.Show, :edit
+
+      live "/people", EntityLive.Index, :index
+      live "/people/new", EntityLive.Index, :new
+      live "/people/:id/edit", EntityLive.Index, :edit
+
+      live "/people/:id", EntityLive.Show, :show
+      live "/people/:id/new_address", EntityLive.Show, :new_address
+      live "/people/:id/show/edit", EntityLive.Show, :edit
     end
 
     # Remove these if you'd like to use your own authentication views

@@ -5,7 +5,7 @@ defmodule TheronsErp.MixProject do
     [
       app: :therons_erp,
       version: "0.1.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.18.2",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -76,7 +76,8 @@ defmodule TheronsErp.MixProject do
       {:live_select, "~> 1.0"},
       {:seqfuzz, "~> 0.2.0"},
       {:igniter, "~> 0.5", only: [:dev, :test]},
-      {:petal_components, "~> 2.8"}
+      {:petal_components, "~> 2.8"},
+      {:credo, "~> 1.7"}
     ]
   end
 

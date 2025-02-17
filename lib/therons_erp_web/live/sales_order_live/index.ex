@@ -1,5 +1,6 @@
 defmodule TheronsErpWeb.SalesOrderLive.Index do
   use TheronsErpWeb, :live_view
+  import TheronsErpWeb.Layouts
 
   @impl true
   def render(assigns) do
@@ -18,7 +19,14 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
       rows={@streams.sales_orders}
       row_click={fn {_id, sales_order} -> JS.navigate(~p"/sales_orders/#{sales_order}") end}
     >
-      <:col :let={{_id, sales_order}} label="Id">{sales_order.id}</:col>
+      <:col :let={{_id, sales_order}} label="Id">
+        {sales_order.identifier}
+        <.status_badge state={sales_order.state} />
+      </:col>
+
+      <:col :let={{_id, sales_order}} label="Customer">
+        {if sales_order.customer, do: sales_order.customer.name, else: ""}
+      </:col>
 
       <:action :let={{_id, sales_order}}>
         <div class="sr-only">
@@ -57,13 +65,18 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
     """
   end
 
+  @ash_loads [:customer]
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
      |> stream(
        :sales_orders,
-       Ash.read!(TheronsErp.Sales.SalesOrder, actor: socket.assigns[:current_user])
+       Ash.read!(TheronsErp.Sales.SalesOrder,
+         actor: socket.assigns[:current_user],
+         load: @ash_loads
+       )
      )
      |> assign_new(:current_user, fn -> nil end)}
   end
@@ -78,7 +91,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
     |> assign(:page_title, "Edit Sales order")
     |> assign(
       :sales_order,
-      Ash.get!(TheronsErp.Sales.SalesOrder, id, actor: socket.assigns.current_user)
+      Ash.get!(TheronsErp.Sales.SalesOrder, id,
+        actor: socket.assigns.current_user,
+        load: @ash_loads
+      )
     )
   end
 
@@ -88,7 +104,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Index do
     socket
     |> assign(:page_title, "New Sales order")
     |> assign(:sales_order, nil)
-    |> push_redirect(to: ~p"/sales_orders/#{sales_order}")
+    |> push_navigate(to: ~p"/sales_orders/#{sales_order}")
   end
 
   defp apply_action(socket, :index, _params) do

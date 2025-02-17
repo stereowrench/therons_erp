@@ -92,7 +92,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     )
   end
 
-  defp apply_action(socket, :new, params) do
+  defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Product category")
     |> assign(:product_category, nil)

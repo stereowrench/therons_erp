@@ -287,6 +287,8 @@ defmodule TheronsErpWeb.CoreComponents do
   attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
 
+  attr :inline_container, :boolean, default: false
+
   attr :rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
@@ -355,7 +357,7 @@ defmodule TheronsErpWeb.CoreComponents do
         id={@id}
         name={@name}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6 min-h-[6rem]",
+          "mt-2 block w-full text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6 min-h-[6rem]",
           @errors == [] && "border-zinc-300 focus:border-zinc-400",
           @errors != [] && "border-rose-400 focus:border-rose-400"
         ]}
@@ -369,7 +371,7 @@ defmodule TheronsErpWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div>
+    <div class={if @inline_container, do: "inline-container", else: ""}>
       <.label for={@id}>{@label}</.label>
       <input
         type={@type}
@@ -377,7 +379,7 @@ defmodule TheronsErpWeb.CoreComponents do
         id={@id}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
+          "mt-2 block w-full text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
           @errors == [] && "border-zinc-300 focus:border-zinc-400",
           @errors != [] && "border-rose-400 focus:border-rose-400"
         ]}
@@ -693,15 +695,15 @@ defmodule TheronsErpWeb.CoreComponents do
         text_input_class={
           if @inline do
             [
-              "mt-2 block w-full border-transparent rounded-lg py-[7px] px-[11px] hover:border-solid box-border",
+              "mt-2 block w-full border-transparent py-[7px] px-[11px] hover:border-solid box-border",
               "text-zinc-900 focus:outline-solid focus:ring-4 sm:text-sm sm:leading-6",
               "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-              "hover:border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
+              "hover:border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5 border-b-brand",
               @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
             ]
           else
             [
-              "mt-2 block w-full rounded-lg border-zinc-300 py-[7px] px-[11px]",
+              "mt-2 block w-full border-zinc-300 py-[7px] px-[11px]",
               "text-zinc-900 focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
               "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
               "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",

@@ -31,6 +31,68 @@ const hooks = {
   ...live_select,
 };
 
+hooks.Sidebar = {
+  mounted() {
+    let menuOpen = false;
+
+    let listeners = (a) =>
+      a.addEventListener("click", () => {
+        if (!menuOpen) {
+          menuOpen = true;
+          document
+            .getElementById("off-canvas-menu")
+            .classList.add("translate-x-0");
+
+          document
+            .getElementById("off-canvas-menu")
+            .classList.remove("-translate-x-full");
+
+          document.getElementById("close-sidebar").classList.add("opacity-100");
+
+          document
+            .getElementById("close-sidebar")
+            .classList.remove("opacity-0");
+
+          document.getElementById("menu-backdrop").classList.add("opacity-100");
+
+          document
+            .getElementById("menu-backdrop")
+            .classList.remove("opacity-0");
+
+          document.getElementById("off-canvas").classList.add("z-50");
+
+          document.getElementById("off-canvas").style.display = "initial";
+        } else {
+          menuOpen = false;
+          document
+            .getElementById("off-canvas-menu")
+            .classList.add("-translate-x-full");
+
+          document
+            .getElementById("off-canvas-menu")
+            .classList.remove("translate-x-0");
+
+          document.getElementById("close-sidebar").classList.add("opacity-0");
+
+          document
+            .getElementById("close-sidebar")
+            .classList.remove("opacity-100");
+
+          document.getElementById("menu-backdrop").classList.add("opacity-0");
+
+          document
+            .getElementById("menu-backdrop")
+            .classList.remove("opacity-100");
+          document.getElementById("off-canvas").classList.remove("z-50");
+          document.getElementById("off-canvas").style.display = "none";
+        }
+      });
+
+    listeners(document.getElementById("open-sidebar"));
+    listeners(document.getElementById("close-sidebar"));
+  },
+};
+
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },

@@ -1,7 +1,5 @@
-defmodule TheronsErpWeb.ProductCategoryLiveTest do
+defmodule TheronsErpWeb.BreadcrumbTest do
   use TheronsErpWeb.ConnCase
-
-  import Phoenix.LiveViewTest
 
   test "stream_crumbs" do
     out =
@@ -9,6 +7,6 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
       |> TheronsErpWeb.Breadcrumbs.stream_crumbs()
       |> Enum.to_list()
 
-    assert out = [[1, 2, 3], [2, 3], [3]]
+    assert ^out = [[1, 2, 3], [2, 3], [3]]
   end
 end

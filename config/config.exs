@@ -57,7 +57,14 @@ config :spark,
 config :therons_erp,
   ecto_repos: [TheronsErp.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [TheronsErp.Sales, TheronsErp.Inventory, TheronsErp.Ledger, TheronsErp.Accounts]
+  ash_domains: [
+    TheronsErp.Invoices,
+    TheronsErp.People,
+    TheronsErp.Sales,
+    TheronsErp.Inventory,
+    TheronsErp.Ledger,
+    TheronsErp.Accounts
+  ]
 
 # Configures the endpoint
 config :therons_erp, TheronsErpWeb.Endpoint,

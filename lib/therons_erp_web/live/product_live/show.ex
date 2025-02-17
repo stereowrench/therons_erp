@@ -9,84 +9,81 @@ defmodule TheronsErpWeb.ProductLive.Show do
     ~H"""
     <.simple_form for={@form} id="product-inline-form" phx-change="validate" phx-submit="save">
       <.header>
-        {@product.name} [{@product.identifier}]
-        <%= if @unsaved_changes do %>
+        <span class="product-name-field">
+          <.input field={@form[:name]} label="" data-1p-ignore />
+        </span>
+        <%= if @line_id not in ["", nil] do %>
           <.button phx-disable-with="Saving..." class="save-button">
-            <.icon name="hero-check-circle" />
+            <.icon name="hero-check-circle" /> Return to Sales Order
           </.button>
+        <% else %>
+          <%= if @unsaved_changes do %>
+            <.button phx-disable-with="Saving..." class="save-button">
+              <.icon name="hero-check-circle" />
+            </.button>
+          <% end %>
         <% end %>
-        <:subtitle></:subtitle>
-
-        <:actions>
-          <.link patch={~p"/products/#{@product}/show/edit"} phx-click={JS.push_focus()}>
-            <.button>Edit product</.button>
-          </.link>
-        </:actions>
-
-        <%= if @live_action != :edit do %>
-          <div>
-            <.live_select
-              field={@form[:category_id]}
-              label="Category"
-              inline={true}
-              options={@initial_categories}
-              update_min_len={0}
-              phx-focus="set-default"
-              container_class="inline-container"
-              text_input_class="inline-text-input"
-              dropdown_class="inline-dropdown"
-            >
-              <:option :let={opt}>
-                <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
-              </:option>
-              <:inject_adjacent>
-                <%= if Phoenix.HTML.Form.input_value(@form, :category_id) do %>
-                  <span class="link-to-inside-field">
-                    <.link navigate={
-                      TheronsErpWeb.Breadcrumbs.navigate_to_url(
-                        @breadcrumbs,
-                        {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id),
-                         get_category_name(
-                           @categories,
-                           Phoenix.HTML.Form.input_value(@form, :category_id)
-                         )},
-                        {"products", @product.id, @product.name}
-                      )
-                    }>
-                      <.icon name="hero-arrow-right" />
-                    </.link>
-                  </span>
-                <% end %>
-              </:inject_adjacent>
-            </.live_select>
-          </div>
-        <% end %>
+        <:subtitle>
+          [{@product.identifier}]
+        </:subtitle>
       </.header>
-      <.list>
+      <%!-- <.list>
         <:item title="Id">{@product.id}</:item>
-      </.list>
+      </.list> --%>
 
+      <%= if @live_action != :edit do %>
+        <div>
+          <.input field={@form[:saleable]} type="checkbox" label="Saleable" />
+
+          <.input field={@form[:purchaseable]} type="checkbox" label="Purchaseable" />
+
+          <.input field={@form[:cost]} value={do_money(@form[:cost])} type="number" label="Cost" />
+
+          <.input
+            field={@form[:sales_price]}
+            value={do_money(@form[:sales_price])}
+            type="number"
+            label="Sales Price"
+          />
+
+          <.live_select
+            field={@form[:category_id]}
+            label="Category"
+            inline={true}
+            options={@initial_categories}
+            update_min_len={0}
+            phx-focus="set-default"
+            container_class="inline-container"
+            text_input_class="inline-text-input"
+            dropdown_class="inline-dropdown"
+          >
+            <:option :let={opt}>
+              <.highlight matches={opt.matches} string={opt.label} value={opt.value} />
+            </:option>
+            <:inject_adjacent>
+              <%= if Phoenix.HTML.Form.input_value(@form, :category_id) not in ["create", nil] do %>
+                <span class="link-to-inside-field">
+                  <.link navigate={
+                    TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                      @breadcrumbs,
+                      {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id),
+                       get_category_name(
+                         @categories,
+                         Phoenix.HTML.Form.input_value(@form, :category_id)
+                       )},
+                      {"products", @product.id, @product.name}
+                    )
+                  }>
+                    <.icon name="hero-arrow-right" />
+                  </.link>
+                </span>
+              <% end %>
+            </:inject_adjacent>
+          </.live_select>
+        </div>
+      <% end %>
       <.back navigate={~p"/products"}>Back to products</.back>
     </.simple_form>
-    <.modal
-      :if={@live_action == :edit}
-      id="product-modal"
-      show
-      on_cancel={JS.patch(~p"/products/#{@product}")}
-    >
-      <.live_component
-        module={TheronsErpWeb.ProductLive.FormComponent}
-        id={@product.id}
-        title={@page_title}
-        action={@live_action}
-        current_user={@current_user}
-        breadcrumbs={@breadcrumbs}
-        product={@product}
-        args={@args}
-        from_args={@from_args}
-        patch={~p"/products/#{@product}"}
-      />
-    </.modal>
     """
   end
 
@@ -115,6 +112,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
      |> assign(:from_args, params["from_args"])
      |> assign(:set_category, %{text: nil, value: nil})
      |> assign(:unsaved_changes, false)
+     |> assign(:line_id, params["line_id"])
      |> assign_form()}
   end
 
@@ -194,7 +192,10 @@ defmodule TheronsErpWeb.ProductLive.Show do
         socket =
           socket
           |> put_flash(:info, "Product #{socket.assigns.form.source.type}d successfully")
-          |> Breadcrumbs.navigate_back({"products", "edit", product.id})
+          |> Breadcrumbs.navigate_back({"products", "edit", product.id}, %{
+            line_id: socket.assigns.line_id,
+            product_id: product.id
+          })
 
         {:noreply, socket}
 
@@ -244,5 +245,22 @@ defmodule TheronsErpWeb.ProductLive.Show do
     end
 
     {:noreply, socket}
+  end
+
+  defp do_money(field) do
+    case field.value do
+      nil ->
+        ""
+
+      "" ->
+        ""
+
+      %Money{} = money ->
+        money.amount
+        |> Decimal.to_float()
+
+      el ->
+        el
+    end
   end
 end

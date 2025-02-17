@@ -5,11 +5,6 @@
 
 /* This file is for your main application CSS */
 
-.inline-container {
-    @apply h-full relative;
-    display: inline-block;
-}
-
 .inline-text-input {
 }
 
@@ -27,11 +22,19 @@
     @apply hover:bg-transparent !important;
 }
 
+.inline-container {
+    @apply h-full relative;
+    display: inline-block;
+}
+
 .inline-container:hover + .link-to-inside-field > a > span {
     visibility: visible;
 }
 
 .link-to-inside-field {
+    position: absolute;
+    margin-top: 22px;
+
     span {
         position: relative;
         left: -35px;
@@ -40,6 +43,25 @@
 
     span:hover {
         visibility: visible;
+    }
+}
+
+.link-to-inside-field.address-link {
+    span {
+        left: -135px;
+    }
+}
+
+.revert-button {
+    position: absolute;
+    /* margin-top: 22px; */
+    color: black;
+    @apply border-transparent bg-transparent;
+    @apply hover:bg-transparent !important;
+
+    span {
+        position: relative;
+        left: -35px;
     }
 }
 
@@ -64,6 +86,101 @@
 
         input {
             @apply border-transparent hover:border-solid hover:border-zinc-300;
+            @apply border-b-brand;
         }
     }
+}
+
+.product-category-table {
+    @apply text-left;
+
+    td {
+        div {
+            width: 100%;
+        }
+
+        padding-left: 0;
+    }
+}
+
+.product-name-field {
+    display: inline-block;
+    input {
+        field-sizing: content;
+        @apply border-transparent hover:border-solid hover:border-zinc-300;
+        @apply border-b-brand;
+    }
+}
+
+.input-icon {
+    position: relative;
+}
+
+.input-icon > i {
+    position: absolute;
+    display: block;
+    transform: translate(0, -40%);
+    top: 50%;
+    pointer-events: none;
+    width: 25px;
+    text-align: center;
+    font-style: normal;
+}
+
+.input-icon input {
+    padding-left: 25px;
+    padding-right: 0;
+}
+
+.cost-summary {
+    width: 200px;
+    float: right;
+
+    div {
+        text-align: right;
+
+        span {
+            float: left;
+        }
+    }
+}
+
+.address-container {
+    display: inline-block;
+    width: 400px;
+}
+
+.address div {
+    height: 1.5em;
+}
+
+.address-container div select {
+    display: inline-block;
+    width: 200px;
+}
+
+.fieldsetlike {
+    width: 500px;
+    overflow-x: scroll;
+    padding: 20px;
+    border: 1px solid lightgray;
+}
+
+.fieldsetlikelabel {
+    position: relative;
+    top: 14px; /* change this how you need */
+    left: 20px; /* change this how you need */
+    background-color: white;
+    display: inline-block;
+}
+
+.address-city-state-zip {
+    div {
+        display: inline-block;
+    }
+}
+
+.empty-field {
+    @apply border-red-500 border-solid border-2;
+    box-sizing: border-box;
 }

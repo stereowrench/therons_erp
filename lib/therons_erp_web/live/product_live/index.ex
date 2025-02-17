@@ -18,17 +18,24 @@ defmodule TheronsErpWeb.ProductLive.Index do
       rows={@streams.products}
       row_click={fn {_id, product} -> JS.navigate(~p"/products/#{product}") end}
     >
+      <:col :let={{_id, product}} label="Identifier">{product.identifier}</:col>
       <:col :let={{_id, product}} label="Name">{product.name}</:col>
       <:col :let={{_id, product}} label="Category">
         {(product.category && product.category.full_name) || ""}
+      </:col>
+
+      <:col :let={{_id, product}} label="Saleable">
+        <input type="checkbox" checked={product.saleable} onclick="return false;" />
+      </:col>
+
+      <:col :let={{_id, product}} label="Purchaseable">
+        <input type="checkbox" checked={product.purchaseable} onclick="return false;" />
       </:col>
 
       <:action :let={{_id, product}}>
         <div class="sr-only">
           <.link navigate={~p"/products/#{product}"}>Show</.link>
         </div>
-
-        <.link patch={~p"/products/#{product}/edit"}>Edit</.link>
       </:action>
 
       <:action :let={{id, product}}>
@@ -40,37 +47,16 @@ defmodule TheronsErpWeb.ProductLive.Index do
         </.link>
       </:action>
     </.table>
-
-    <.modal
-      :if={@live_action in [:new, :edit]}
-      id="product-modal"
-      show
-      on_cancel={JS.navigate(~p"/products")}
-    >
-      <.live_component
-        module={TheronsErpWeb.ProductLive.FormComponent}
-        id={(@product && @product.id) || :new}
-        title={@page_title}
-        current_user={@current_user}
-        action={@live_action}
-        breadcrumbs={@breadcrumbs}
-        product={@product}
-        args={@args}
-        from_args={@from_args}
-        patch={~p"/products"}
-      />
-    </.modal>
     """
   end
 
   @impl true
-  def mount(params, _session, socket) do
+  def mount(_params, _session, socket) do
     {:ok,
      socket
      |> stream(
        :products,
-       Ash.read!(TheronsErp.Inventory.Product, actor: socket.assigns[:current_user])
-       |> Ash.load!(:category)
+       TheronsErp.Inventory.get_products!(actor: socket.assigns[:current_user], load: [:category])
      )
      |> assign_new(:current_user, fn -> nil end)}
   end
@@ -92,10 +78,16 @@ defmodule TheronsErpWeb.ProductLive.Index do
     )
   end
 
-  defp apply_action(socket, :new, _params) do
+  defp apply_action(socket, :new, params) do
+    product = TheronsErp.Inventory.create_product_stub!()
+
     socket
     |> assign(:page_title, "New Product")
     |> assign(:product, nil)
+    |> push_navigate(
+      to:
+        ~p"/products/#{product}?#{[breadcrumbs: params["breadcrumbs"], line_id: params["line_id"]]}"
+    )
   end
 
   defp apply_action(socket, :index, _params) do
