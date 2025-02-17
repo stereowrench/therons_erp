@@ -6,9 +6,9 @@ defmodule TheronsErpWeb.ProductLiveTest do
   import TheronsErp.InventoryFixtures
   import TheronsErp.Generator
 
-  @create_attrs %{name: "some name", tags: ["option1", "option2"]}
-  @update_attrs %{name: "some updated name", tags: ["option1"]}
-  @invalid_attrs %{name: nil, tags: []}
+  @create_attrs %{name: "some name"}
+  @update_attrs %{name: "some updated name"}
+  @invalid_attrs %{name: nil}
 
   defp create_product(_) do
     product = generate(product())
@@ -28,23 +28,29 @@ defmodule TheronsErpWeb.ProductLiveTest do
     test "saves new product", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/products")
 
-      assert index_live |> element("a", "New Product") |> render_click() =~
-               "New Product"
+      assert {:error, {:live_redirect, %{to: path}}} =
+               result =
+               index_live |> element("a", "New Product") |> render_click()
 
-      assert_patch(index_live, ~p"/products/new")
+      assert path =~ ~r"\/products\/[a-z1-9\-]+.*"
 
-      assert index_live
-             |> form("#product-form", product: @invalid_attrs)
-             |> render_change() =~ "can&#39;t be blank"
+      {:ok, view, html} = follow_redirect(result, conn)
+      assert html =~ "New Product"
 
-      assert index_live
-             |> form("#product-form", product: @create_attrs)
+      assert view
+             |> form("#product-inline-form", product: @invalid_attrs)
+             |> render_change() =~
+               "is required"
+
+      assert view
+             |> form("#product-inline-form", product: @create_attrs)
              |> render_submit()
 
-      assert_patch(index_live, ~p"/products")
+      {path, _flash} = assert_redirect(view)
+      assert path =~ ~r"\/products\/[a-z1-9\-]+.*"
+      {:ok, view, html} = follow_redirect(result, conn)
 
-      html = render(index_live)
-      assert html =~ "Product created successfully"
+      html = render(view)
       assert html =~ "some name"
     end
 
