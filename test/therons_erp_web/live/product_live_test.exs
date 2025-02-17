@@ -4,13 +4,14 @@ defmodule TheronsErpWeb.ProductLiveTest do
   import Phoenix.LiveViewTest
   import TheronsErp.Generator
   import TheronsErp.InventoryFixtures
+  import TheronsErp.Generator
 
   @create_attrs %{name: "some name", tags: ["option1", "option2"]}
   @update_attrs %{name: "some updated name", tags: ["option1"]}
   @invalid_attrs %{name: nil, tags: []}
 
   defp create_product(_) do
-    product = build(:product)
+    product = generate(product())
     %{product: product}
   end
 
