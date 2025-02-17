@@ -12,8 +12,9 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
   @invalid_attrs %{name: nil}
 
   defp create_records(_) do
-    product_category = generate(product_category())
-    %{product_category: product_category}
+    parent_category = generate(product_category())
+    product_category = generate(product_category(product_category_id: parent_category.id))
+    %{product_category: product_category, parent_category: parent_category}
   end
 
   describe "Index" do
@@ -101,38 +102,22 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
       assert html =~ product_category.name
     end
 
-    test "updates product_category within modal", %{
+    test "updates product_category", %{
       conn: conn,
-      product_category: product_category
+      product_category: product_category,
+      parent_category: parent_category
     } do
       conn
       |> visit(~p"/product_categories/#{product_category}")
       |> fill_in("Name", with: nil)
       |> submit()
-      |> PhoenixTest.open_browser()
-
-      # |> assert_has()
-
-      # {:ok, show_live, _html} = live(conn, ~p"/product_categories/#{product_category}")
-
-      # assert show_live |> element("a", "Edit") |> render_click() =~
-      #          "Edit Product category"
-
-      # assert_patch(show_live, ~p"/product_categories/#{product_category}/show/edit")
-
-      # assert show_live
-      #        |> form("#product_category-form", product_category: @invalid_attrs)
-      #        |> render_change() =~ "can&#39;t be blank"
-
-      # assert show_live
-      #        |> form("#product_category-form", product_category: @update_attrs)
-      #        |> render_submit()
-
-      # assert_patch(show_live, ~p"/product_categories/#{product_category}")
-
-      # html = render(show_live)
-      # assert html =~ "Product category updated successfully"
-      # assert html =~ "some updated name"
+      |> assert_has("input[name='product_category[name]'] ~ p", text: "is required")
+      |> fill_in("Name", with: "My Category")
+      |> submit()
+      |> assert_has(".text-lg", text: "My Category")
+      |> fill_in("input", "Parent Category", with: parent_category.id)
+      |> submit()
+      |> assert_has(".text-lg", text: "#{parent_category.name} / My Category")
     end
   end
 end
