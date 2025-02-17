@@ -22,6 +22,7 @@ defmodule TheronsErp.Inventory.ProductCategory do
     end
 
     destroy :delete do
+      primary? true
     end
 
     create :create do
