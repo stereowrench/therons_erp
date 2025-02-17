@@ -1,5 +1,6 @@
 defmodule TheronsErpWeb.ProductCategoryLive.Index do
   use TheronsErpWeb, :live_view
+  alias TheronsErpWeb.Breadcrumbs
 
   @impl true
   def render(assigns) do
@@ -17,14 +18,32 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
       id="product_categories"
       rows={@streams.product_categories}
       row_click={
-        fn {_id, product_category} -> JS.navigate(~p"/product_categories/#{product_category}") end
+        fn {_id, product_category} ->
+          JS.navigate(
+            Breadcrumbs.navigate_to_url(
+              @breadcrumbs,
+              {"product_categories", "edit", product_category.id},
+              {"product_categories"}
+            )
+          )
+        end
       }
     >
       <:col :let={{_id, product_category}} label="Name">{product_category.full_name}</:col>
 
       <:action :let={{_id, product_category}}>
         <div class="sr-only">
-          <.link navigate={~p"/product_categories/#{product_category}"}>Show</.link>
+          <.link navigate={
+            JS.navigate(
+              Breadcrumbs.navigate_to_url(
+                @breadcrumbs,
+                {"product_categories", "edit", product_category.id},
+                {"product_categories"}
+              )
+            )
+          }>
+            Show
+          </.link>
         </div>
       </:action>
 
@@ -87,9 +106,9 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     socket
     |> assign(:page_title, "New Product category")
     |> assign(:product_category, nil)
-    |> push_navigate(
-      to:
-        ~p"/product_categories/#{product_category}?#{[breadcrumbs: params["breadcrumbs"], line_id: params["line_id"]]}"
+    |> Breadcrumbs.navigate_to(
+      {"product_category", "new_stub", product_category.id},
+      {"product_categories"}
     )
   end
 

@@ -29,22 +29,28 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
     test "saves new product_category", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/product_categories")
 
-      assert index_live |> element("a", "New Product category") |> render_click() =~
-               "New Product category"
+      assert {:error, {:live_redirect, %{to: path}}} =
+               result =
+               index_live |> element("a", "New Product category") |> render_click()
 
-      assert_patch(index_live, ~p"/product_categories/new")
+      assert path =~ ~r"\/product_categories\/[a-z1-9\-]+.*"
 
-      assert index_live
-             |> form("#product_category-form", product_category: @invalid_attrs)
-             |> render_change() =~ "can&#39;t be blank"
+      {:ok, view, html} = follow_redirect(result, conn)
+      assert html =~ "New Category"
 
-      assert index_live
-             |> form("#product_category-form", product_category: @create_attrs)
+      assert view
+             |> form("#product-category-inline-form", product_category: @invalid_attrs)
+             |> render_change() =~ "is required"
+
+      assert view
+             |> form("#product-category-inline-form", product_category: @create_attrs)
              |> render_submit()
 
-      assert_patch(index_live, ~p"/product_categories")
+      {path, _flash} = assert_redirect(view)
+      assert path =~ ~r"\/product_categories\/[a-z1-9\-]+.*"
+      {:ok, view, html} = follow_redirect(result, conn)
 
-      html = render(index_live)
+      html = render(view)
       assert html =~ "Product category created successfully"
       assert html =~ "some name"
     end
