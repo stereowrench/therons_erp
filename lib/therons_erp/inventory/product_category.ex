@@ -127,11 +127,24 @@ defmodule TheronsErp.Inventory.ProductCategory do
         end
       end)
       |> Ash.Changeset.after_action(fn changeset, result ->
-        alt =
-          is_nil(Ash.Changeset.get_attribute(changeset, :product_category_id)) and
-            not is_nil(Ash.Changeset.fetch_argument(changeset, :product_category_id))
+        pcid =
+          case Ash.Changeset.get_attribute(changeset, :product_category_id) do
+            {:ok, foo} -> foo
+            _ -> nil
+          end
 
-        if not is_nil(Ash.Changeset.get_attribute(changeset, :product_category_id)) or alt do
+        pcid2 =
+          case Ash.Changeset.fetch_argument(changeset, :product_category_id) do
+            {:ok, foo} -> foo
+            :error -> :error
+            _ -> nil
+          end
+
+        alt =
+          is_nil(pcid) and
+            not is_nil(pcid2)
+
+        if not is_nil(pcid) or alt do
           id = Ash.Changeset.get_attribute(changeset, :id)
 
           unless id == nil do
