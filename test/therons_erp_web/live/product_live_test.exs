@@ -14,6 +14,9 @@ defmodule TheronsErpWeb.ProductLiveTest do
     product = generate(product())
     product_category = generate(product_category())
 
+    product_category_parent =
+      generate(product_category(product_category_id: product_category.id))
+
     %{product: product, product_category: product_category}
   end
 

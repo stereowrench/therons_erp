@@ -21,7 +21,7 @@ defmodule TheronsErp.Generator do
       %TheronsErp.Inventory.ProductCategory{
         id: Faker.UUID.v4(),
         name: Faker.Commerce.En.product_name(),
-        product_category_id: Faker.UUID.v4(),
+        product_category_id: nil,
         full_name: Faker.Commerce.En.product_name(),
         inserted_at: Faker.DateTime.backward(7),
         updated_at: Faker.DateTime.backward(7)
