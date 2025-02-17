@@ -5,17 +5,19 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
   import TheronsErp.Generator
   import TheronsErp.InventoryFixtures
 
+  import TheronsErp.Generator
+
   @create_attrs %{name: "some name"}
   @update_attrs %{name: "some updated name"}
   @invalid_attrs %{name: nil}
 
-  defp create_product_category(_) do
-    product_category = build(:product_category)
+  defp create_records(_) do
+    product_category = generate(product_category())
     %{product_category: product_category}
   end
 
   describe "Index" do
-    setup [:create_product_category]
+    setup [:create_records]
 
     test "lists all product_categories", %{conn: conn, product_category: product_category} do
       {:ok, _index_live, html} = live(conn, ~p"/product_categories")
@@ -84,7 +86,7 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
   end
 
   describe "Show" do
-    setup [:create_product_category]
+    setup [:create_records]
 
     test "displays product_category", %{conn: conn, product_category: product_category} do
       {:ok, _show_live, html} = live(conn, ~p"/product_categories/#{product_category}")
