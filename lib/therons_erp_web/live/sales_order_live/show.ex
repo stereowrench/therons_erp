@@ -1,4 +1,5 @@
 defmodule TheronsErpWeb.SalesOrderLive.Show do
+  alias TheronsErp.People
   alias TheronsErpWeb.Breadcrumbs
   use TheronsErpWeb, :live_view
   import TheronsErpWeb.Selects
@@ -472,6 +473,13 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         {prod.id, [%{value: prod.id, label: prod.name, matches: []}]}
       end
 
+    customer =
+      if cid = params["from_args"]["customer_id"] do
+        Ash.get!(People.Entity, cid, load: [:addresses])
+      else
+        sales_order.customer
+      end
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
@@ -487,8 +495,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:total_price_changes, %{})
      |> assign(:total_cost_changes, %{})
      |> assign(:set_customer, %{text: nil, value: nil})
-     |> assign(:addresses, if(sales_order.customer, do: sales_order.customer.addresses, else: []))
-     |> assign(:default_customers, get_initial_customer_options(sales_order.customer_id))
+     |> assign(:addresses, addresses_for_customer(customer))
+     |> assign(:default_customers, get_initial_customer_options(customer && customer.id))
      |> assign_form()}
   end
 
@@ -693,7 +701,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
            assign(socket, form: form)
            |> assign(:unsaved_changes, form.source.changed? || drop > 0)
            |> assign(:set_customer, set_customer)
-           |> assign(:addresses, if(customer, do: customer.addresses, else: []))
+           |> assign(:addresses, addresses_for_customer(customer))
            |> assign(:params, sales_order_params)
            |> assign(:drop_sales, drop)}
         end
@@ -1103,5 +1111,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       Regex.run(~r/sales_order\[sales_lines\]\[(\d+)\]_product_id_live_select_component/, id)
 
     number
+  end
+
+  defp addresses_for_customer(customer) do
+    if(customer, do: customer.addresses, else: [])
   end
 end
