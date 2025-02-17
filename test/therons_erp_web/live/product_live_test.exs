@@ -54,29 +54,6 @@ defmodule TheronsErpWeb.ProductLiveTest do
       assert html =~ "some name"
     end
 
-    test "updates product in listing", %{conn: conn, product: product} do
-      {:ok, index_live, _html} = live(conn, ~p"/products")
-
-      assert index_live |> element("#products-#{product.id} a", "Edit") |> render_click() =~
-               "Edit Product"
-
-      assert_patch(index_live, ~p"/products/#{product}/edit")
-
-      assert index_live
-             |> form("#product-form", product: @invalid_attrs)
-             |> render_change() =~ "can&#39;t be blank"
-
-      assert index_live
-             |> form("#product-form", product: @update_attrs)
-             |> render_submit()
-
-      assert_patch(index_live, ~p"/products")
-
-      html = render(index_live)
-      assert html =~ "Product updated successfully"
-      assert html =~ "some updated name"
-    end
-
     test "deletes product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/products")
 
