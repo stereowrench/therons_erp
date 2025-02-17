@@ -1,5 +1,4 @@
 defmodule TheronsErpWeb.Router do
-  alias TheronsErp.Sales
   use TheronsErpWeb, :router
 
   use AshAuthentication.Phoenix.Router
