@@ -1,5 +1,5 @@
 defmodule TheronsErpWeb.BreadcrumbTest do
-  use TheronsErpWeb.ConnCase
+  use TheronsErp.DataCase
 
   test "stream_crumbs" do
     out =

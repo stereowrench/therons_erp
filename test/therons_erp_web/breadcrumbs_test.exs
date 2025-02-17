@@ -1,8 +1,7 @@
 defmodule TheronsErpWeb.BreadcrumbsTest do
-  use TheronsErpWeb.DataCase
+  use TheronsErpWeb.ConnCase
 
   alias TheronsErpWeb.Breadcrumbs
-  use Breadcrumbs
 
   describe "Navigate Forward" do
     test "People" do

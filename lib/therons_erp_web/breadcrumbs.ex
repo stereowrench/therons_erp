@@ -234,7 +234,7 @@ defmodule TheronsErpWeb.Breadcrumbs do
     "New category"
   end
 
-  defp name_for_crumb({"product_category", _cid, params, name}) do
+  defp name_for_crumb({"product_category", _cid, _params, name}) do
     "#{name}"
   end
 
