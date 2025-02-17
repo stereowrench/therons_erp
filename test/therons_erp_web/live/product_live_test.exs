@@ -10,13 +10,15 @@ defmodule TheronsErpWeb.ProductLiveTest do
   @update_attrs %{name: "some updated name"}
   @invalid_attrs %{name: nil}
 
-  defp create_product(_) do
+  defp create_records(_) do
     product = generate(product())
-    %{product: product}
+    product_category = generate(product_category())
+
+    %{product: product, product_category: product_category}
   end
 
   describe "Index" do
-    setup [:create_product]
+    setup [:create_records]
 
     test "lists all products", %{conn: conn, product: product} do
       {:ok, _index_live, html} = live(conn, ~p"/products")
@@ -63,7 +65,7 @@ defmodule TheronsErpWeb.ProductLiveTest do
   end
 
   describe "Show" do
-    setup [:create_product]
+    setup [:create_records]
 
     test "displays product", %{conn: conn, product: product} do
       {:ok, _show_live, html} = live(conn, ~p"/products/#{product}")
