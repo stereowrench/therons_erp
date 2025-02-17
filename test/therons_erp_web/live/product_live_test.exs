@@ -19,9 +19,7 @@ defmodule TheronsErpWeb.ProductLiveTest do
     setup [:create_product]
 
     test "lists all products", %{conn: conn, product: product} do
-      {:ok, index_live, html} = live(conn, ~p"/products")
-
-      open_browser(index_live)
+      {:ok, _index_live, html} = live(conn, ~p"/products")
 
       assert html =~ "Listing Products"
       assert html =~ product.name
