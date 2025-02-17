@@ -487,7 +487,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
      |> assign(:total_price_changes, %{})
      |> assign(:total_cost_changes, %{})
      |> assign(:set_customer, %{text: nil, value: nil})
-     |> assign(:addresses, sales_order.customer.addresses)
+     |> assign(:addresses, if(sales_order.customer, do: sales_order.customer.addresses, else: []))
      |> assign(:default_customers, get_initial_customer_options(sales_order.customer_id))
      |> assign_form()}
   end
@@ -678,9 +678,13 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           # If address_id not in customer addresses we want to reset the sales_order_params["address_id"] to nil
           # Load the customer by sales_order_params["customer_id"]
           customer =
-            Ash.get!(TheronsErp.People.Entity, sales_order_params["customer_id"],
-              load: [:addresses]
-            )
+            if sales_order_params["customer_id"] not in [nil, ""] do
+              Ash.get!(TheronsErp.People.Entity, sales_order_params["customer_id"],
+                load: [:addresses]
+              )
+            else
+              nil
+            end
 
           form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
           drop = length(sales_order_params["_drop_sales_lines"] || [])
@@ -689,7 +693,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
            assign(socket, form: form)
            |> assign(:unsaved_changes, form.source.changed? || drop > 0)
            |> assign(:set_customer, set_customer)
-           |> assign(:addresses, customer.addresses)
+           |> assign(:addresses, if(customer, do: customer.addresses, else: []))
            |> assign(:params, sales_order_params)
            |> assign(:drop_sales, drop)}
         end
@@ -860,7 +864,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   def erase_total_price_changes(sales_order_params, price_changes) do
     new_lines =
-      for {id, line} <- sales_order_params["sales_lines"], into: %{} do
+      for {id, line} <- sales_order_params["sales_lines"] || [], into: %{} do
         if price_changes[id] != false do
           {id, line}
         else
@@ -1075,7 +1079,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   defp update_live_forms(new_args) do
-    for {line_no, line} <- new_args["sales_lines"] do
+    for {line_no, line} <- new_args["sales_lines"] || [] do
       pid =
         line["product_id"]
 

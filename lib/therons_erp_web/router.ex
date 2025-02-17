@@ -1,4 +1,5 @@
 defmodule TheronsErpWeb.Router do
+  alias TheronsErp.Sales
   use TheronsErpWeb, :router
 
   use AshAuthentication.Phoenix.Router
@@ -65,6 +66,7 @@ defmodule TheronsErpWeb.Router do
       live "/products/:id", ProductLive.Show, :show
 
       live "/sales_orders", SalesOrderLive.Index, :index
+      live "/sales_orders/new", SalesOrderLive.Index, :new
       live "/sales_orders/:id/edit", SalesOrderLive.Index, :edit
 
       live "/sales_orders/:id", SalesOrderLive.Show, :show
