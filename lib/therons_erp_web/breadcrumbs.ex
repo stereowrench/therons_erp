@@ -11,6 +11,10 @@ defmodule TheronsErpWeb.Breadcrumbs do
     []
   end
 
+  def decode_breadcrumbs("") do
+    []
+  end
+
   def decode_breadcrumbs(breadcrumbs) do
     # base 64 code then JSON decode
     breadcrumbs

@@ -12,7 +12,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
         <span class="product-name-field">
           <.input field={@form[:name]} label="" data-1p-ignore />
         </span>
-        <%= if @line_id do %>
+        <%= if @line_id not in ["", nil] do %>
           <.button phx-disable-with="Saving..." class="save-button">
             <.icon name="hero-check-circle" /> Return to Sales Order
           </.button>
