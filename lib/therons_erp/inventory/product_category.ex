@@ -30,6 +30,16 @@ defmodule TheronsErp.Inventory.ProductCategory do
       change &perform_full_name_update/2
     end
 
+    create :create_stub do
+      accept []
+
+      change fn changeset, _context ->
+        changeset
+        |> Ash.Changeset.change_attribute(:name, "New Category")
+        |> Ash.Changeset.change_attribute(:full_name, "New Category")
+      end
+    end
+
     update :update_parent do
       accept [:product_category_id, :name]
       require_atomic? false

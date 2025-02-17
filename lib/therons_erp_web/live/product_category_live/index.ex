@@ -81,10 +81,16 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :new, _params) do
+  defp apply_action(socket, :new, params) do
+    product_category = TheronsErp.Inventory.create_category_stub!()
+
     socket
     |> assign(:page_title, "New Product category")
     |> assign(:product_category, nil)
+    |> push_navigate(
+      to:
+        ~p"/product_categories/#{product_category}?#{[breadcrumbs: params["breadcrumbs"], line_id: params["line_id"]]}"
+    )
   end
 
   defp apply_action(socket, :index, _params) do

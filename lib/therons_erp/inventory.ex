@@ -7,6 +7,7 @@ defmodule TheronsErp.Inventory do
       define :create_category, args: [:name], action: :create
       define :change_parent, args: [:product_category_id], action: :update_parent
       define :get_categories, action: :list
+      define :create_category_stub, action: :create_stub
     end
 
     resource TheronsErp.Inventory.Product do
