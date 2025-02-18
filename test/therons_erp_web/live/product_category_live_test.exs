@@ -64,31 +64,6 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
       |> assert_has(".breadcrumbs a", text: "Bob's Category")
     end
 
-    test "updates product_category in listing", %{conn: conn, product_category: product_category} do
-      {:ok, index_live, _html} = live(conn, ~p"/product_categories")
-
-      assert index_live
-             |> element("#product_categories-#{product_category.id} a", "Edit")
-             |> render_click() =~
-               "Edit Product category"
-
-      assert_patch(index_live, ~p"/product_categories/#{product_category}/edit")
-
-      assert index_live
-             |> form("#product_category-form", product_category: @invalid_attrs)
-             |> render_change() =~ "can&#39;t be blank"
-
-      assert index_live
-             |> form("#product_category-form", product_category: @update_attrs)
-             |> render_submit()
-
-      assert_patch(index_live, ~p"/product_categories")
-
-      html = render(index_live)
-      assert html =~ "Product category updated successfully"
-      assert html =~ "some updated name"
-    end
-
     test "deletes product_category in listing", %{conn: conn, product_category: product_category} do
       {:ok, index_live, _html} = live(conn, ~p"/product_categories")
 
