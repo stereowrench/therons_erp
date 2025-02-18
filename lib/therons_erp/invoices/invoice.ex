@@ -65,7 +65,10 @@ defmodule TheronsErp.Invoices.Invoice do
   end
 
   relationships do
-    belongs_to :customer, TheronsErp.People.Entity
+    belongs_to :customer, TheronsErp.People.Entity do
+      allow_nil? false
+    end
+
     belongs_to :sales_order, TheronsErp.Sales.SalesOrder
     has_many :line_items, TheronsErp.Invoices.LineItem
   end

@@ -37,7 +37,8 @@ defmodule TheronsErp.Sales.SalesOrder do
           Invoice
           |> Ash.Changeset.for_create(:create, %{
             sales_order_id: result.id,
-            sales_lines: result.sales_lines
+            sales_lines: result.sales_lines,
+            customer_id: result.customer_id
           })
           |> Ash.create!()
 

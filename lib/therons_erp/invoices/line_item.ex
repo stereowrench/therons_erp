@@ -46,6 +46,6 @@ defmodule TheronsErp.Invoices.LineItem do
   end
 
   calculations do
-    calculate :total_price, :money, expr(sales_price * quantity)
+    calculate :total_price, :money, expr(price * quantity)
   end
 end

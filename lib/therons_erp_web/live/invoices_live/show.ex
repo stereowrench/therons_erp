@@ -8,7 +8,10 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
   def render(assigns) do
     ~H"""
     <div>
-      <table>
+      <.header>
+        Invoice {@invoice.identifier} for {@invoice.customer.name}
+      </.header>
+      <table class="invoice-table">
         <thead>
           <tr>
             <th>Product</th>
@@ -21,9 +24,9 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
           <%= for line_item <- @invoice.line_items do %>
             <tr>
               <td>{line_item.product.name}</td>
-              <td>${line_item.price.amount |> Decimal.to_string()}</td>
+              <td>{line_item.price}</td>
               <td>{line_item.quantity}</td>
-              <td>${line_item.total_price}</td>
+              <td>{line_item.total_price}</td>
             </tr>
           <% end %>
         </tbody>
@@ -44,6 +47,8 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
   end
 
   defp load_by_id(id) do
-    Ash.get!(TheronsErp.Invoices.Invoice, id, load: [line_items: [:product]])
+    Ash.get!(TheronsErp.Invoices.Invoice, id,
+      load: [:customer, line_items: [:product, :total_price]]
+    )
   end
 end
