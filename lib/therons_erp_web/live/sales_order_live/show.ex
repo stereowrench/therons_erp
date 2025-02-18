@@ -680,7 +680,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
     if sales_order_params["address_id"] == "create" and
          sales_order_params["customer_id"] not in [nil, "create"] and
-         target != ["sales_order", "customer_id"] do
+         target == ["sales_order", "address_id"] do
       {:noreply,
        socket
        |> Breadcrumbs.navigate_to(
