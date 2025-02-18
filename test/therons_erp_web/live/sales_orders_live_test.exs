@@ -34,6 +34,7 @@ defmodule TheronsErpWeb.SalesOrdersLiveTest do
     customer = generate(customer())
     address = generate(address(entity_id: customer.id))
     sales_order = generate(sales_order(address_id: address.id, customer_id: customer.id))
+    product = generate(product())
 
     conn
     |> visit(~p"/sales_orders/#{sales_order.id}")
@@ -43,12 +44,30 @@ defmodule TheronsErpWeb.SalesOrdersLiveTest do
         Phoenix.LiveViewTest.element(view, "form"),
         %{
           "_target" => ["sales_order", "sales_lines"],
-          "sales_order_params" => %{"_add_sales_lines" => "end"}
+          "sales_order" => %{"_add_sales_lines" => "end"}
         }
       )
     end)
     |> submit()
+    |> assert_has("p", text: "is required")
+    |> unwrap(fn view ->
+      Phoenix.LiveViewTest.render_change(
+        Phoenix.LiveViewTest.element(view, "form"),
+        %{
+          "_target" => ["sales_order", "sales_lines"],
+          "sales_order" => %{
+            "sales_lines" => %{
+              "0" => %{
+                "product_id" => product.id,
+                "quantity" => "1"
+              }
+            }
+          }
+        }
+      )
+    end)
     |> PhoenixTest.open_browser()
+    |> refute_has("p", text: "is required")
   end
 
   test "Sales order draft -> ready"

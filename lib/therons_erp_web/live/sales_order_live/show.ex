@@ -547,7 +547,20 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     new_cost =
       socket.assigns.form.source.data.sales_lines
       |> Enum.at(String.to_integer(index))
-      |> (&if(&1.product.cost, do: &1.product.cost.amount |> Decimal.to_string(), else: "")).()
+      |> case do
+        nil ->
+          id =
+            Phoenix.HTML.Form.input_value(socket.assigns.form, :sales_lines)
+            |> Enum.at(String.to_integer(index))
+            |> Phoenix.HTML.Form.input_value(:product_id)
+
+          product = Ash.get!(TheronsErp.Inventory.Product, id)
+          if product.cost, do: product.cost.amount |> Decimal.to_string(), else: ""
+
+        here ->
+          here
+          |> (&if(&1.product.cost, do: &1.product.cost.amount |> Decimal.to_string(), else: "")).()
+      end
 
     new_params = put_in(params, ["sales_lines", index, "unit_price"], new_cost)
 
@@ -570,10 +583,23 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     new_price =
       socket.assigns.form.source.data.sales_lines
       |> Enum.at(String.to_integer(index))
-      |> (&if(&1.product.sales_price,
-            do: &1.product.sales_price.amount |> Decimal.to_string(),
-            else: ""
-          )).()
+      |> case do
+        nil ->
+          id =
+            Phoenix.HTML.Form.input_value(socket.assigns.form, :sales_lines)
+            |> Enum.at(String.to_integer(index))
+            |> Phoenix.HTML.Form.input_value(:product_id)
+
+          product = Ash.get!(TheronsErp.Inventory.Product, id)
+          if product.sales_price, do: product.sales_price.amount |> Decimal.to_string(), else: ""
+
+        here ->
+          here
+          |> (&if(&1.product.sales_price,
+                do: &1.product.sales_price.amount |> Decimal.to_string(),
+                else: ""
+              )).()
+      end
 
     new_params = put_in(params, ["sales_lines", index, "sales_price"], new_price)
 
@@ -630,6 +656,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         %{"sales_order" => sales_order_params, "_target" => target} = params,
         socket
       ) do
+    IO.inspect(sales_order_params, label: "sop")
+    IO.inspect(target, label: "target")
     sales_order_params = process_modifications(sales_order_params, socket)
 
     socket =
@@ -1053,7 +1081,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
         _ ->
           cond do
-            from_args["line_id"] ->
+            from_args["line_id"] not in ["", nil] ->
               new_args =
                 put_in(
                   Map.merge(args, from_args),
@@ -1077,6 +1105,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
               update_live_forms(new_args)
               AshPhoenix.Form.validate(form, new_args)
+
+            true ->
+              AshPhoenix.Form.validate(form, %{})
           end
       end
 
