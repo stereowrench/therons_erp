@@ -28,33 +28,23 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
     end
 
     test "saves new product_category", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, ~p"/product_categories")
-
-      assert {:error, {:live_redirect, %{to: path}}} =
-               result =
-               index_live |> element("a", "New Product category") |> render_click()
-
-      assert path =~ ~r"\/product_categories\/[a-z1-9\-]+.*"
-
-      {:ok, view, html} = follow_redirect(result, conn)
-      assert html =~ "New Category"
-
-      assert view
-             |> form("#product-category-inline-form", product_category: @invalid_attrs)
-             |> render_change() =~ "is required"
-
-      assert view
-             |> form("#product-category-inline-form", product_category: @create_attrs)
-             |> render_submit()
-
-      {path, _flash} = assert_redirect(view)
-      assert path =~ ~r"\/product_categories\/[a-z1-9\-]+.*"
-      {:ok, view, html} = follow_redirect(result, conn)
-
-      html = render(view)
-      assert html =~ "Product category created successfully"
-      assert html =~ "some name"
+      conn
+      |> visit(~p"/product_categories")
+      |> click_link("New Product category")
+      |> fill_in("Name", with: "Bob's Category")
+      |> submit()
+      |> assert_has(".text-lg", text: "Bob's Category")
     end
+
+    test "doesn't save invalid category", %{conn: conn} do
+      conn
+      |> visit(~p"/product_categories")
+      |> click_link("New Product category")
+      |> fill_in("Name", with: "")
+      |> assert_has("input[name='product_category[name]'] ~ p ", text: "is required")
+    end
+
+    test "new shows product breadcrumb"
 
     test "updates product_category in listing", %{conn: conn, product_category: product_category} do
       {:ok, index_live, _html} = live(conn, ~p"/product_categories")
