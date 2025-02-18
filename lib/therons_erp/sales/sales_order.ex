@@ -91,6 +91,9 @@ defmodule TheronsErp.Sales.SalesOrder do
       require_atomic? false
       argument :sales_lines, {:array, :map}
 
+      validate present(:customer_id)
+      validate present(:address_id)
+
       change manage_relationship(:sales_lines, type: :direct_control),
         where: [attribute_equals(:state, :draft)]
 
@@ -115,6 +118,7 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     belongs_to :customer, TheronsErp.People.Entity
+
     belongs_to :address, TheronsErp.People.Address
 
     has_one :invoice, TheronsErp.Invoices.Invoice do

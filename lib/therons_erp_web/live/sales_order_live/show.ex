@@ -12,6 +12,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   def render(assigns) do
     ~H"""
     <.simple_form for={@form} id="sales_order-form" phx-change="validate" phx-submit="save">
+      <label for="test-hack" style="display:none;">Test Hack</label>
+      <input id="test-hack" name="test-hack" class="test-hack" type="text" style="display:none;" />
       <.header>
         Sales order {@sales_order.identifier}
         <.status_badge state={@sales_order.state} />
@@ -25,6 +27,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               Delete {@drop_sales} items.
             </span>
           <% end %>
+        <% else %>
+          <.button phx-disable-with="Saving..." class="save-button" style="display:none;">
+            <.icon name="hero-check-circle" />
+          </.button>
         <% end %>
 
         <:actions>
@@ -1021,22 +1027,15 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
          %{assigns: %{sales_order: sales_order, args: args, from_args: from_args}} = socket
        ) do
     form =
-      if sales_order do
-        AshPhoenix.Form.for_update(sales_order, :update,
-          as: "sales_order",
-          actor: socket.assigns.current_user
-        )
-      else
-        AshPhoenix.Form.for_create(TheronsErp.Sales.SalesOrder, :create,
-          as: "sales_order",
-          actor: socket.assigns.current_user
-        )
-      end
+      AshPhoenix.Form.for_update(sales_order, :update,
+        as: "sales_order",
+        actor: socket.assigns.current_user
+      )
 
     form =
       case {args, from_args} do
         {nil, nil} ->
-          form
+          AshPhoenix.Form.validate(form, %{})
 
         {_, nil} ->
           AshPhoenix.Form.validate(form, args)

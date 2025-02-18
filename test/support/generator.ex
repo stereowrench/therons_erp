@@ -1,6 +1,15 @@
 defmodule TheronsErp.Generator do
   use Ash.Generator
 
+  def customer(opts \\ []) do
+    seed_generator(
+      %TheronsErp.People.Entity{
+        name: Faker.Person.name()
+      },
+      overrides: opts
+    )
+  end
+
   def product(opts \\ []) do
     seed_generator(
       %TheronsErp.Inventory.Product{
