@@ -17,9 +17,6 @@ defmodule TheronsErpWeb.ProductLiveTest do
     product_category_parent =
       generate(product_category(product_category_id: product_category.id))
 
-    IO.inspect(product_category, label: "pc")
-    IO.inspect(product_category_parent, label: "pcp")
-
     %{product: product, product_category: product_category}
   end
 

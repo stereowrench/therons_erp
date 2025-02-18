@@ -34,8 +34,6 @@ defmodule TheronsErp.Sales.SalesOrder do
 
       change fn changeset, result ->
         Ash.Changeset.after_action(changeset, fn changeset, result ->
-          IO.inspect(result)
-
           Invoice
           |> Ash.Changeset.for_create(:create, %{
             sales_order_id: result.id,
