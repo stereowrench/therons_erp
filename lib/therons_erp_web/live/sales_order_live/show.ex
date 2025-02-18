@@ -12,8 +12,10 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   def render(assigns) do
     ~H"""
     <.simple_form for={@form} id="sales_order-form" phx-change="validate" phx-submit="save">
-      <label for="test-hack" style="display:none;">Test Hack</label>
-      <input id="test-hack" name="test-hack" class="test-hack" type="text" style="display:none;" />
+      <%= if Mix.env() == :test do %>
+        <label for="test-hack" style="display:none;">Test Hack</label>
+        <input id="test-hack" name="test-hack" class="test-hack" type="text" style="display:none;" />
+      <% end %>
       <.header>
         Sales order {@sales_order.identifier}
         <.status_badge state={@sales_order.state} />
@@ -656,8 +658,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         %{"sales_order" => sales_order_params, "_target" => target} = params,
         socket
       ) do
-    IO.inspect(sales_order_params, label: "sop")
-    IO.inspect(target, label: "target")
     sales_order_params = process_modifications(sales_order_params, socket)
 
     socket =

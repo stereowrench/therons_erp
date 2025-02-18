@@ -38,7 +38,7 @@ defmodule TheronsErpWeb.SalesOrdersLiveTest do
 
     conn
     |> visit(~p"/sales_orders/#{sales_order.id}")
-    |> check("input[name='sales_order[_add_sales_lines]']", "")
+    |> fill_in(".test-hack", "Test Hack", with: "")
     |> unwrap(fn view ->
       Phoenix.LiveViewTest.render_change(
         Phoenix.LiveViewTest.element(view, "form"),
@@ -59,14 +59,18 @@ defmodule TheronsErpWeb.SalesOrdersLiveTest do
             "sales_lines" => %{
               "0" => %{
                 "product_id" => product.id,
-                "quantity" => "1"
+                "quantity" => "1",
+                "sales_price" => "2",
+                "total_cost" => "1",
+                "total_price" => "2",
+                "unit_price" => "1"
               }
             }
           }
         }
       )
     end)
-    |> PhoenixTest.open_browser()
+    |> submit()
     |> refute_has("p", text: "is required")
   end
 
