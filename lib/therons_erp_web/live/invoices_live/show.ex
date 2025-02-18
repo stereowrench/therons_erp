@@ -37,7 +37,12 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
                   {line_item.product.name}
                 </.link>
               </td>
-              <td>{line_item.price}</td>
+              <td>
+                {line_item.price} {render_discount_arrows(
+                  line_item.price,
+                  line_item.product.sales_price
+                )}
+              </td>
               <td>{line_item.quantity}</td>
               <td>{line_item.total_price}</td>
             </tr>
@@ -63,5 +68,13 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
     Ash.get!(TheronsErp.Invoices.Invoice, id,
       load: [:customer, line_items: [:product, :total_price]]
     )
+  end
+
+  defp render_discount_arrows(line_item_price, product_price) do
+    case Money.cmp(line_item_price, product_price) do
+      0 -> ""
+      -1 -> "↓ (#{Money.to_string!(product_price)})"
+      1 -> "↑ (#{Money.to_string!(product_price)})"
+    end
   end
 end
