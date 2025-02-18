@@ -485,7 +485,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       if cid = params["from_args"]["customer_id"] do
         Ash.get!(People.Entity, cid, load: [:addresses])
       else
-        sales_order.customer
+        if cid = params["args"]["customer_id"] do
+          Ash.get!(People.Entity, cid, load: [:addresses])
+        else
+          sales_order.customer
+        end
       end
 
     {:noreply,
