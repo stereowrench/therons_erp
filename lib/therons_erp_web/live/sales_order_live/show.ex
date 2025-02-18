@@ -235,7 +235,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                         type="number"
                         inline_container={true}
                       />
-                      <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :sales_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.sales_price, else: "")) do %>
+                      <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :sales_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.sales_price, else: (if p2 = fetch_by_product_id(sales_line), do: p2.sales_price, else: ""))) do %>
                         <.button
                           phx-disable-with="Saving..."
                           class="revert-button"
@@ -258,7 +258,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                         type="number"
                         inline_container={true}
                       />
-                      <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :unit_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.cost, else: "")) do %>
+                      <%= if compare_monies_neq(Phoenix.HTML.Form.input_value(sales_line, :unit_price), (if p = Phoenix.HTML.Form.input_value(sales_line, :product), do: p.cost, else: (if p2 = fetch_by_product_id(sales_line), do: p2.cost, else: ""))) do %>
                         <.button
                           phx-disable-with="Saving..."
                           class="revert-button"
@@ -895,6 +895,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   defp compare_monies_neq(a, b) do
+    IO.inspect({a, b})
+
     case {a, b} do
       {nil, nil} ->
         false
@@ -1145,5 +1147,13 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   defp addresses_for_customer(customer) do
     if(customer, do: customer.addresses, else: [])
+  end
+
+  defp fetch_by_product_id(sales_line) do
+    product_id = Phoenix.HTML.Form.input_value(sales_line, :product_id)
+
+    if product_id not in ["", nil] do
+      Ash.get!(TheronsErp.Inventory.Product, product_id)
+    end
   end
 end
