@@ -1,6 +1,29 @@
 defmodule TheronsErp.Generator do
   use Ash.Generator
 
+  def sales_order(opts \\ []) do
+    seed_generator(
+      %TheronsErp.Sales.SalesOrder{
+        customer_id: generate(customer()).id,
+        state: :draft
+      },
+      overrides: opts
+    )
+  end
+
+  def address(opts \\ []) do
+    seed_generator(
+      %TheronsErp.People.Address{
+        address: Faker.Address.street_address(),
+        city: Faker.Address.city(),
+        state: Faker.Address.state(),
+        zip_code: Faker.Address.zip_code(),
+        phone: Faker.Phone.EnUs.phone()
+      },
+      overrides: opts
+    )
+  end
+
   def customer(opts \\ []) do
     seed_generator(
       %TheronsErp.People.Entity{
