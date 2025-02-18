@@ -7,10 +7,6 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
 
   import TheronsErp.Generator
 
-  @create_attrs %{name: "some name"}
-  @update_attrs %{name: "some updated name"}
-  @invalid_attrs %{name: nil}
-
   defp create_records(_) do
     parent_category = generate(product_category())
     product_category = generate(product_category(product_category_id: parent_category.id))

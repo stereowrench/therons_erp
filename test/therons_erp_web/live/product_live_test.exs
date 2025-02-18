@@ -14,8 +14,7 @@ defmodule TheronsErpWeb.ProductLiveTest do
     product = generate(product())
     product_category = generate(product_category())
 
-    product_category_parent =
-      generate(product_category(product_category_id: product_category.id))
+    generate(product_category(product_category_id: product_category.id))
 
     %{product: product, product_category: product_category}
   end
@@ -37,7 +36,7 @@ defmodule TheronsErpWeb.ProductLiveTest do
                result =
                index_live |> element("a", "New Product") |> render_click()
 
-      assert path =~ ~r"\/products\/[a-z1-9\-]+.*"
+      assert path =~ ~r"\/products\/[a-z0-9\-]+.*"
 
       {:ok, view, html} = follow_redirect(result, conn)
       assert html =~ "New Product"
@@ -52,8 +51,8 @@ defmodule TheronsErpWeb.ProductLiveTest do
              |> render_submit()
 
       {path, _flash} = assert_redirect(view)
-      assert path =~ ~r"\/products\/[a-z1-9\-]+.*"
-      {:ok, view, html} = follow_redirect(result, conn)
+      assert path =~ ~r"\/products\/[a-z0-9\-]+.*"
+      {:ok, view, _html} = follow_redirect(result, conn)
 
       html = render(view)
       assert html =~ "some name"
@@ -88,7 +87,7 @@ defmodule TheronsErpWeb.ProductLiveTest do
              |> form("#product-inline-form", product: @invalid_attrs)
              |> render_change() =~ "is required"
 
-      assert {:error, {:redirect, %{to: path}}} =
+      assert {:error, {:redirect, %{to: _path}}} =
                result =
                show_live
                |> form("#product-inline-form", product: @update_attrs)
