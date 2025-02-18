@@ -44,7 +44,25 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
       |> assert_has("input[name='product_category[name]'] ~ p ", text: "is required")
     end
 
-    test "new shows product breadcrumb"
+    test "new shows product breadcrumb", %{conn: conn, parent_category: parent_category} do
+      conn
+      |> visit(~p"/product_categories")
+      |> click_link("New Product category")
+      |> fill_in("Name", with: "Bob's Category")
+      |> submit()
+      |> assert_has(".breadcrumbs a", text: "Product Categories")
+      |> unwrap(fn view ->
+        Phoenix.LiveViewTest.render_submit(element(view, "form"), %{
+          product_category: %{
+            product_category_id: parent_category.id
+          }
+        })
+      end)
+      |> submit()
+      |> click_link(".link-to-inside-field > a", "")
+      |> assert_has(".breadcrumbs a", text: "Product Categories")
+      |> assert_has(".breadcrumbs a", text: "Bob's Category")
+    end
 
     test "updates product_category in listing", %{conn: conn, product_category: product_category} do
       {:ok, index_live, _html} = live(conn, ~p"/product_categories")
@@ -97,6 +115,8 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
       product_category: product_category,
       parent_category: parent_category
     } do
+      new_parent = generate(product_category())
+
       conn
       |> visit(~p"/product_categories/#{product_category}")
       |> fill_in("Name", with: nil)
@@ -104,10 +124,16 @@ defmodule TheronsErpWeb.ProductCategoryLiveTest do
       |> assert_has("input[name='product_category[name]'] ~ p", text: "is required")
       |> fill_in("Name", with: "My Category")
       |> submit()
-      |> assert_has(".text-lg", text: "My Category")
-      |> fill_in("input", "Parent Category", with: parent_category.id)
-      |> submit()
       |> assert_has(".text-lg", text: "#{parent_category.name} / My Category")
+      |> unwrap(fn view ->
+        Phoenix.LiveViewTest.render_submit(element(view, "form"), %{
+          product_category: %{
+            product_category_id: new_parent.id
+          }
+        })
+      end)
+      |> submit()
+      |> assert_has(".text-lg", text: "#{new_parent.name} / My Category")
     end
   end
 end

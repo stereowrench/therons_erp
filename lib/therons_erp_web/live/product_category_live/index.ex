@@ -8,7 +8,13 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     <.header>
       Listing Product categories
       <:actions>
-        <.link patch={~p"/product_categories/new"}>
+        <.link href={
+          Breadcrumbs.navigate_to_url(
+            @breadcrumbs,
+            {"product_category", "new"},
+            {"product_categories"}
+          )
+        }>
           <.button>New Product category</.button>
         </.link>
       </:actions>
@@ -107,7 +113,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     |> assign(:page_title, "New Product category")
     |> assign(:product_category, nil)
     |> Breadcrumbs.navigate_to(
-      {"product_category", "new_stub", product_category.id, params},
+      {"product_category", "new_stub", product_category.id, params, params["new"]},
       {"product_categories"}
     )
   end
