@@ -950,7 +950,19 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           false
 
         line_data ->
-          line_data.total_price != nil
+          if price = Phoenix.HTML.Form.input_value(sales_line, :total_price) do
+            price =
+              if is_binary(price) do
+                Money.new(:USD, price)
+              else
+                price
+              end
+
+            IO.inspect({price, line_data.total_price})
+            !Money.equal?(price, line_data.total_price)
+          else
+            line_data.total_price != nil
+          end
       end
     end
   end
@@ -965,7 +977,19 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
           false
 
         line_data ->
-          line_data.total_cost != nil
+          if cost = Phoenix.HTML.Form.input_value(sales_line, :total_cost) do
+            cost =
+              if is_binary(cost) do
+                Money.new(:USD, cost)
+              else
+                cost
+              end
+
+            IO.inspect({cost, line_data.total_cost})
+            !Money.equal?(cost, line_data.total_cost)
+          else
+            line_data.total_cost != nil
+          end
       end
     end
   end
