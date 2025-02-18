@@ -20,6 +20,10 @@ defmodule TheronsErpWeb.Nav do
         {pp, _} when pp in [TheronsErpWeb.EntityLive.Index, TheronsErpWeb.EntityLive.Show] ->
           :people
 
+        {inv, _}
+        when inv in [TheronsErpWeb.InvoicesLive.Index, TheronsErpWeb.InvoicesLive.Show] ->
+          :invoices
+
         {pc, _}
         when pc in [
                TheronsErpWeb.ProductCategoryLive.Index,

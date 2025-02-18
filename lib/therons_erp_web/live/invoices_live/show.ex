@@ -23,7 +23,20 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
         <tbody>
           <%= for line_item <- @invoice.line_items do %>
             <tr>
-              <td>{line_item.product.name}</td>
+              <td>
+                <.link
+                  navigate={
+                    TheronsErpWeb.Breadcrumbs.navigate_to_url(
+                      @breadcrumbs,
+                      {"products", line_item.product.id, ""},
+                      {"invoices", @invoice.id, @invoice.identifier}
+                    )
+                  }
+                  class="text-blue-600"
+                >
+                  {line_item.product.name}
+                </.link>
+              </td>
               <td>{line_item.price}</td>
               <td>{line_item.quantity}</td>
               <td>{line_item.total_price}</td>

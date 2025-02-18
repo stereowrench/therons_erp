@@ -113,6 +113,17 @@
                       <li>
                         <.nav_link
                           active={@active_tab}
+                          name={:invoices}
+                          path={~p"/invoices"}
+                          text="Invoices"
+                          icon="hero-banknotes"
+                        />
+                      </li>
+                    </ul>
+                    <ul class="-mx-2 space-y-1">
+                      <li>
+                        <.nav_link
+                          active={@active_tab}
                           name={:products}
                           path={~p"/products"}
                           text="Products"
@@ -186,6 +197,17 @@
                       path={~p"/sales_orders"}
                       text="Sales Orders"
                       icon="hero-credit-card"
+                    />
+                  </li>
+                </ul>
+                <ul class="-mx-2 mt-2 space-y-1">
+                  <li>
+                    <.nav_link
+                      active={@active_tab}
+                      name={:invoices}
+                      path={~p"/invoices"}
+                      text="Invoices"
+                      icon="hero-banknotes"
                     />
                   </li>
                 </ul>

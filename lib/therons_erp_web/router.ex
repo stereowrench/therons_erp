@@ -80,6 +80,7 @@ defmodule TheronsErpWeb.Router do
       live "/people/:id/show/edit", EntityLive.Show, :edit
 
       live "/invoices/:id", InvoicesLive.Show, :show
+      live "/invoices", InvoicesLive.Index, :index
     end
 
     # Remove these if you'd like to use your own authentication views
