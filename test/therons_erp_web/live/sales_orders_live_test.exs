@@ -98,10 +98,4 @@ defmodule TheronsErpWeb.SalesOrdersLiveTest do
     |> click_button("Generate invoice")
     |> assert_has("badge", text: "invoiced")
   end
-
-  test "Sales order breadcrumbs"
-
-  test "Address error"
-
-  # Create new address then don't save it. Now adding a new line item takes you to the new address page.
 end
