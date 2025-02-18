@@ -74,8 +74,31 @@ defmodule TheronsErpWeb.SalesOrdersLiveTest do
     |> refute_has("p", text: "is required")
   end
 
-  test "Sales order draft -> ready"
-  test "Sales order ready -> invoice"
+  test "Sales order draft -> ready", %{conn: conn} do
+    customer = generate(customer())
+    address = generate(address(entity_id: customer.id))
+    sales_order = generate(sales_order(address_id: address.id, customer_id: customer.id))
+
+    conn
+    |> visit(~p"/sales_orders/#{sales_order.id}")
+    |> click_button("Ready")
+    |> assert_has("badge", text: "Ready")
+  end
+
+  test "Sales order ready -> invoice", %{conn: conn} do
+    customer = generate(customer())
+    address = generate(address(entity_id: customer.id))
+
+    sales_order =
+      generate(sales_order(address_id: address.id, customer_id: customer.id, state: :ready))
+
+    conn
+    |> visit(~p"/sales_orders/#{sales_order.id}")
+    |> assert_has("badge", text: "Ready")
+    |> click_button("Generate invoice")
+    |> assert_has("badge", text: "invoiced")
+  end
+
   test "Sales order breadcrumbs"
 
   test "Address error"
