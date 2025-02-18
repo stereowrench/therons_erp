@@ -24,8 +24,14 @@ defmodule TheronsErp.Invoices.LineItem do
   attributes do
     uuid_primary_key :id
 
-    attribute :price, :money
-    attribute :quantity, :integer
+    attribute :price, :money do
+      allow_nil? false
+    end
+
+    attribute :quantity, :integer do
+      allow_nil? false
+    end
+
     timestamps()
   end
 
@@ -37,5 +43,9 @@ defmodule TheronsErp.Invoices.LineItem do
     belongs_to :product, TheronsErp.Inventory.Product do
       allow_nil? false
     end
+  end
+
+  calculations do
+    calculate :total_price, :money, expr(sales_price * quantity)
   end
 end
