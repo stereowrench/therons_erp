@@ -662,7 +662,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         %{"sales_order" => sales_order_params, "_target" => target} = params,
         socket
       ) do
-    sales_order_params = process_modifications(sales_order_params, socket)
+    sales_order_params =
+      process_modifications(sales_order_params, socket)
 
     socket =
       socket
@@ -732,7 +733,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               nil
             end
 
-          form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
+          form =
+            AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
+
           drop = length(sales_order_params["_drop_sales_lines"] || [])
 
           {:noreply,

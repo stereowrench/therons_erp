@@ -19,7 +19,11 @@ defmodule TheronsErp.Sales.SalesLine do
       # Set unit_price and sales_price based on product price and cost
       change fn changeset, _ ->
         # Load the product if it exists
-        if product_id = Ash.Changeset.get_attribute(changeset, :product_id) do
+        if Ash.Changeset.get_attribute(changeset, :product_id) &&
+             (!Ash.Changeset.get_attribute(changeset, :sales_price) ||
+                !Ash.Changeset.get_attribute(changeset, :unit_price) ||
+                !Ash.Changeset.get_attribute(changeset, :quantity)) do
+          product_id = Ash.Changeset.get_attribute(changeset, :product_id)
           product = Ash.get!(TheronsErp.Inventory.Product, product_id)
 
           changeset
