@@ -895,8 +895,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   end
 
   defp compare_monies_neq(a, b) do
-    IO.inspect({a, b})
-
     case {a, b} do
       {nil, nil} ->
         false
@@ -958,7 +956,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 price
               end
 
-            IO.inspect({price, line_data.total_price})
             !Money.equal?(price, line_data.total_price)
           else
             line_data.total_price != nil
@@ -985,7 +982,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 cost
               end
 
-            IO.inspect({cost, line_data.total_cost})
             !Money.equal?(cost, line_data.total_cost)
           else
             line_data.total_cost != nil
