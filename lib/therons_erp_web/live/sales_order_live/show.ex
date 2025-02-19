@@ -1136,7 +1136,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               AshPhoenix.Form.validate(form, new_args)
 
             true ->
-              AshPhoenix.Form.validate(form, %{})
+              update_live_forms(args)
+              AshPhoenix.Form.validate(form, args)
           end
       end
 
