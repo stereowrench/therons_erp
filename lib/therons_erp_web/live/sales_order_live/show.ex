@@ -49,6 +49,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               Generate invoice
             </.button>
           <% end %>
+          <%= if @sales_order.state == :cancelled do %>
+            <.button phx-disable-with="Saving..." phx-click="set-draft">
+              Return to draft
+            </.button>
+          <% end %>
           <%= if @sales_order.state == :invoiced && @sales_order.invoice.state == :draft do %>
             <.button phx-disable-with="Saving..." phx-click="set-cancelled">
               Cancel invoice
