@@ -159,6 +159,16 @@ defmodule TheronsErpWeb.Breadcrumbs do
           else
             ~p"/sales_orders/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: params]}"
           end
+
+        {"invoices", id, _identifier} ->
+          if from_args do
+            ~p"/invoices/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args]}"
+          else
+            ~p"/invoices/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs)]}"
+          end
+
+        {"invoices"} ->
+          ~p"/invoices"
       end
 
     {which, breadcrumbs}
@@ -248,6 +258,14 @@ defmodule TheronsErpWeb.Breadcrumbs do
 
   defp name_for_crumb({"product_categories"}) do
     "Product Categories"
+  end
+
+  defp name_for_crumb({"invoices", _id, identifier}) do
+    "I#{identifier}"
+  end
+
+  defp name_for_crumb({"invoices"}) do
+    "Invoices"
   end
 
   def stream_crumbs(list) when is_list(list) do

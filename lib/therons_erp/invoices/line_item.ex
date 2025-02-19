@@ -7,6 +7,10 @@ defmodule TheronsErp.Invoices.LineItem do
   postgres do
     table "line_items"
     repo TheronsErp.Repo
+
+    references do
+      reference :invoice, on_delete: :delete
+    end
   end
 
   code_interface do
@@ -19,13 +23,23 @@ defmodule TheronsErp.Invoices.LineItem do
     create :create do
       accept [:price, :quantity, :invoice_id, :product_id]
     end
+
+    destroy :destroy do
+      primary? true
+    end
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :price, :money
-    attribute :quantity, :integer
+    attribute :price, :money do
+      allow_nil? false
+    end
+
+    attribute :quantity, :integer do
+      allow_nil? false
+    end
+
     timestamps()
   end
 
@@ -37,5 +51,9 @@ defmodule TheronsErp.Invoices.LineItem do
     belongs_to :product, TheronsErp.Inventory.Product do
       allow_nil? false
     end
+  end
+
+  calculations do
+    calculate :total_price, :money, expr(price * quantity)
   end
 end

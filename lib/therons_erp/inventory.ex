@@ -1,6 +1,9 @@
 defmodule TheronsErp.Inventory do
-  use Ash.Domain,
-    otp_app: :therons_erp
+  use Ash.Domain, otp_app: :therons_erp, extensions: [AshAdmin.Domain]
+
+  admin do
+    show? true
+  end
 
   resources do
     resource TheronsErp.Inventory.ProductCategory do

@@ -37,7 +37,8 @@ defmodule TheronsErp.Sales.SalesOrder do
           Invoice
           |> Ash.Changeset.for_create(:create, %{
             sales_order_id: result.id,
-            sales_lines: result.sales_lines
+            sales_lines: result.sales_lines,
+            customer_id: result.customer_id
           })
           |> Ash.create!()
 
@@ -47,8 +48,25 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     update :cancel_invoice do
-      # TODO cancel the invoice here
+      require_atomic? false
       change transition_state(:cancelled)
+
+      change fn changeset, result ->
+        changeset
+        |> Ash.Changeset.after_action(fn changeset, result ->
+          invoice =
+            Ash.get!(
+              TheronsErp.Invoices.Invoice,
+              result.invoice.id
+            )
+
+          Ash.destroy!(invoice, action: :destroy)
+
+          {:ok, result}
+        end)
+
+        # |> then(fn changeset -> Ash.Changeset.change_attribute(changeset, :invoice_id, nil) end)
+      end
     end
 
     update :ready do

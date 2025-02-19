@@ -77,29 +77,23 @@
     vertical-align: middle;
 }
 
-.product-category-table {
-    @apply table-auto w-full;
+.product-category-table,
+.invoice-table {
+    @apply table-auto w-full text-left;
 
     td {
         @apply border-t border-gray-200 px-4 py-2;
         vertical-align: middle;
+        padding-left: 0;
+
+        div {
+            width: 100%;
+        }
 
         input {
             @apply border-transparent hover:border-solid hover:border-zinc-300;
             @apply border-b-brand;
         }
-    }
-}
-
-.product-category-table {
-    @apply text-left;
-
-    td {
-        div {
-            width: 100%;
-        }
-
-        padding-left: 0;
     }
 }
 
