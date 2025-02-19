@@ -8,6 +8,7 @@ defmodule TheronsErp.InvoiceTest do
 
   test "copying line items" do
     sales_order = Sales.create_draft!()
+    customer = generate(customer())
 
     product =
       Inventory.create_product!("Test Product", Money.new(100, :USD), %{cost: Money.new(50, :USD)})
@@ -25,7 +26,8 @@ defmodule TheronsErp.InvoiceTest do
       Invoice
       |> Ash.Changeset.for_create(:create, %{
         sales_order_id: sales_order.id,
-        sales_lines: [sales_line]
+        sales_lines: [sales_line],
+        customer_id: customer.id
       })
       |> Ash.create!()
       |> Ash.load!(:line_items)
