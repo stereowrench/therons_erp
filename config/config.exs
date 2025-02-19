@@ -66,8 +66,7 @@ config :therons_erp,
     TheronsErp.Sales,
     TheronsErp.Inventory,
     TheronsErp.Ledger,
-    TheronsErp.Accounts,
-    TheronsErp.ResourceLedger
+    TheronsErp.Accounts
   ]
 
 # Configures the endpoint

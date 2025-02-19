@@ -10,6 +10,11 @@ defmodule TheronsErp.Ledger.Account do
     balance_resource TheronsErp.Ledger.Balance
   end
 
+  account do
+    transfer_resource TheronsErp.Ledger.Transfer
+    balance_resource TheronsErp.Ledger.Balance
+  end
+
   postgres do
     table "ledger_accounts"
     repo TheronsErp.Repo
