@@ -6,7 +6,8 @@ defmodule TheronsErp.Inventory.ProductCategory do
     otp_app: :therons_erp,
     domain: TheronsErp.Inventory,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshArchival.Resource]
+    extensions: [AshArchival.Resource],
+    primary_read_warning?: false
 
   require Ash.Query
 
@@ -19,15 +20,28 @@ defmodule TheronsErp.Inventory.ProductCategory do
     defaults [:read]
 
     read :list do
+      primary? true
+      prepare build(sort: [id: :desc])
     end
 
     destroy :delete do
+      primary? true
     end
 
     create :create do
       accept [:name, :product_category_id]
 
       change &perform_full_name_update/2
+    end
+
+    create :create_stub do
+      accept []
+
+      change fn changeset, _context ->
+        changeset
+        |> Ash.Changeset.change_attribute(:name, "New Category")
+        |> Ash.Changeset.change_attribute(:full_name, "New Category")
+      end
     end
 
     update :update_parent do
@@ -127,22 +141,16 @@ defmodule TheronsErp.Inventory.ProductCategory do
         end
       end)
       |> Ash.Changeset.after_action(fn changeset, result ->
-        alt =
-          Ash.Changeset.get_attribute(changeset, :product_category_id) == nil and
-            Ash.Changeset.fetch_argument(changeset, :product_category_id) != nil
+        id = Ash.Changeset.get_attribute(changeset, :id)
 
-        if Ash.Changeset.get_attribute(changeset, :product_category_id) != nil or alt do
-          id = Ash.Changeset.get_attribute(changeset, :id)
+        unless id == nil do
+          subcats =
+            ProductCategory
+            |> Ash.Query.filter(product_category_id == ^id)
+            |> Ash.read!()
 
-          unless id == nil do
-            subcats =
-              ProductCategory
-              |> Ash.Query.filter(product_category_id == ^id)
-              |> Ash.read!()
-
-            for cat <- subcats do
-              Inventory.change_parent!(cat.id, changeset.data.id)
-            end
+          for cat <- subcats do
+            Inventory.change_parent!(cat.id, changeset.data.id)
           end
         end
 

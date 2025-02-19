@@ -8,13 +8,13 @@ defmodule TheronsErp.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      TheronsErp.Repo,
       {Oban,
        AshOban.config(
          Application.fetch_env!(:therons_erp, :ash_domains),
          Application.fetch_env!(:therons_erp, Oban)
        )},
       TheronsErpWeb.Telemetry,
-      TheronsErp.Repo,
       {DNSCluster, query: Application.get_env(:therons_erp, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: TheronsErp.PubSub},
       # Start the Finch HTTP client for sending emails

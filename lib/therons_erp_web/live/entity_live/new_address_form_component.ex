@@ -56,7 +56,8 @@ defmodule TheronsErpWeb.EntityLive.NewAddressFormComponent do
           socket
           |> put_flash(:info, "Address #{socket.assigns.form.source.type}d successfully")
           |> Breadcrumbs.navigate_back({"people", address.entity_id}, %{
-            address_id: address.id
+            address_id: address.id,
+            customer_id: address.entity_id
           })
 
         {:noreply, socket}

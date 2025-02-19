@@ -40,6 +40,7 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     destroy :destroy do
+      primary? true
     end
   end
 

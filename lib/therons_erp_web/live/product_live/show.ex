@@ -66,7 +66,7 @@ defmodule TheronsErpWeb.ProductLive.Show do
                   <.link navigate={
                     TheronsErpWeb.Breadcrumbs.navigate_to_url(
                       @breadcrumbs,
-                      {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id),
+                      {"product_category", Phoenix.HTML.Form.input_value(@form, :category_id), %{},
                        get_category_name(
                          @categories,
                          Phoenix.HTML.Form.input_value(@form, :category_id)

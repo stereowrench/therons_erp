@@ -28,6 +28,7 @@ defmodule TheronsErpWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import TheronsErpWeb.ConnCase
+      import PhoenixTest
     end
   end
 

@@ -6,7 +6,12 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <.simple_form for={@form} id="product-inline-form" phx-change="validate" phx-submit="save">
+    <.simple_form
+      for={@form}
+      id="product-category-inline-form"
+      phx-change="validate"
+      phx-submit="save"
+    >
       <.header>
         {@product_category.full_name}
 
@@ -53,11 +58,12 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
                     TheronsErpWeb.Breadcrumbs.navigate_to_url(
                       @breadcrumbs,
                       {"product_category", Phoenix.HTML.Form.input_value(@form, :product_category_id),
+                       %{},
                        get_category_name(
                          @categories,
                          Phoenix.HTML.Form.input_value(@form, :product_category_id)
                        )},
-                      {"product_category", @product_category.id, @product_category.full_name}
+                      {"product_category", @product_category.id, %{}, @product_category.full_name}
                     )
                   }>
                     <.icon name="hero-arrow-right" />
@@ -81,7 +87,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
               TheronsErpWeb.Breadcrumbs.navigate_to_url(
                 @breadcrumbs,
                 {"products", product.id, product.name},
-                {"product_category", @product_category.id, @product_category.full_name}
+                {"product_category", @product_category.id, %{}, @product_category.full_name}
               )
             )
           end
@@ -140,6 +146,7 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
      |> assign(:initial_categories, get_initial_options(current_category_id))
      |> assign(:categories, get_categories(current_category_id))
      |> assign(:set_category, %{text: nil, value: nil})
+     |> assign(:is_new, params["new"] == "true")
      |> assign_form()}
   end
 
@@ -165,8 +172,8 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
       end
 
     initial_categories =
-      if from_args["category_id"] do
-        get_initial_options(from_args["category_id"])
+      if from_args["product_category_id"] do
+        get_initial_options(from_args["product_category_id"])
       else
         socket.assigns.initial_categories
       end
@@ -179,14 +186,14 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
 
   @impl true
   def handle_event("validate", %{"product_category" => category_params}, socket) do
-    if category_params["category_id"] == "create" do
+    if category_params["product_category_id"] == "create" do
       cid = socket.assigns.product_category.id
 
       {:noreply,
        socket
        |> Breadcrumbs.navigate_to(
          {"product_category", "new_cat", cid},
-         {"product_category", cid, category_params}
+         {"product_category", cid, category_params, socket.assigns.product_category.full_name}
        )}
     else
       id = category_params["product_category_id"]
@@ -263,15 +270,21 @@ defmodule TheronsErpWeb.ProductCategoryLive.Show do
       case AshPhoenix.Form.submit(socket.assigns.form, params: category_params) do
         {:ok, category} ->
           socket =
-            socket
-            |> put_flash(:info, "Category #{socket.assigns.form.source.type}d successfully")
-            |> assign(
-              :product_category,
-              category
-            )
-            |> assign(:initial_categories, get_initial_options(category.id))
-            |> assign(:categories, get_categories(category.id))
-            |> assign_form()
+            if socket.assigns.is_new do
+              socket
+              |> put_flash(:info, "Category #{socket.assigns.form.source.type}d successfully")
+              |> Breadcrumbs.navigate_back({"product_categories", "edit", category.id}, %{
+                product_category_id: category.id
+              })
+            else
+              socket
+              |> put_flash(:info, "Category #{socket.assigns.form.source.type}d successfully")
+              |> push_patch(
+                to:
+                  ~p"/product_categories/#{category.id}?#{[breadcrumbs: Breadcrumbs.encode_breadcrumbs(socket.assigns.breadcrumbs)]}",
+                replace: true
+              )
+            end
 
           {:noreply, socket}
 

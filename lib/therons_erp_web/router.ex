@@ -41,6 +41,7 @@ defmodule TheronsErpWeb.Router do
   scope "/", TheronsErpWeb do
     pipe_through :browser
 
+    get "/home", PageController, :home
     get "/", PageController, :home
 
     auth_routes AuthController, TheronsErp.Accounts.User, path: "/auth"
@@ -54,7 +55,6 @@ defmodule TheronsErpWeb.Router do
       ] do
       live "/product_categories", ProductCategoryLive.Index, :index
       live "/product_categories/new", ProductCategoryLive.Index, :new
-      live "/product_categories/:id/edit", ProductCategoryLive.Index, :edit
 
       live "/product_categories/:id", ProductCategoryLive.Show, :show
       live "/product_categories/:id/show/edit", ProductCategoryLive.Show, :edit
@@ -65,6 +65,7 @@ defmodule TheronsErpWeb.Router do
       live "/products/:id", ProductLive.Show, :show
 
       live "/sales_orders", SalesOrderLive.Index, :index
+      live "/sales_orders/new", SalesOrderLive.Index, :new
       live "/sales_orders/:id/edit", SalesOrderLive.Index, :edit
 
       live "/sales_orders/:id", SalesOrderLive.Show, :show
@@ -77,6 +78,8 @@ defmodule TheronsErpWeb.Router do
       live "/people/:id", EntityLive.Show, :show
       live "/people/:id/new_address", EntityLive.Show, :new_address
       live "/people/:id/show/edit", EntityLive.Show, :edit
+
+      live "/invoices/:id", InvoicesLive.Show, :show
     end
 
     # Remove these if you'd like to use your own authentication views

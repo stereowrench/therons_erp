@@ -1,5 +1,6 @@
 defmodule TheronsErpWeb.ProductCategoryLive.Index do
   use TheronsErpWeb, :live_view
+  alias TheronsErpWeb.Breadcrumbs
 
   @impl true
   def render(assigns) do
@@ -7,7 +8,13 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     <.header>
       Listing Product categories
       <:actions>
-        <.link patch={~p"/product_categories/new"}>
+        <.link href={
+          Breadcrumbs.navigate_to_url(
+            @breadcrumbs,
+            {"product_category", "new"},
+            {"product_categories"}
+          )
+        }>
           <.button>New Product category</.button>
         </.link>
       </:actions>
@@ -17,17 +24,33 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
       id="product_categories"
       rows={@streams.product_categories}
       row_click={
-        fn {_id, product_category} -> JS.navigate(~p"/product_categories/#{product_category}") end
+        fn {_id, product_category} ->
+          JS.navigate(
+            Breadcrumbs.navigate_to_url(
+              @breadcrumbs,
+              {"product_categories", "edit", product_category.id},
+              {"product_categories"}
+            )
+          )
+        end
       }
     >
       <:col :let={{_id, product_category}} label="Name">{product_category.full_name}</:col>
 
       <:action :let={{_id, product_category}}>
         <div class="sr-only">
-          <.link navigate={~p"/product_categories/#{product_category}"}>Show</.link>
+          <.link navigate={
+            JS.navigate(
+              Breadcrumbs.navigate_to_url(
+                @breadcrumbs,
+                {"product_categories", "edit", product_category.id},
+                {"product_categories"}
+              )
+            )
+          }>
+            Show
+          </.link>
         </div>
-
-        <.link patch={~p"/product_categories/#{product_category}/edit"}>Edit</.link>
       </:action>
 
       <:action :let={{id, product_category}}>
@@ -83,19 +106,16 @@ defmodule TheronsErpWeb.ProductCategoryLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, "Edit Product category")
-    |> assign(
-      :product_category,
-      Ash.get!(TheronsErp.Inventory.ProductCategory, id, actor: socket.assigns.current_user)
-    )
-  end
+  defp apply_action(socket, :new, params) do
+    product_category = TheronsErp.Inventory.create_category_stub!()
 
-  defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Product category")
     |> assign(:product_category, nil)
+    |> Breadcrumbs.navigate_to(
+      {"product_category", "new_stub", product_category.id, params, params["new"]},
+      {"product_categories"}
+    )
   end
 
   defp apply_action(socket, :index, _params) do
