@@ -665,6 +665,17 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
     sales_order_params =
       process_modifications(sales_order_params, socket)
 
+    sales_order_params =
+      case target do
+        ["sales_order", "sales_lines", idx, "product_id"] ->
+          put_in(sales_order_params, ["sales_lines", idx], %{
+            "product_id" => sales_order_params["sales_lines"][idx]["product_id"]
+          })
+
+        _ ->
+          sales_order_params
+      end
+
     socket =
       socket
       |> record_total_price_change(params["_target"])
