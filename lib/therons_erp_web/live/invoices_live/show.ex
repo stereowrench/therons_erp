@@ -17,6 +17,17 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
             <.button phx-disable-with="Saving..." class="save-button">
               <.icon name="hero-check-circle" />
             </.button>
+          <% else %>
+            <%= if @invoice.state in [:sent, :draft] do %>
+              <.button phx-disable-with="Saving..." phx-click="set-paid">
+                Pay
+              </.button>
+            <% end %>
+            <%= if @invoice.state == :paid do %>
+              <.button phx-disable-with="Saving..." phx-click="set-unpaid">
+                Unpay
+              </.button>
+            <% end %>
           <% end %>
         </.header>
 
@@ -106,15 +117,23 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
 
         <div class="cost-summary">
           <div class="total-price">
-            <span class="input-icon">
-              <i class="z-10">$</i>
-              <.input field={@form[:paid_amount]} type="number" value={@invoice.paid_amount.amount} />
+            <%= if @invoice.state == :draft do %>
+              <span class="input-icon">
+                <i class="z-10">$</i>
+                <.input field={@form[:paid_amount]} type="number" value={@invoice.paid_amount.amount} />
+              </span>
+            <% else %>
+              <span>
+                Paid: {@invoice.paid_amount}
+              </span>
+            <% end %>
+          </div>
+          <br /><hr />
+          <div class="total-cost">
+            <span>
+              {@invoice.total_price}
             </span>
           </div>
-          <div class="total-cost">
-            {@invoice.total_price}
-          </div>
-          <hr />
         </div>
       </.simple_form>
     </div>
@@ -128,7 +147,7 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
 
   @impl true
   def handle_params(%{"id" => id} = params, _, socket) do
-    invoice = load_by_id(id)
+    invoice = load_by_id(id, socket)
 
     {:noreply,
      socket |> assign(:unsaved_changes, false) |> assign(:invoice, invoice) |> assign_form()}
@@ -161,6 +180,16 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
      socket |> assign(:unsaved_changes, form.source.changed?) |> assign(form: to_form(form))}
   end
 
+  def handle_event("set-paid", _, socket) do
+    Ash.Changeset.for_update(socket.assigns.invoice, :pay) |> Ash.update!()
+    {:noreply, socket |> assign(:invoice, load_by_id(socket.assigns.invoice.id, socket))}
+  end
+
+  def handle_event("set-unpaid", _, socket) do
+    Ash.Changeset.for_update(socket.assigns.invoice, :unpay) |> Ash.update!()
+    {:noreply, socket |> assign(:invoice, load_by_id(socket.assigns.invoice.id, socket))}
+  end
+
   defp assign_form(%{assigns: %{invoice: invoice}} = socket) do
     form =
       AshPhoenix.Form.for_update(invoice, :update,
@@ -172,8 +201,9 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
     |> assign(form: to_form(form))
   end
 
-  defp load_by_id(id) do
+  defp load_by_id(id, socket) do
     Ash.get!(TheronsErp.Invoices.Invoice, id,
+      actor: socket.assigns.current_user,
       load: [
         :total_price,
         :customer,

@@ -19,10 +19,13 @@ defmodule TheronsErp.Invoices.Invoice do
 
     transitions do
       transition(:send, from: [:draft], to: [:sent])
+      transition(:pay, from: [:sent, :draft], to: [:paid])
+      transition(:unpay, from: [:paid], to: [:draft])
     end
   end
 
   actions do
+    # TODO implement sending
     defaults [
       :read,
       update: [:customer_id, :sales_order_id, :paid_amount]
@@ -35,6 +38,10 @@ defmodule TheronsErp.Invoices.Invoice do
     update :pay do
       accept [:paid_amount]
       change transition_state(:paid)
+    end
+
+    update :unpay do
+      change transition_state(:draft)
     end
 
     destroy :destroy do
