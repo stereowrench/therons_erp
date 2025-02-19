@@ -20,6 +20,51 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
           <% end %>
         </.header>
 
+        <div>
+          <label class="fieldsetlikelabel">Address</label>
+          <div class="fieldsetlike">
+            <div class="address">
+              <%!-- Address 1 --%>
+              <div class="address-line">
+                <span>
+                  <%!-- Address label --%>
+                  <span class="text-xs">Address</span>
+                  {@invoice.sales_order.address.address}
+                </span>
+              </div>
+              <%!-- Address 2 --%>
+              <div class="address2-line">
+                <span>
+                  <span class="text-xs">Address 2</span>
+                  {@invoice.sales_order.address.address2}
+                </span>
+              </div>
+              <div class="address-city-state-zip">
+                <%!-- City --%>
+                <div class="city-line">
+                  <span class="text-xs">City</span>
+                  {@invoice.sales_order.address.city}
+                </div>
+                <%!-- State --%>
+                <div class="state-line">
+                  <span class="text-xs">State</span>
+                  {@invoice.sales_order.address.state}
+                </div>
+                <%!-- Zip Code --%>
+                <div class="zip-line">
+                  <span class="text-xs">Zip Code</span>
+                  {@invoice.sales_order.address.zip_code}
+                </div>
+              </div>
+              <%!-- Phone number --%>
+              <div class="phone-line">
+                <span class="text-xs">Phone Number</span>
+                {@invoice.sales_order.address.phone}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <table class="invoice-table">
           <thead>
             <tr>
@@ -129,7 +174,12 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
 
   defp load_by_id(id) do
     Ash.get!(TheronsErp.Invoices.Invoice, id,
-      load: [:total_price, :customer, line_items: [:product, :total_price]]
+      load: [
+        :total_price,
+        :customer,
+        line_items: [:product, :total_price],
+        sales_order: [:address]
+      ]
     )
   end
 

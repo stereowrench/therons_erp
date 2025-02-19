@@ -5,9 +5,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   import TheronsErpWeb.Selects
   import TheronsErpWeb.Layouts
 
-  # TODO address should be selectable when customer is changed but not persisted
-  # TODO address should be reset when customer changed
-
   @impl true
   def render(assigns) do
     ~H"""
