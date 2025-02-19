@@ -40,3 +40,5 @@ config :phoenix_test, :endpoint, TheronsErpWeb.Endpoint
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+config :ash, :policies, show_policy_breakdowns?: true

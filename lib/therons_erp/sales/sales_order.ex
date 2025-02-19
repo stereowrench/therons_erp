@@ -48,8 +48,21 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     update :cancel_invoice do
-      # TODO cancel the invoice here
       change transition_state(:cancelled)
+
+      change fn changeset, result ->
+        Ash.changeset().after_action(changeset, fn changeset, result ->
+          invoice =
+            Ash.get!(
+              TheronsErp.Invoices.Invoice,
+              Ash.Changeset.get_attribute(changeset, :invoice_id)
+            )
+
+          Ash.destroy!(invoice)
+
+          {:ok, result}
+        end)
+      end
     end
 
     update :ready do

@@ -3,7 +3,8 @@ defmodule TheronsErp.Invoices.Invoice do
     otp_app: :therons_erp,
     domain: TheronsErp.Invoices,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshStateMachine]
+    extensions: [AshStateMachine],
+    authorizers: [Ash.Policy.Authorizer]
 
   alias TheronsErp.Invoices.LineItem
 
@@ -31,6 +32,10 @@ defmodule TheronsErp.Invoices.Invoice do
       change transition_state(:sent)
     end
 
+    destroy :destroy do
+      primary? true
+    end
+
     create :create do
       accept [:customer_id, :sales_order_id]
       argument :sales_lines, {:array, :map}
@@ -51,6 +56,24 @@ defmodule TheronsErp.Invoices.Invoice do
           {:ok, result}
         end)
       end
+    end
+  end
+
+  policies do
+    policy action(:destroy) do
+      authorize_if expr(state == "draft")
+    end
+
+    policy action_type(:create) do
+      authorize_if always()
+    end
+
+    policy action_type(:update) do
+      authorize_if always()
+    end
+
+    policy action_type(:read) do
+      authorize_if always()
     end
   end
 

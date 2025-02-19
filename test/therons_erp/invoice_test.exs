@@ -4,6 +4,7 @@ defmodule TheronsErp.InvoiceTest do
   alias TheronsErp.Inventory
   alias TheronsErp.Sales.{SalesLine}
   alias TheronsErp.Invoices.Invoice
+  import TheronsErp.Generator
 
   test "copying line items" do
     sales_order = Sales.create_draft!()
@@ -33,5 +34,21 @@ defmodule TheronsErp.InvoiceTest do
     assert line_item.product_id == product.id
     assert Money.equal?(line_item.price, sales_line.sales_price)
     assert line_item.quantity == sales_line.quantity
+  end
+
+  test "deleting invoies" do
+    invoice = generate(invoice())
+
+    assert Ash.destroy!(invoice) == :ok
+
+    invoice = generate(invoice())
+
+    invoice
+    |> Ash.Changeset.for_action(:send)
+    |> Ash.update!()
+
+    assert_raise Ash.Error.Forbidden, fn ->
+      Ash.destroy!(invoice)
+    end
   end
 end

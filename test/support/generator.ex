@@ -1,6 +1,16 @@
 defmodule TheronsErp.Generator do
   use Ash.Generator
 
+  def invoice(opts \\ []) do
+    seed_generator(
+      %TheronsErp.Invoices.Invoice{
+        customer_id: generate(customer()).id,
+        state: :draft
+      },
+      overrides: opts
+    )
+  end
+
   def sales_order(opts \\ []) do
     seed_generator(
       %TheronsErp.Sales.SalesOrder{
