@@ -48,20 +48,24 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     update :cancel_invoice do
+      require_atomic? false
       change transition_state(:cancelled)
 
       change fn changeset, result ->
-        Ash.changeset().after_action(changeset, fn changeset, result ->
+        changeset
+        |> Ash.Changeset.after_action(fn changeset, result ->
           invoice =
             Ash.get!(
               TheronsErp.Invoices.Invoice,
-              Ash.Changeset.get_attribute(changeset, :invoice_id)
+              result.invoice.id
             )
 
-          Ash.destroy!(invoice)
+          Ash.destroy!(invoice, action: :destroy)
 
           {:ok, result}
         end)
+
+        # |> then(fn changeset -> Ash.Changeset.change_attribute(changeset, :invoice_id, nil) end)
       end
     end
 

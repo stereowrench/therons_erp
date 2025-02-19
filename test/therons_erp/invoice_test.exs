@@ -50,5 +50,9 @@ defmodule TheronsErp.InvoiceTest do
     assert_raise Ash.Error.Forbidden, fn ->
       Ash.destroy!(invoice)
     end
+
+    invoice = generate(invoice())
+    line_item = generate(invoice_line(invoice_id: invoice.id))
+    Ash.destroy!(line_item, action: :destroy)
   end
 end

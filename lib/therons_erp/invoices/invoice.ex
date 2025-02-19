@@ -34,6 +34,7 @@ defmodule TheronsErp.Invoices.Invoice do
 
     destroy :destroy do
       primary? true
+      change cascade_destroy(:line_items, action: :destroy)
     end
 
     create :create do

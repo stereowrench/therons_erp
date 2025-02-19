@@ -1,6 +1,17 @@
 defmodule TheronsErp.Generator do
   use Ash.Generator
 
+  def invoice_line(opts \\ []) do
+    seed_generator(
+      %TheronsErp.Invoices.LineItem{
+        price: Money.new(100, :USD),
+        quantity: Faker.random_between(1, 10),
+        product_id: generate(product()).id
+      },
+      overrides: opts
+    )
+  end
+
   def invoice(opts \\ []) do
     seed_generator(
       %TheronsErp.Invoices.Invoice{

@@ -7,6 +7,10 @@ defmodule TheronsErp.Invoices.LineItem do
   postgres do
     table "line_items"
     repo TheronsErp.Repo
+
+    references do
+      reference :invoice, on_delete: :delete
+    end
   end
 
   code_interface do
@@ -18,6 +22,10 @@ defmodule TheronsErp.Invoices.LineItem do
 
     create :create do
       accept [:price, :quantity, :invoice_id, :product_id]
+    end
+
+    destroy :destroy do
+      primary? true
     end
   end
 

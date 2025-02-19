@@ -49,6 +49,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               Generate invoice
             </.button>
           <% end %>
+          <%= if @sales_order.state == :invoiced && @sales_order.invoice.state == :draft do %>
+            <.button phx-disable-with="Saving..." phx-click="set-cancelled">
+              Cancel invoice
+            </.button>
+          <% end %>
         </:actions>
         <:subtitle></:subtitle>
       </.header>
@@ -797,6 +802,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   def handle_event("set-draft", _, socket) do
     Ash.Changeset.for_update(socket.assigns.sales_order, :revive) |> Ash.update!()
+    {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
+  end
+
+  def handle_event("set-cancelled", _, socket) do
+    Ash.Changeset.for_update(socket.assigns.sales_order, :cancel_invoice) |> Ash.update!()
     {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
   end
 
