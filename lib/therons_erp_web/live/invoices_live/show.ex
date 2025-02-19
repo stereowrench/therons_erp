@@ -1,7 +1,6 @@
 defmodule TheronsErpWeb.InvoicesLive.Show do
   alias TheronsErpWeb.Breadcrumbs
   use TheronsErpWeb, :live_view
-  import TheronsErpWeb.Selects
   import TheronsErpWeb.Layouts
 
   @impl true
@@ -146,7 +145,7 @@ defmodule TheronsErpWeb.InvoicesLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id} = params, _, socket) do
+  def handle_params(%{"id" => id} = _params, _, socket) do
     invoice = load_by_id(id, socket)
 
     {:noreply,

@@ -160,7 +160,7 @@ defmodule TheronsErpWeb.Breadcrumbs do
             ~p"/sales_orders/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), args: params]}"
           end
 
-        {"invoices", id, identifier} ->
+        {"invoices", id, _identifier} ->
           if from_args do
             ~p"/invoices/#{id}?#{[breadcrumbs: encode_breadcrumbs(breadcrumbs), from_args: from_args]}"
           else
