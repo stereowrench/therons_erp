@@ -141,35 +141,16 @@ defmodule TheronsErp.Inventory.ProductCategory do
         end
       end)
       |> Ash.Changeset.after_action(fn changeset, result ->
-        pcid =
-          case Ash.Changeset.get_attribute(changeset, :product_category_id) do
-            {:ok, foo} -> foo
-            _ -> nil
-          end
+        id = Ash.Changeset.get_attribute(changeset, :id)
 
-        pcid2 =
-          case Ash.Changeset.fetch_argument(changeset, :product_category_id) do
-            {:ok, foo} -> foo
-            :error -> :error
-            _ -> nil
-          end
+        unless id == nil do
+          subcats =
+            ProductCategory
+            |> Ash.Query.filter(product_category_id == ^id)
+            |> Ash.read!()
 
-        alt =
-          is_nil(pcid) and
-            not is_nil(pcid2)
-
-        if not is_nil(pcid) or alt do
-          id = Ash.Changeset.get_attribute(changeset, :id)
-
-          unless id == nil do
-            subcats =
-              ProductCategory
-              |> Ash.Query.filter(product_category_id == ^id)
-              |> Ash.read!()
-
-            for cat <- subcats do
-              Inventory.change_parent!(cat.id, changeset.data.id)
-            end
+          for cat <- subcats do
+            Inventory.change_parent!(cat.id, changeset.data.id)
           end
         end
 
