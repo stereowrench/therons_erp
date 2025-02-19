@@ -974,7 +974,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 price
               end
 
-            !Money.equal?(price, line_data.total_price)
+            !Money.equal?(price, line_data.active_price)
           else
             line_data.total_price != nil
           end
