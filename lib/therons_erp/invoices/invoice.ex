@@ -25,11 +25,16 @@ defmodule TheronsErp.Invoices.Invoice do
   actions do
     defaults [
       :read,
-      update: [:customer_id, :sales_order_id]
+      update: [:customer_id, :sales_order_id, :paid_amount]
     ]
 
     update :send do
       change transition_state(:sent)
+    end
+
+    update :pay do
+      accept [:paid_amount]
+      change transition_state(:paid)
     end
 
     destroy :destroy do
@@ -42,7 +47,8 @@ defmodule TheronsErp.Invoices.Invoice do
       argument :sales_lines, {:array, :map}
 
       change fn changeset, context ->
-        Ash.Changeset.after_action(changeset, fn changeset, result ->
+        changeset
+        |> Ash.Changeset.after_action(fn changeset, result ->
           sales_lines = Ash.Changeset.get_argument(changeset, :sales_lines)
 
           for line <- sales_lines do
@@ -55,6 +61,16 @@ defmodule TheronsErp.Invoices.Invoice do
           end
 
           {:ok, result}
+        end)
+        |> then(fn changeset ->
+          sales_order =
+            Ash.get!(
+              TheronsErp.Sales.SalesOrder,
+              Ash.Changeset.get_attribute(changeset, :sales_order_id),
+              load: [:total_price]
+            )
+
+          Ash.Changeset.change_attribute(changeset, :paid_amount, sales_order.total_price)
         end)
       end
     end
@@ -85,6 +101,8 @@ defmodule TheronsErp.Invoices.Invoice do
       generated? true
     end
 
+    attribute :paid_amount, :money
+
     timestamps()
   end
 
@@ -95,5 +113,9 @@ defmodule TheronsErp.Invoices.Invoice do
 
     belongs_to :sales_order, TheronsErp.Sales.SalesOrder
     has_many :line_items, TheronsErp.Invoices.LineItem
+  end
+
+  aggregates do
+    sum :total_price, [:line_items], :total_price
   end
 end
