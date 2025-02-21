@@ -21,7 +21,13 @@ defmodule TheronsErp.Purchasing.Vendor do
     attribute :zip_coe, :string
 
     attribute :identifier, :integer do
-      generated(true)
+      generated? true
     end
+
+    timestamps()
+  end
+
+  relationships do
+    has_many :purchase_orders, TheronsErp.Purchasing.PurchaseOrder
   end
 end
