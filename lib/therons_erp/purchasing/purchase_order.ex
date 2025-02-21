@@ -20,5 +20,7 @@ defmodule TheronsErp.Purchasing.PurchaseOrder do
 
   relationships do
     belongs_to :vendor, TheronsErp.Purchasing.Vendor
+
+    has_many :items, TheronsErp.Purchasing.PurchaseOrderItem
   end
 end

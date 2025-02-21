@@ -5,5 +5,6 @@ defmodule TheronsErp.Purchasing do
   resources do
     resource TheronsErp.Purchasing.Vendor
     resource TheronsErp.Purchasing.PurchaseOrder
+    resource TheronsErp.Purchasing.PurchaseOrderItem
   end
 end
