@@ -61,6 +61,7 @@ config :therons_erp,
   ecto_repos: [TheronsErp.Repo],
   generators: [timestamp_type: :utc_datetime],
   ash_domains: [
+    TheronsErp.Purchasing,
     TheronsErp.Invoices,
     TheronsErp.People,
     TheronsErp.Sales,
