@@ -15,6 +15,11 @@ defmodule TheronsErp.Purchasing.PurchaseOrder do
     attribute :order_date, :date
     attribute :delivery_date, :date
     attribute :total_amount, :money
+
+    attribute :identifier, :integer do
+      generated? true
+    end
+
     timestamps()
   end
 
