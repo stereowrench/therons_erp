@@ -3,5 +3,6 @@ defmodule TheronsErp.Purchasing do
     otp_app: :therons_erp
 
   resources do
+    resource TheronsErp.Purchasing.Vendor
   end
 end
