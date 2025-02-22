@@ -75,5 +75,7 @@ defmodule TheronsErp.Inventory.Product do
 
   relationships do
     belongs_to :category, TheronsErp.Inventory.ProductCategory
+
+    belongs_to :route, TheronsErp.Inventory.Routes
   end
 end

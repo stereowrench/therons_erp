@@ -6,6 +6,8 @@ defmodule TheronsErp.Inventory do
   end
 
   resources do
+    resource TheronsErp.Inventory.Routes
+
     resource TheronsErp.Inventory.ProductCategory do
       define :create_category, args: [:name], action: :create
       define :change_parent, args: [:product_category_id], action: :update_parent
