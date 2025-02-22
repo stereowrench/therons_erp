@@ -1,6 +1,15 @@
 defmodule TheronsErp.Generator do
   use Ash.Generator
 
+  def routes(opts \\ []) do
+    seed_generator(
+      %TheronsErp.Inventory.Routes{
+        name: Faker.Commerce.En.product_name()
+      },
+      overrides: opts
+    )
+  end
+
   def invoice_line(opts \\ []) do
     seed_generator(
       %TheronsErp.Invoices.LineItem{

@@ -1,10 +1,9 @@
 defmodule TheronsErp.Inventory.Route do
   use Ash.Resource,
-      data_layer: :embedded
+    data_layer: :embedded
 
   attributes do
-    attribute :type, :atom, constraints: [one_of: [:push, :pull]]
-    attribute :from_location, :string
-    attribute :to_location, :string
+    attribute :from_location, :string, public?: true
+    attribute :to_location, :string, public?: true
   end
 end
