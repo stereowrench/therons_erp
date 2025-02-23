@@ -7,6 +7,7 @@ defmodule TheronsErp.Inventory do
 
   resources do
     resource TheronsErp.Inventory.Routes
+    resource TheronsErp.Inventory.Movement
 
     resource TheronsErp.Inventory.ProductCategory do
       define :create_category, args: [:name], action: :create
