@@ -77,5 +77,7 @@ defmodule TheronsErp.Inventory.Product do
     belongs_to :category, TheronsErp.Inventory.ProductCategory
 
     belongs_to :route, TheronsErp.Inventory.Routes
+
+    has_many :replenishments, TheronsErp.Purchasing.Replenishment
   end
 end

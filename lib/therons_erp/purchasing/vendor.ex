@@ -29,5 +29,7 @@ defmodule TheronsErp.Purchasing.Vendor do
 
   relationships do
     has_many :purchase_orders, TheronsErp.Purchasing.PurchaseOrder
+
+    has_many :replenishments, TheronsErp.Purchasing.Replenishment
   end
 end
