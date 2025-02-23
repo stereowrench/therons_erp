@@ -13,6 +13,9 @@ defmodule TheronsErp.Purchasing.Replenishment do
     uuid_primary_key :id
     attribute :quantity_multiple, :integer
     attribute :price, :money
+
+    attribute :trigger_quantity, :integer
+
     timestamps()
   end
 
