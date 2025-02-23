@@ -9,6 +9,22 @@ defmodule TheronsErp.Inventory.Movement do
     repo TheronsErp.Repo
   end
 
+  actions do
+    read :read do
+    end
+
+    create :create do
+      accept [:from_location, :to_location, :quantity, :manually_created]
+    end
+
+    update :update do
+      accept [:from_location, :to_location, :quantity, :manually_created]
+    end
+
+    destroy :destroy do
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -16,6 +32,8 @@ defmodule TheronsErp.Inventory.Movement do
     attribute :to_location, :string
 
     attribute :quantity, :decimal
+
+    attribute :manually_created, :boolean, default: false
 
     timestamps()
   end
