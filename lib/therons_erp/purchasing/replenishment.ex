@@ -9,6 +9,19 @@ defmodule TheronsErp.Purchasing.Replenishment do
     repo TheronsErp.Repo
   end
 
+  actions do
+    read :read do
+    end
+
+    create :create do
+      accept [:product_id, :vendor_id, :trigger_quantity, :quantity_multiple, :price]
+    end
+
+    update :update do
+      accept [:product_id, :vendor_id, :trigger_quantity, :quantity_multiple, :price]
+    end
+  end
+
   attributes do
     uuid_primary_key :id
     attribute :quantity_multiple, :integer
