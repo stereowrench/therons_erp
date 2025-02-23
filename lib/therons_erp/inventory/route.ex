@@ -2,8 +2,13 @@ defmodule TheronsErp.Inventory.Route do
   use Ash.Resource,
     data_layer: :embedded
 
-  attributes do
-    attribute :from_location, :string, public?: true
-    attribute :to_location, :string, public?: true
+  relationships do
+    belongs_to :from_location, TheronsErp.Inventory.Location do
+      public? true
+    end
+
+    belongs_to :to_location, TheronsErp.Inventory.Location do
+      public? true
+    end
   end
 end

@@ -1,6 +1,15 @@
 defmodule TheronsErp.Generator do
   use Ash.Generator
 
+  def location(opts \\ []) do
+    seed_generator(
+      %TheronsErp.Inventory.Location{
+        name: sequence(:location, &"Location #{&1}")
+      },
+      overrides: opts
+    )
+  end
+
   def routes(opts \\ []) do
     seed_generator(
       %TheronsErp.Inventory.Routes{
