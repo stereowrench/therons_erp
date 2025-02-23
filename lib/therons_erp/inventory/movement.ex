@@ -15,8 +15,8 @@ defmodule TheronsErp.Inventory.Movement do
 
     create :create do
       accept [
-        :from_location,
-        :to_location,
+        :from_location_id,
+        :to_location_id,
         :quantity,
         :manually_created,
         :product_id,
@@ -28,8 +28,8 @@ defmodule TheronsErp.Inventory.Movement do
 
     update :update do
       accept [
-        :from_location,
-        :to_location,
+        :from_location_id,
+        :to_location_id,
         :quantity,
         :manually_created,
         :product_id,
@@ -45,9 +45,6 @@ defmodule TheronsErp.Inventory.Movement do
 
   attributes do
     uuid_primary_key :id
-
-    attribute :from_location, :string
-    attribute :to_location, :string
 
     attribute :quantity, :decimal
 
@@ -65,5 +62,8 @@ defmodule TheronsErp.Inventory.Movement do
       attribute_type: AshDoubleEntry.ULID
 
     belongs_to :eager_transfer, TheronsErp.Ledger.Transfer, attribute_type: AshDoubleEntry.ULID
+
+    belongs_to :from_location, TheronsErp.Inventory.Location
+    belongs_to :to_location, TheronsErp.Inventory.Location
   end
 end
