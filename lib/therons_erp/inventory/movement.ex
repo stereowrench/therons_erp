@@ -14,11 +14,29 @@ defmodule TheronsErp.Inventory.Movement do
     end
 
     create :create do
-      accept [:from_location, :to_location, :quantity, :manually_created]
+      accept [
+        :from_location,
+        :to_location,
+        :quantity,
+        :manually_created,
+        :product_id,
+        :actual_transfer_id,
+        :predicted_transfer_id,
+        :eager_transfer_id
+      ]
     end
 
     update :update do
-      accept [:from_location, :to_location, :quantity, :manually_created]
+      accept [
+        :from_location,
+        :to_location,
+        :quantity,
+        :manually_created,
+        :product_id,
+        :actual_transfer_id,
+        :predicted_transfer_id,
+        :eager_transfer_id
+      ]
     end
 
     destroy :destroy do
@@ -39,6 +57,8 @@ defmodule TheronsErp.Inventory.Movement do
   end
 
   relationships do
+    belongs_to :product, TheronsErp.Inventory.Product
+
     belongs_to :actual_transfer, TheronsErp.Ledger.Transfer, attribute_type: AshDoubleEntry.ULID
 
     belongs_to :predicted_transfer, TheronsErp.Ledger.Transfer,
