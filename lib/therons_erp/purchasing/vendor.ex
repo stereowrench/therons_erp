@@ -18,7 +18,7 @@ defmodule TheronsErp.Purchasing.Vendor do
     attribute :email, :string
     attribute :city, :string
     attribute :state, :string
-    attribute :zip_coe, :string
+    attribute :zip_code, :string
 
     attribute :identifier, :integer do
       generated? true
