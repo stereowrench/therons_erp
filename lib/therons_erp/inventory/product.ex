@@ -78,6 +78,6 @@ defmodule TheronsErp.Inventory.Product do
 
     belongs_to :route, TheronsErp.Inventory.Routes
 
-    has_many :replenishments, TheronsErp.Purchasing.Replenishment
+    has_one :replenishments, TheronsErp.Purchasing.Replenishment
   end
 end
