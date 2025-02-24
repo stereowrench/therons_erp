@@ -8,7 +8,9 @@ defmodule TheronsErp.SchedulingTest do
 
   defp get_balance_of_ledger(location, product) do
     TheronsErp.Ledger.Account
-    |> Ash.get!(%{identifier: "inv.#{location.id}.#{product.identifier}"}, load: :balance_as_of)
+    |> Ash.get!(%{identifier: "inv.predicted.#{location.id}.#{product.identifier}"},
+      load: :balance_as_of
+    )
     |> Map.get(:balance_as_of)
   end
 
@@ -22,13 +24,54 @@ defmodule TheronsErp.SchedulingTest do
     |> Ash.create!()
   end
 
+  test "ledger accepts date" do
+    acct =
+      TheronsErp.Ledger.Account
+      |> Ash.Changeset.for_create(:open, %{identifier: "foo", currency: "XIT"})
+      |> Ash.create!()
+
+    acct2 =
+      TheronsErp.Ledger.Account
+      |> Ash.Changeset.for_create(:open, %{identifier: "foo2", currency: "XIT"})
+      |> Ash.create!()
+
+    TheronsErp.Ledger.Transfer
+    |> Ash.Changeset.for_create(:transfer, %{
+      amount: Money.new(200, :XIT),
+      to_account_id: acct.id,
+      from_account_id: acct2.id,
+      timestamp: DateTime.shift(MyDate.now!(), day: 2)
+    })
+    |> Ash.create!()
+
+    Ash.read!(TheronsErp.Ledger.Balance) |> IO.inspect()
+
+    assert Money.equal?(
+             TheronsErp.Ledger.Account
+             |> Ash.get!(acct.id,
+               load: [balance_as_of: [timestamp: MyDate.now!()]]
+             )
+             |> Map.get(:balance_as_of),
+             Money.new(0, :XIT)
+           )
+
+    assert Money.equal?(
+             TheronsErp.Ledger.Account
+             |> Ash.get!(acct.id,
+               load: [balance_as_of: [timestamp: DateTime.shift(MyDate.now!(), day: 2)]]
+             )
+             |> Map.get(:balance_as_of),
+             Money.new(200, :XIT)
+           )
+  end
+
   test "push route" do
     loc_a = generate(location())
     loc_b = generate(location())
     routes = [%{from_location_id: loc_a.id, to_location_id: loc_b.id}]
     route = generate(routes(routes: routes, type: :push))
     vendor = generate(vendor())
-    po = generate(purchase_order(vendor_id: vendor.id))
+    po = generate(purchase_order(vendor_id: vendor.id, destination_location_id: loc_a.id))
 
     po_item =
       generate(purchase_order_item(purchase_order_id: po.id, quantity: 2)) |> Ash.load!(:product)

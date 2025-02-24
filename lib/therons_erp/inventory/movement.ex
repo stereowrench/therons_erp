@@ -2,15 +2,29 @@ defmodule TheronsErp.Inventory.Movement do
   use Ash.Resource,
     otp_app: :therons_erp,
     domain: TheronsErp.Inventory,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshStateMachine]
 
   postgres do
     table "movements"
     repo TheronsErp.Repo
   end
 
+  state_machine do
+    initial_states([:ready])
+    default_initial_state(:ready)
+
+    transitions do
+      transition(:move, from: :ready, to: [:moved])
+    end
+  end
+
   actions do
     read :read do
+    end
+
+    update :move do
+      change transition_state(:move)
     end
 
     create :create do

@@ -8,9 +8,18 @@ defmodule MyDate do
         |> Keyword.get(:today)
       end
     end
+
+    def now!() do
+      t = today()
+      DateTime.new!(t, ~T[13:26:08.003])
+    end
   else
     def today() do
       Date.utc_today()
+    end
+
+    def now() do
+      DateTime.utc_now()
     end
   end
 end
