@@ -24,6 +24,8 @@ defmodule TheronsErp.Ledger.Account do
     defaults [:read]
 
     create :open do
+      upsert? true
+      upsert_identity :unique_identifier
       accept [:identifier, :currency]
     end
 

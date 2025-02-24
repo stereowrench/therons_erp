@@ -12,6 +12,16 @@ defmodule TheronsErp.SchedulingTest do
     |> Map.get(:balance_as_of)
   end
 
+  test "upsert account" do
+    TheronsErp.Ledger.Account
+    |> Ash.Changeset.for_create(:open, %{identifier: "foo", currency: "XIT"})
+    |> Ash.create!()
+
+    TheronsErp.Ledger.Account
+    |> Ash.Changeset.for_create(:open, %{identifier: "foo", currency: "XIT"})
+    |> Ash.create!()
+  end
+
   test "push route" do
     loc_a = generate(location())
     loc_b = generate(location())
