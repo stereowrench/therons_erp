@@ -22,13 +22,6 @@ defmodule TheronsErp.Ledger.Transfer do
     end
   end
 
-  changes do
-    change AshDoubleEntry.Transfer.Changes.VerifyTransfer do
-      only_when_valid? true
-      on [:create, :update, :destroy]
-    end
-  end
-
   attributes do
     attribute :id, AshDoubleEntry.ULID do
       primary_key? true

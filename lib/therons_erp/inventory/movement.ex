@@ -38,6 +38,8 @@ defmodule TheronsErp.Inventory.Movement do
         :predicted_transfer_id,
         :eager_transfer_id
       ]
+
+      change &create_predicted/2
     end
 
     update :update do
@@ -55,6 +57,34 @@ defmodule TheronsErp.Inventory.Movement do
 
     destroy :destroy do
     end
+  end
+
+  def create_predicted(changeset, context) do
+    amount = Ash.Changeset.get_attribute(changeset, :quantity)
+    product_id = Ash.Changeset.get_attribute(changeset, :product_id)
+    product = Ash.get!(TheronsErp.Inventory.Product, product_id)
+    from_location_id = Ash.Changeset.get_attribute(changeset, :from_location_id)
+
+    from_account_id =
+      get_acct_id(get_inv_identifier(:predicted, from_location_id, product.identifier))
+
+    to_location_id = Ash.Changeset.get_attribute(changeset, :to_location_id)
+
+    to_account_id =
+      get_acct_id(get_inv_identifier(:predicted, to_location_id, product.identifier))
+
+    {:ok, predicted_transfer} =
+      TheronsErp.Ledger.Transfer.create(
+        %{
+          from_account_id: from_account_id,
+          to_account_id: to_account_id,
+          amount: amount
+        },
+        context
+      )
+
+    changeset
+    |> Ash.Changeset.put_attribute(:predicted_transfer_id, predicted_transfer.id)
   end
 
   attributes do
@@ -79,5 +109,23 @@ defmodule TheronsErp.Inventory.Movement do
 
     belongs_to :from_location, TheronsErp.Inventory.Location
     belongs_to :to_location, TheronsErp.Inventory.Location
+  end
+
+  def get_acct_id(identifier) do
+    TheronsErp.Ledger.Account
+    |> Ash.get!(%{identifier: identifier})
+    |> then(& &1.id)
+  end
+
+  def get_inv_identifier(:actual, location_id, product_identifier) do
+    "inv.actual.#{location_id}.#{product_identifier}"
+  end
+
+  def get_inv_identifier(:predicted, location_id, product_identifier) do
+    "inv.predicted.#{location_id}.#{product_identifier}"
+  end
+
+  def get_inv_identifier(:eager, location_id, product_identifier) do
+    "inv.eager.#{location_id}.#{product_identifier}"
   end
 end

@@ -44,8 +44,6 @@ defmodule TheronsErp.SchedulingTest do
     })
     |> Ash.create!()
 
-    Ash.read!(TheronsErp.Ledger.Balance) |> IO.inspect()
-
     assert Money.equal?(
              TheronsErp.Ledger.Account
              |> Ash.get!(acct.id,

@@ -28,10 +28,16 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     GenServer.call(pid, :generate_accounts)
   end
 
-  # TODO persist changes
-
   def add_movement(pid, movement) do
     GenServer.call(pid, {:add_movement, movement})
+  end
+
+  def propagate_push_route(pid, quantity, product_id) do
+    GenServer.call(pid, {:propagate_push_route, quantity, product_id})
+  end
+
+  def add_new_movement(pid, movement) do
+    GenServer.call(pid, {:add_new_movement, movement})
   end
 
   def add_purchase_order(pid, purchase_order) do
@@ -51,6 +57,7 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     state = Map.put(state, :to_peers, %{})
     state = Map.put(state, :inventory, %{})
     state = Map.put(state, :new_movements, %{})
+    state = Map.put(state, :stale_movements, %{})
     {:ok, state}
   end
 
@@ -82,6 +89,10 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     {:ok, Map.put(state, :to_peers, peers)}
   end
 
+  defp get_to_peer_for_product(state, product_id) do
+    Enum.find(state.to_peers, fn {_, product}, _pid -> product.id == product_id end)
+  end
+
   def handle_call({:set_product_inventory, {product, amount}}, _from, state) do
     {:reply, :ok, put_inv(product, amount, state)}
   end
@@ -95,11 +106,50 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
   end
 
   def handle_call({:add_movement, movement}, _from, state) do
-    {:reply, :ok, Map.put(state, :stale_movements, [movement | state.movements])}
+    {:reply, :ok, Map.put(state, :stale_movements, [movement | state.stale_movements])}
+  end
+
+  def handle_call({:add_new_movement, movement}, _from, state) do
+    # TODO modify a stale movement if possible.
+    {:reply, :ok, Map.put(state, :new_movements, [movement | state.new_movements])}
+  end
+
+  def handle_call({:propagate_push_route, quantity, product_id}, _from, state) do
+    # TODO modify a stale movement if possible.
+    peer = get_to_peer_for_product(state, product_id)
+
+    if peer do
+      movement = %{
+        quantity: quantity,
+        product_id: product_id,
+        from_inventory_id: state.inventory_id,
+        to_inventory_id: get_to_peer_for_product(state, product_id)
+      }
+
+      {:reply, :ok, Map.put(state, :new_movements, [movement | state.new_movements])}
+    else
+      {:reply, :ok, state}
+    end
   end
 
   def handle_call({:add_purchase_order, purchase_order}, _from, state) do
-    {:reply, :ok, Map.put(state, :purchase_orders, [purchase_order | state.movements])}
+    accts = generate_po_accts(purchase_order)
+
+    movements =
+      for item <- purchase_order.items do
+        propagate_push_route(self(), item.quantity, item.product_id)
+
+        %{
+          product_id: item.product_id,
+          from_inventory_id: accts[item.id],
+          to_inventory_id: state.inventory_id
+        }
+      end
+
+    {:reply, :ok,
+     state
+     |> Map.put(:purchase_orders, [purchase_order | state.purchase_orders])
+     |> Map.put(:new_movements, movements ++ state.new_movements)}
   end
 
   def handle_call({:receive_products, {from_inventory_id, product, amount}}, _from, state) do
@@ -126,6 +176,7 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
         product_id: product_id,
         quantity: amount
       })
+      |> Ash.create!()
     end
 
     {:reply, :ok, state}
@@ -150,16 +201,26 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     state.to_peers[product_id]
   end
 
-  defp get_inv_identifier(:actual, location_id, product) do
-    "inv.actual.#{location_id}.#{product.identifier}"
+  defp get_po_identifier(po, po_item) do
+    "po.#{po.id}.#{po_item.id}"
   end
 
-  defp get_inv_identifier(:predicted, location_id, product) do
-    "inv.predicted.#{location_id}.#{product.identifier}"
+  defp generate_po_accts(po) do
+    for item <- po.items, into: %{} do
+      acct =
+        TheronsErp.Ledger.Account
+        |> Ash.Changeset.for_create(:open, %{
+          identifier: get_po_identifier(po, item),
+          currency: "XIT"
+        })
+        |> Ash.create!()
+
+      {item.id, acct}
+    end
   end
 
-  defp get_inv_identifier(:eager, location_id, product) do
-    "inv.eager.#{location_id}.#{product.identifier}"
+  defp get_inv_identifier(type, location_id, product) do
+    TheronsErp.Inventory.Movement.get_inv_identifier(type, location_id, product.identifier)
   end
 
   defp generate_accounts(location_id, product) do

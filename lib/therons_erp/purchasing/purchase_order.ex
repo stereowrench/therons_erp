@@ -20,6 +20,9 @@ defmodule TheronsErp.Purchasing.PurchaseOrder do
   end
 
   actions do
+    read :read do
+    end
+
     create :create do
       accept [:order_date, :delivery_date, :vendor_id, :total_amount, :destination_location_id]
     end
