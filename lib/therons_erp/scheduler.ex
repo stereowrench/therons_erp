@@ -9,4 +9,7 @@ defmodule TheronsErp.Scheduler do
   scheduler creates processes for each location.
 
   """
+
+  def schedule() do
+  end
 end

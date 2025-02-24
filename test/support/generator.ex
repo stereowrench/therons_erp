@@ -1,11 +1,50 @@
 defmodule TheronsErp.Generator do
   use Ash.Generator
 
+  def vendor(opts \\ []) do
+    changeset_generator(
+      TheronsErp.Purchasing.Vendor,
+      :create,
+      defaults: [
+        name: Faker.Person.name()
+      ],
+      overrides: opts
+    )
+  end
+
+  def purchase_order(opts \\ []) do
+    changeset_generator(
+      TheronsErp.Purchasing.PurchaseOrder,
+      :create,
+      defaults: [
+        order_date: MyDate.today(),
+        delivery_date: MyDate.today(),
+        total_amount: Money.new(100, :USD)
+      ],
+      overrides: opts
+    )
+  end
+
+  def purchase_order_item(opts \\ []) do
+    changeset_generator(
+      TheronsErp.Purchasing.PurchaseOrderItem,
+      :create,
+      defaults: [
+        quantity: Faker.random_between(1, 10),
+        product_id: generate(product()).id,
+        unit_price: Money.new(10, :USD)
+      ],
+      overrides: opts
+    )
+  end
+
   def location(opts \\ []) do
-    seed_generator(
-      %TheronsErp.Inventory.Location{
+    changeset_generator(
+      TheronsErp.Inventory.Location,
+      :create,
+      defaults: [
         name: sequence(:location, &"Location #{&1}")
-      },
+      ],
       overrides: opts
     )
   end

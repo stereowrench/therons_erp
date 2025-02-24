@@ -19,6 +19,14 @@ defmodule TheronsErp.Purchasing.PurchaseOrderItem do
     end
   end
 
+  actions do
+    defaults [:read]
+
+    create :create do
+      accept [:quantity, :unit_price, :purchase_order_id, :product_id]
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 

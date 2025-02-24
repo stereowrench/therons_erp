@@ -9,6 +9,12 @@ defmodule TheronsErp.Purchasing.PurchaseOrder do
     repo TheronsErp.Repo
   end
 
+  actions do
+    create :create do
+      accept [:order_date, :delivery_date, :vendor_id, :total_amount]
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 

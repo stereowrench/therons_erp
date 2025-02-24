@@ -9,6 +9,12 @@ defmodule TheronsErp.Purchasing.Vendor do
     repo TheronsErp.Repo
   end
 
+  actions do
+    create :create do
+      accept [:name, :address, :phone, :email, :city, :state, :zip_code]
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 
