@@ -42,20 +42,22 @@ defmodule TheronsErp.Scheduler do
     products =
       TheronsErp.Inventory.Product
       |> Ash.Query.for_read(:list)
-      |> Ash.read!(load: [:route])
+      |> Ash.read!(load: [:routes])
 
     for product <- products do
-      route = product.route
+      routes = product.routes
 
-      if route do
-        for r <- route.routes do
-          to = location_map[r.to_location_id]
-          from = location_map[r.from_location_id]
+      for route <- routes do
+        if route do
+          for r <- route.routes do
+            to = location_map[r.to_location_id]
+            from = location_map[r.from_location_id]
 
-          if route.type == :push do
-            SchedulerAgent.add_to_peer(from, {r.to_location_id, product.id, to})
-          else
-            SchedulerAgent.add_peer(to, {r.from_location_id, product.id, from})
+            if route.type == :push do
+              SchedulerAgent.add_to_peer(from, {r.to_location_id, product.id, to})
+            else
+              SchedulerAgent.add_peer(to, {r.from_location_id, product.id, from})
+            end
           end
         end
       end
@@ -79,10 +81,12 @@ defmodule TheronsErp.Scheduler do
     sales_orders =
       TheronsErp.Sales.SalesOrder
       |> Ash.Query.filter(state in [:ready, :invoiced])
-      |> Ash.read!(load: [:sales_lines])
+      |> Ash.read!(load: [sales_lines: [product: [:routes]]])
 
     for sales_order <- sales_orders do
-      SchedulerAgent.add_sales_order()
+      for sales_line <- sales_order.sales_lines do
+        SchedulerAgent.add_sales_line(sales_line)
+      end
     end
 
     for {_loc, agent} <- location_map do

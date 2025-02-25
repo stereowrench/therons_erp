@@ -82,7 +82,7 @@ defmodule TheronsErp.Inventory.Movement do
         %{
           from_account_id: from_account_id,
           to_account_id: to_account_id,
-          amount: amount
+          amount: Money.new(amount, :XIT)
         }
       )
       |> Ash.create()
@@ -94,7 +94,7 @@ defmodule TheronsErp.Inventory.Movement do
   attributes do
     uuid_primary_key :id
 
-    attribute :quantity, :money
+    attribute :quantity, :decimal
 
     attribute :manually_created, :boolean, default: false
 

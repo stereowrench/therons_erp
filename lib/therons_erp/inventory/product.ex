@@ -31,8 +31,7 @@ defmodule TheronsErp.Inventory.Product do
         :category_id,
         :saleable,
         :purchaseable,
-        :cost,
-        :route_id
+        :cost
       ]
     end
 
@@ -52,8 +51,7 @@ defmodule TheronsErp.Inventory.Product do
         :category_id,
         :saleable,
         :purchaseable,
-        :cost,
-        :route_id
+        :cost
       ]
     end
 
@@ -94,7 +92,13 @@ defmodule TheronsErp.Inventory.Product do
   relationships do
     belongs_to :category, TheronsErp.Inventory.ProductCategory
 
-    belongs_to :route, TheronsErp.Inventory.Routes
+    many_to_many :routes, TheronsErp.Inventory.Routes do
+      through TheronsErp.Inventory.ProductRoutes
+      source_attribute :id
+      source_attribute_on_join_resource :product_id
+      destination_attribute :id
+      destination_attribute_on_join_resource :routes_id
+    end
 
     has_one :replenishments, TheronsErp.Purchasing.Replenishment
   end

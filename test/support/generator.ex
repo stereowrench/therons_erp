@@ -49,6 +49,18 @@ defmodule TheronsErp.Generator do
     )
   end
 
+  def product_routes(opts \\ []) do
+    changeset_generator(
+      TheronsErp.Inventory.ProductRoutes,
+      :create,
+      defaults: [
+        product_id: nil,
+        routes_id: nil
+      ],
+      overrides: opts
+    )
+  end
+
   def routes(opts \\ []) do
     seed_generator(
       %TheronsErp.Inventory.Routes{

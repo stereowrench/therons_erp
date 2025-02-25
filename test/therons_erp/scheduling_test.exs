@@ -76,8 +76,9 @@ defmodule TheronsErp.SchedulingTest do
       |> Ash.load!(:product)
 
     # Add route to product
-    Ash.Changeset.for_update(po_item.product, :update, %{route_id: route.id})
-    |> Ash.update!()
+    # Ash.Changeset.for_update(po_item.product, :update, %{route_id: route.id})
+    # |> Ash.update!()
+    product_routes = generate(product_routes(product_id: po_item.product.id, routes_id: route.id))
 
     Scheduler.schedule()
 
@@ -113,6 +114,12 @@ defmodule TheronsErp.SchedulingTest do
     assert Money.equal?(get_balance_of_ledger(loc_a, po_item.product), Money.new(0, :XIT))
     assert Money.equal?(get_balance_of_ledger(loc_b, po_item.product), Money.new(2, :XIT))
   end
+
+  test "errors generated for overdrawn accounts"
+
+  test "argument allows error if sales order cannot be fulfilled"
+
+  test "argument allows error if manufacturing order cannot be filled"
 
   test "forbid cycles"
 end

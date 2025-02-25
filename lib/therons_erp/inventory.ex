@@ -6,6 +6,7 @@ defmodule TheronsErp.Inventory do
   end
 
   resources do
+    resource TheronsErp.Inventory.ProductRoutes
     resource TheronsErp.Inventory.Routes
     resource TheronsErp.Inventory.Movement
     resource TheronsErp.Inventory.Location

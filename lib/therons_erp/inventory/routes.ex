@@ -43,8 +43,13 @@ defmodule TheronsErp.Inventory.Routes do
   end
 
   relationships do
-    has_many :products, TheronsErp.Inventory.Product do
-      destination_attribute :route_id
+    many_to_many :products, TheronsErp.Inventory.Product do
+      through TheronsErp.Inventory.ProductRoutes
+      source_attribute :id
+      source_attribute_on_join_resource :routes_id
+
+      destination_attribute :id
+      destination_attribute_on_join_resource :product_id
     end
   end
 end
