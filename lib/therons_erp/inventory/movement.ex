@@ -21,6 +21,7 @@ defmodule TheronsErp.Inventory.Movement do
 
   actions do
     read :read do
+      primary? true
     end
 
     update :move do
@@ -61,6 +62,7 @@ defmodule TheronsErp.Inventory.Movement do
 
   def create_predicted(changeset, context) do
     amount = Ash.Changeset.get_attribute(changeset, :quantity)
+
     product_id = Ash.Changeset.get_attribute(changeset, :product_id)
     product = Ash.get!(TheronsErp.Inventory.Product, product_id)
     from_location_id = Ash.Changeset.get_attribute(changeset, :from_location_id)
@@ -74,23 +76,25 @@ defmodule TheronsErp.Inventory.Movement do
       get_acct_id(get_inv_identifier(:predicted, to_location_id, product.identifier))
 
     {:ok, predicted_transfer} =
-      TheronsErp.Ledger.Transfer.create(
+      TheronsErp.Ledger.Transfer
+      |> Ash.Changeset.for_create(
+        :transfer,
         %{
           from_account_id: from_account_id,
           to_account_id: to_account_id,
           amount: amount
-        },
-        context
+        }
       )
+      |> Ash.create()
 
     changeset
-    |> Ash.Changeset.put_attribute(:predicted_transfer_id, predicted_transfer.id)
+    |> Ash.Changeset.change_attribute(:predicted_transfer_id, predicted_transfer.id)
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :quantity, :decimal
+    attribute :quantity, :money
 
     attribute :manually_created, :boolean, default: false
 

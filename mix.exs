@@ -19,7 +19,7 @@ defmodule TheronsErp.MixProject do
   def application do
     [
       mod: {TheronsErp.Application, []},
-      extra_applications: [:logger, :runtime_tools, :wx, :observer]
+      extra_applications: [:logger, :runtime_tools, :wx, :observer, :debugger]
     ]
   end
 

@@ -24,7 +24,16 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     create :create do
-      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable, :cost]
+      accept [
+        :name,
+        :sales_price,
+        :type,
+        :category_id,
+        :saleable,
+        :purchaseable,
+        :cost,
+        :route_id
+      ]
     end
 
     create :create_stub do
@@ -36,7 +45,16 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     update :update do
-      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable, :cost]
+      accept [
+        :name,
+        :sales_price,
+        :type,
+        :category_id,
+        :saleable,
+        :purchaseable,
+        :cost,
+        :route_id
+      ]
     end
 
     destroy :destroy do

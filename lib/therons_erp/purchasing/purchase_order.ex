@@ -21,6 +21,7 @@ defmodule TheronsErp.Purchasing.PurchaseOrder do
 
   actions do
     read :read do
+      primary? true
     end
 
     create :create do

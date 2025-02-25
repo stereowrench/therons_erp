@@ -72,7 +72,12 @@ defmodule TheronsErp.SchedulingTest do
     po = generate(purchase_order(vendor_id: vendor.id, destination_location_id: loc_a.id))
 
     po_item =
-      generate(purchase_order_item(purchase_order_id: po.id, quantity: 2)) |> Ash.load!(:product)
+      generate(purchase_order_item(purchase_order_id: po.id, quantity: 2))
+      |> Ash.load!(:product)
+
+    # Add route to product
+    Ash.Changeset.for_update(po_item.product, :update, %{route_id: route.id})
+    |> Ash.update!()
 
     Scheduler.schedule()
 
