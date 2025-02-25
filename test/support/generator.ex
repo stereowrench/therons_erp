@@ -79,6 +79,18 @@ defmodule TheronsErp.Generator do
     )
   end
 
+  def sales_line(opts \\ []) do
+    changeset_generator(
+      TheronsErp.Sales.SalesLine,
+      :create,
+      defaults: [
+        unit_price: nil,
+        sales_price: nil
+      ],
+      overrides: opts
+    )
+  end
+
   def sales_order(opts \\ []) do
     seed_generator(
       %TheronsErp.Sales.SalesOrder{

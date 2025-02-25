@@ -29,14 +29,9 @@ defmodule TheronsErp.Scheduler do
       |> Ash.Query.filter(state == :ready)
       |> Ash.read!()
 
-    routes =
-      TheronsErp.Inventory.Routes
-      |> Ash.read!()
-
     location_map =
       for location <- locations, into: %{} do
         {:ok, pid} = SchedulerAgent.start_link(location_id: location.id)
-        # dbg()
         Ecto.Adapters.SQL.Sandbox.allow(TheronsErp.Repo, self(), pid)
 
         {location.id, pid}
@@ -79,6 +74,15 @@ defmodule TheronsErp.Scheduler do
 
     for {_loc, agent} <- location_map do
       SchedulerAgent.process(agent)
+    end
+
+    sales_orders =
+      TheronsErp.Sales.SalesOrder
+      |> Ash.Query.filter(state in [:ready, :invoiced])
+      |> Ash.read!(load: [:sales_lines])
+
+    for sales_order <- sales_orders do
+      SchedulerAgent.add_sales_order()
     end
 
     for {_loc, agent} <- location_map do
