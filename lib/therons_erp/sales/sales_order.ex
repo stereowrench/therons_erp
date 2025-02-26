@@ -94,7 +94,7 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     create :create do
-      accept [:customer_id, :address_id, :pull_location_id]
+      accept [:customer_id, :address_id]
       primary? true
       argument :sales_lines, {:array, :map}
 
@@ -102,22 +102,10 @@ defmodule TheronsErp.Sales.SalesOrder do
         where: [attribute_equals(:state, :draft)]
 
       # TODO validate address belongs to customer
-      change fn changeset, result ->
-        if Ash.Changeset.get_attribute(changeset, :pull_location_id) == nil do
-          loc =
-            TheronsErp.Inventory.Location
-            |> Ash.Changeset.for_create(:create, %{name: "warehouse.storage"})
-            |> Ash.create!()
-
-          Ash.Changeset.change_attribute(changeset, :pull_location_id, loc.id)
-        else
-          changeset
-        end
-      end
     end
 
     update :update do
-      accept [:customer_id, :address_id, :pull_location_id]
+      accept [:customer_id, :address_id]
       require_atomic? false
       argument :sales_lines, {:array, :map}
 
@@ -154,8 +142,6 @@ defmodule TheronsErp.Sales.SalesOrder do
     has_one :invoice, TheronsErp.Invoices.Invoice do
       destination_attribute :sales_order_id
     end
-
-    belongs_to :pull_location, TheronsErp.Inventory.Location
   end
 
   aggregates do

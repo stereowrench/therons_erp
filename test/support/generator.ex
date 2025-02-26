@@ -97,6 +97,7 @@ defmodule TheronsErp.Generator do
       :create,
       defaults: [
         unit_price: nil,
+        pull_location_id: nil,
         sales_price: nil
       ],
       overrides: opts
@@ -109,8 +110,8 @@ defmodule TheronsErp.Generator do
       :create,
       defaults: [
         customer_id: generate(customer()).id,
-        state: :draft,
-        pull_location_id: nil
+        address_id: nil,
+        state: :draft
       ],
       overrides: opts
     )

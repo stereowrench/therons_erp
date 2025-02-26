@@ -104,7 +104,7 @@ defmodule TheronsErp.SchedulingTest do
     |> Ash.update!()
 
     # Create sales order
-    so = generate(sales_order())
+    so = generate(sales_order(pull_location_id: loc_b.id))
 
     sales_line =
       generate(sales_line(quantity: 2, product_id: po_item.product.id, sales_order_id: so.id))
@@ -114,6 +114,8 @@ defmodule TheronsErp.SchedulingTest do
     assert Money.equal?(get_balance_of_ledger(loc_a, po_item.product), Money.new(0, :XIT))
     assert Money.equal?(get_balance_of_ledger(loc_b, po_item.product), Money.new(2, :XIT))
   end
+
+  test "existing stock"
 
   test "errors generated for overdrawn accounts"
 

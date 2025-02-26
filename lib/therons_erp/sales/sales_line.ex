@@ -14,7 +14,15 @@ defmodule TheronsErp.Sales.SalesLine do
 
     create :create do
       primary? true
-      accept [:sales_price, :unit_price, :quantity, :product_id, :sales_order_id]
+
+      accept [
+        :sales_price,
+        :unit_price,
+        :quantity,
+        :product_id,
+        :sales_order_id,
+        :pull_location_id
+      ]
 
       # Set unit_price and sales_price based on product price and cost
       change fn changeset, _ ->
@@ -33,12 +41,38 @@ defmodule TheronsErp.Sales.SalesLine do
           changeset
         end
       end
+
+      change &add_pull_location/2
     end
 
     update :update do
       require_atomic? false
       primary? true
-      accept [:sales_price, :unit_price, :quantity, :product_id, :total_price, :sales_order_id]
+
+      accept [
+        :sales_price,
+        :unit_price,
+        :quantity,
+        :product_id,
+        :total_price,
+        :sales_order_id,
+        :pull_location_id
+      ]
+
+      change &add_pull_location/2
+    end
+  end
+
+  def add_pull_location(changeset, result) do
+    if Ash.Changeset.get_attribute(changeset, :pull_location_id) == nil do
+      loc =
+        TheronsErp.Inventory.Location
+        |> Ash.Changeset.for_create(:create, %{name: "warehouse.storage"})
+        |> Ash.create!()
+
+      Ash.Changeset.change_attribute(changeset, :pull_location_id, loc.id)
+    else
+      changeset
     end
   end
 
@@ -65,6 +99,8 @@ defmodule TheronsErp.Sales.SalesLine do
     belongs_to :product, TheronsErp.Inventory.Product do
       allow_nil? false
     end
+
+    belongs_to :pull_location, TheronsErp.Inventory.Location
   end
 
   calculations do
