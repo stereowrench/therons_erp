@@ -104,11 +104,14 @@ defmodule TheronsErp.Generator do
   end
 
   def sales_order(opts \\ []) do
-    seed_generator(
-      %TheronsErp.Sales.SalesOrder{
+    changeset_generator(
+      TheronsErp.Sales.SalesOrder,
+      :create,
+      defaults: [
         customer_id: generate(customer()).id,
-        state: :draft
-      },
+        state: :draft,
+        pull_location_id: nil
+      ],
       overrides: opts
     )
   end

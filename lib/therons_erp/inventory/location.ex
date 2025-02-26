@@ -16,6 +16,8 @@ defmodule TheronsErp.Inventory.Location do
 
     create :create do
       accept [:name]
+      upsert? true
+      upsert_identity :unique_name
     end
 
     create :update do
@@ -38,5 +40,9 @@ defmodule TheronsErp.Inventory.Location do
     has_many :from_transfers, TheronsErp.Inventory.Movement do
       destination_attribute :from_location_id
     end
+  end
+
+  identities do
+    identity :unique_name, [:name]
   end
 end
