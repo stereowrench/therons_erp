@@ -81,11 +81,11 @@ defmodule TheronsErp.Scheduler do
     sales_orders =
       TheronsErp.Sales.SalesOrder
       |> Ash.Query.filter(state in [:ready, :invoiced])
-      |> Ash.read!(load: [sales_lines: [product: [:routes]]])
+      |> Ash.read!(load: [sales_lines: [:pull_location, product: [:routes]]])
 
     for sales_order <- sales_orders do
       for sales_line <- sales_order.sales_lines do
-        SchedulerAgent.add_sales_line(sales_line)
+        SchedulerAgent.add_sales_line(location_map[sales_line.pull_location_id], sales_line)
       end
     end
 

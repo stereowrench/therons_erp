@@ -7,8 +7,10 @@ defmodule TheronsErp.SchedulingTest do
   end
 
   defp get_balance_of_ledger(location, product) do
+    id = "inv.predicted.#{location.id}.#{product.identifier}"
+
     TheronsErp.Ledger.Account
-    |> Ash.get!(%{identifier: "inv.predicted.#{location.id}.#{product.identifier}"},
+    |> Ash.get!(%{identifier: id},
       load: :balance_as_of
     )
     |> Map.get(:balance_as_of)
@@ -99,20 +101,33 @@ defmodule TheronsErp.SchedulingTest do
       generate(purchase_order_item(purchase_order_id: po.id, quantity: 2))
       |> Ash.load!(:product)
 
-    # Add route to product
-    Ash.Changeset.for_update(po_item.product, :update, %{route_id: route.id})
-    |> Ash.update!()
+    product_routes = generate(product_routes(product_id: po_item.product.id, routes_id: route.id))
 
     # Create sales order
-    so = generate(sales_order(pull_location_id: loc_b.id))
+    so =
+      generate(sales_order())
+      |> Ash.Changeset.for_update(:ready, %{})
+      |> Ash.update!()
 
     sales_line =
-      generate(sales_line(quantity: 2, product_id: po_item.product.id, sales_order_id: so.id))
+      generate(
+        sales_line(
+          quantity: 2,
+          product_id: po_item.product.id,
+          sales_order_id: so.id,
+          pull_location_id: loc_b.id
+        )
+      )
 
     Scheduler.schedule()
 
+    so_loc =
+      TheronsErp.Inventory.Location
+      |> Ash.get!(%{name: "sales_order.#{so.id}.#{sales_line.id}"})
+
     assert Money.equal?(get_balance_of_ledger(loc_a, po_item.product), Money.new(0, :XIT))
-    assert Money.equal?(get_balance_of_ledger(loc_b, po_item.product), Money.new(2, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_b, po_item.product), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(so_loc, po_item.product), Money.new(2, :XIT))
   end
 
   test "existing stock"

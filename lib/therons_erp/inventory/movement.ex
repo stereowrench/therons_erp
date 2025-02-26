@@ -75,6 +75,20 @@ defmodule TheronsErp.Inventory.Movement do
     to_account_id =
       get_acct_id(get_inv_identifier(:predicted, to_location_id, product.identifier))
 
+    from_location =
+      Ash.get(TheronsErp.Inventory.Location, from_location_id)
+      |> case do
+        {:error, _} -> nil
+        {:ok, location} -> location.name
+      end
+
+    to_location =
+      Ash.get(TheronsErp.Inventory.Location, to_location_id)
+      |> case do
+        {:error, _} -> nil
+        {:ok, location} -> location.name
+      end
+
     {:ok, predicted_transfer} =
       TheronsErp.Ledger.Transfer
       |> Ash.Changeset.for_create(
@@ -131,5 +145,9 @@ defmodule TheronsErp.Inventory.Movement do
 
   def get_inv_identifier(:eager, location_id, product_identifier) do
     "inv.eager.#{location_id}.#{product_identifier}"
+  end
+
+  def get_po_identifier(po, po_item) do
+    "po.#{po.id}.#{po_item.id}"
   end
 end
