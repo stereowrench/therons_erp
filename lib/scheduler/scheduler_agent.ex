@@ -75,7 +75,7 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
   end
 
   defp put_inv(product, amount, state) do
-    inventory = Map.put(state.inventory, product, amount)
+    inventory = Map.put(state.inventory, product.id, amount)
     Map.put(state, :inventory, inventory)
   end
 
@@ -162,7 +162,7 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
         from_inventory_id: state.location_id
       }
 
-    if peer do
+    if peer && lt?(state.inventory[product_id] || 0, quantity) do
       {{location_id, _product_id}, pid} = peer
       propagate_pull_route(pid, quantity, product_id, state.location_id)
     end
@@ -278,7 +278,7 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     peer = get_from_peer_for_product(state, sales_line.product_id)
 
     movements =
-      if peer do
+      if peer && lt?(state.inventory[sales_line.product_id] || 0, sales_line.quantity) do
         {{_peer_location_id, _product_id}, pid} = peer
         propagate_pull_route(pid, sales_line.quantity, sales_line.product_id, state.location_id)
 
@@ -379,5 +379,21 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
 
   defp add_movements(state, movement) do
     add_movements(state, [movement])
+  end
+
+  defp lt?(left, right) do
+    left_clean =
+      case left do
+        %Money{} -> left.amount
+        el -> el
+      end
+
+    right_clean =
+      case right do
+        %Money{} -> right.amount
+        el -> el
+      end
+
+    Decimal.lt?(left_clean, right_clean)
   end
 end

@@ -10,6 +10,8 @@ defmodule TheronsErp.SchedulingTest do
   defp get_balance_of_ledger(location, product, type \\ :predicted) do
     id = "inv.#{type}.#{location.id}.#{product.identifier}"
 
+    TheronsErp.Inventory.Movement.get_acct_id(id)
+
     TheronsErp.Ledger.Account
     |> Ash.get!(%{identifier: id},
       load: :balance_as_of
@@ -166,6 +168,7 @@ defmodule TheronsErp.SchedulingTest do
     assert Money.equal?(get_balance_of_ledger(loc_b, product, :predicted), Money.new(2, :XIT))
 
     routes = [
+      %{from_location_id: loc_a.id, to_location_id: loc_b.id},
       %{from_location_id: loc_b.id, to_location_id: loc_c.id}
     ]
 

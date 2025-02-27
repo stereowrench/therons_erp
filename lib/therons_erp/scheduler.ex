@@ -44,7 +44,29 @@ defmodule TheronsErp.Scheduler do
       |> Ash.Query.for_read(:list)
       |> Ash.read!(load: [:routes])
 
+    # Initialize each location with its actual product inventory
+
     for product <- products do
+      for location <- locations do
+        id =
+          TheronsErp.Inventory.Movement.get_inv_identifier(
+            :actual,
+            location.id,
+            product.identifier
+          )
+
+        TheronsErp.Inventory.Movement.get_acct_id(id)
+
+        balance =
+          TheronsErp.Ledger.Account
+          |> Ash.get!(%{identifier: id},
+            load: :balance_as_of
+          )
+          |> Map.get(:balance_as_of)
+
+        SchedulerAgent.set_product_inventory(location_map[location.id], {product, balance})
+      end
+
       routes = product.routes
 
       for route <- routes do
