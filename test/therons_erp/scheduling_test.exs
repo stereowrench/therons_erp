@@ -91,8 +91,13 @@ defmodule TheronsErp.SchedulingTest do
   test "pull route" do
     loc_a = generate(location())
     loc_b = generate(location())
+    loc_c = generate(location())
 
-    routes = [%{from_location_id: loc_a.id, to_location_id: loc_b.id}]
+    routes = [
+      %{from_location_id: loc_a.id, to_location_id: loc_b.id},
+      %{from_location_id: loc_b.id, to_location_id: loc_c.id}
+    ]
+
     route = generate(routes(routes: routes, type: :pull))
     vendor = generate(vendor())
     po = generate(purchase_order(vendor_id: vendor.id, destination_location_id: loc_a.id))
@@ -115,7 +120,7 @@ defmodule TheronsErp.SchedulingTest do
           quantity: 2,
           product_id: po_item.product.id,
           sales_order_id: so.id,
-          pull_location_id: loc_b.id
+          pull_location_id: loc_c.id
         )
       )
 
@@ -127,6 +132,7 @@ defmodule TheronsErp.SchedulingTest do
 
     assert Money.equal?(get_balance_of_ledger(loc_a, po_item.product), Money.new(0, :XIT))
     assert Money.equal?(get_balance_of_ledger(loc_b, po_item.product), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_c, po_item.product), Money.new(0, :XIT))
     assert Money.equal?(get_balance_of_ledger(so_loc, po_item.product), Money.new(2, :XIT))
   end
 
