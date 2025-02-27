@@ -6,8 +6,8 @@ defmodule TheronsErp.SchedulingTest do
   test "noop does nothing" do
   end
 
-  defp get_balance_of_ledger(location, product) do
-    id = "inv.predicted.#{location.id}.#{product.identifier}"
+  defp get_balance_of_ledger(location, product, type \\ :predicted) do
+    id = "inv.#{type}.#{location.id}.#{product.identifier}"
 
     TheronsErp.Ledger.Account
     |> Ash.get!(%{identifier: id},
@@ -136,7 +136,67 @@ defmodule TheronsErp.SchedulingTest do
     assert Money.equal?(get_balance_of_ledger(so_loc, po_item.product), Money.new(2, :XIT))
   end
 
-  test "existing stock"
+  test "existing stock" do
+    loc_a = generate(location())
+    loc_b = generate(location())
+    loc_c = generate(location())
+    product = generate(product())
+
+    movement1 =
+      TheronsErp.Inventory.Movement
+      |> Ash.Changeset.for_create(:create, %{
+        quantity: 2,
+        from_location_id: loc_a.id,
+        to_location_id: loc_b.id,
+        product_id: product.id
+      })
+      |> Ash.create!()
+
+    assert Money.equal?(get_balance_of_ledger(loc_a, product, :actual), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_b, product, :actual), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_a, product, :predicted), Money.new(-2, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_b, product, :predicted), Money.new(2, :XIT))
+
+    TheronsErp.Inventory.Movement.actualize!(movement1)
+
+    assert Money.equal?(get_balance_of_ledger(loc_a, product, :actual), Money.new(-2, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_b, product, :actual), Money.new(2, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_a, product, :predicted), Money.new(-2, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_b, product, :predicted), Money.new(2, :XIT))
+
+    routes = [
+      %{from_location_id: loc_b.id, to_location_id: loc_c.id}
+    ]
+
+    route = generate(routes(routes: routes, type: :pull))
+    product_routes = generate(product_routes(product_id: product.id, routes_id: route.id))
+
+    so =
+      generate(sales_order())
+      |> Ash.Changeset.for_update(:ready, %{})
+      |> Ash.update!()
+
+    sales_line =
+      generate(
+        sales_line(
+          quantity: 2,
+          product_id: product.id,
+          sales_order_id: so.id,
+          pull_location_id: loc_c.id
+        )
+      )
+
+    Scheduler.schedule()
+
+    so_loc =
+      TheronsErp.Inventory.Location
+      |> Ash.get!(%{name: "sales_order.#{so.id}.#{sales_line.id}"})
+
+    assert Money.equal?(get_balance_of_ledger(loc_a, product), Money.new(-2, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_b, product), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_c, product), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(so_loc, product), Money.new(2, :XIT))
+  end
 
   test "errors generated for overdrawn accounts"
 
