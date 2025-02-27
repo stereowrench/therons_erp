@@ -1,6 +1,7 @@
 defmodule TheronsErp.SchedulingTest do
   use TheronsErp.DataCase
   import TheronsErp.Generator
+  require Ash.Query
   alias TheronsErp.Scheduler
 
   test "noop does nothing" do
@@ -192,10 +193,23 @@ defmodule TheronsErp.SchedulingTest do
       TheronsErp.Inventory.Location
       |> Ash.get!(%{name: "sales_order.#{so.id}.#{sales_line.id}"})
 
+    movements =
+      TheronsErp.Inventory.Movement
+      |> Ash.Query.filter(state == :ready)
+      |> Ash.read!()
+
+    for movement <- movements do
+      TheronsErp.Inventory.Movement.actualize!(movement)
+    end
+
     assert Money.equal?(get_balance_of_ledger(loc_a, product), Money.new(-2, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_a, product, :actual), Money.new(-2, :XIT))
     assert Money.equal?(get_balance_of_ledger(loc_b, product), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_b, product, :actual), Money.new(0, :XIT))
     assert Money.equal?(get_balance_of_ledger(loc_c, product), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_c, product, :actual), Money.new(0, :XIT))
     assert Money.equal?(get_balance_of_ledger(so_loc, product), Money.new(2, :XIT))
+    assert Money.equal?(get_balance_of_ledger(so_loc, product, :actual), Money.new(2, :XIT))
   end
 
   test "errors generated for overdrawn accounts"
