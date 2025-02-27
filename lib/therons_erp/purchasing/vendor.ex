@@ -10,6 +10,10 @@ defmodule TheronsErp.Purchasing.Vendor do
   end
 
   actions do
+    read :read do
+      primary? true
+    end
+
     create :create do
       accept [:name, :address, :phone, :email, :city, :state, :zip_code]
     end

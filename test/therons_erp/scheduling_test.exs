@@ -215,6 +215,59 @@ defmodule TheronsErp.SchedulingTest do
     assert Money.equal?(get_balance_of_ledger(so_loc, product, :actual), Money.new(2, :XIT))
   end
 
+  test "fallback to purchase order if demand drops below threshold" do
+    product = generate(product())
+    vendor = generate(vendor())
+
+    replenishment =
+      generate(
+        replenishment(
+          product_id: product.id,
+          vendor_id: vendor.id,
+          trigger_quantity: 10,
+          quantity_multiple: 5
+        )
+      )
+
+    loc_a = generate(location())
+    loc_b = generate(location())
+    loc_c = generate(location())
+
+    routes = [
+      %{from_location_id: loc_a.id, to_location_id: loc_b.id},
+      %{from_location_id: loc_b.id, to_location_id: loc_c.id}
+    ]
+
+    route = generate(routes(routes: routes, type: :pull))
+    product_routes = generate(product_routes(product_id: product.id, routes_id: route.id))
+
+    so =
+      generate(sales_order())
+      |> Ash.Changeset.for_update(:ready, %{})
+      |> Ash.update!()
+
+    sales_line =
+      generate(
+        sales_line(
+          quantity: 2,
+          product_id: product.id,
+          sales_order_id: so.id,
+          pull_location_id: loc_c.id
+        )
+      )
+
+    Scheduler.schedule()
+
+    so_loc =
+      TheronsErp.Inventory.Location
+      |> Ash.get!(%{name: "sales_order.#{so.id}.#{sales_line.id}"})
+
+    assert Money.equal?(get_balance_of_ledger(loc_a, product), Money.new(13, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_b, product), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(loc_c, product), Money.new(0, :XIT))
+    assert Money.equal?(get_balance_of_ledger(so_loc, product), Money.new(2, :XIT))
+  end
+
   test "errors generated for overdrawn accounts"
 
   test "argument allows error if sales order cannot be fulfilled"

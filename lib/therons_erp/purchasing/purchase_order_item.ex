@@ -19,6 +19,10 @@ defmodule TheronsErp.Purchasing.PurchaseOrderItem do
     end
   end
 
+  code_interface do
+    define :create
+  end
+
   actions do
     defaults [:read]
 

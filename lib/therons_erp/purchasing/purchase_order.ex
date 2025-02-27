@@ -19,6 +19,10 @@ defmodule TheronsErp.Purchasing.PurchaseOrder do
     end
   end
 
+  code_interface do
+    define :create
+  end
+
   actions do
     read :read do
       primary? true

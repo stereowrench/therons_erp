@@ -82,9 +82,13 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
   defp increase_inv(from_inventory_id, product, amount, state) do
     inventory =
       if state.inventory[product.id] do
-        put_in(state.inventory, [product.id], state.inventory[product.id] + amount)
+        put_in(
+          state.inventory,
+          [product.id],
+          Money.add!(state.inventory[product.id], Money.new(amount, :XIT))
+        )
       else
-        put_in(state.inventory, [product.id], amount)
+        put_in(state.inventory, [product.id], Money.new(amount, :XIT))
       end
 
     Map.put(state, :inventory, inventory)
@@ -151,7 +155,7 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     end
   end
 
-  def handle_call({:propagate_pull_route, quantity, product_id, from_location}, _from, state) do
+  def handle_call({:propagate_pull_route, quantity, product_id, from_location}, from, state) do
     peer = get_from_peer_for_product(state, product_id)
 
     movement =
@@ -162,56 +166,71 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
         from_inventory_id: state.location_id
       }
 
-    if peer && lt?(state.inventory[product_id] || 0, quantity) do
-      {{location_id, _product_id}, pid} = peer
-      propagate_pull_route(pid, quantity, product_id, state.location_id)
-    end
+    inv_amt = state.inventory[product_id] || 0
 
-    {:reply, :ok, add_movements(state, movement)}
+    if peer && lt?(inv_amt, quantity) do
+      {{_location_id, _product_id}, pid} = peer
+
+      propagate_pull_route(
+        pid,
+        Decimal.sub(quantity, inv_amt.amount),
+        product_id,
+        state.location_id
+      )
+
+      {:reply, :ok, add_movements(state, movement) |> sub_inv(inv_amt, product_id)}
+    else
+      product =
+        TheronsErp.Inventory.Product
+        |> Ash.get!(product_id, load: [replenishment: [:vendor]])
+
+      remainder = Decimal.sub(inv_amt.amount, quantity)
+
+      state =
+        if !peer && product.replenishment &&
+             Decimal.lt?(remainder, product.replenishment.trigger_quantity) do
+          remainder_float = Decimal.to_float(remainder)
+          needed = Decimal.to_float(product.replenishment.trigger_quantity) - remainder_float
+          quantity_multiple = product.replenishment.quantity_multiple
+          repl_quantity = ceil(needed / quantity_multiple)
+
+          purchase_order =
+            TheronsErp.Purchasing.PurchaseOrder.create!(%{
+              order_date: MyDate.today(),
+              delivery_date: Date.add(MyDate.today(), product.replenishment.lead_time_days),
+              vendor_id: product.replenishment.vendor.id,
+              total_amount: Money.mult!(Money.new(repl_quantity, :XIT), quantity_multiple),
+              destination_location_id: state.location_id
+            })
+
+          _purchase_order_line =
+            TheronsErp.Purchasing.PurchaseOrderItem.create!(%{
+              product_id: product_id,
+              quantity: repl_quantity * quantity_multiple,
+              purchase_order_id: purchase_order.id,
+              unit_price: product.replenishment.price
+            })
+
+          purchase_order = Ash.load!(purchase_order, [:items])
+
+          state = _add_purchase_order(state, purchase_order)
+          increase_inv(state.location_id, product, repl_quantity * quantity_multiple, state)
+        else
+          state
+        end
+
+      if !peer && lt?(inv_amt, quantity) do
+        {:reply, :ok, add_movements(state, movement) |> sub_inv(inv_amt, product_id)}
+      else
+        {:reply, :ok,
+         add_movements(state, movement) |> sub_inv(Money.new(quantity, :XIT), product_id)}
+      end
+    end
   end
 
   def handle_call({:add_purchase_order, purchase_order}, _from, state) do
-    accts = generate_po_accts(purchase_order)
-
-    movements =
-      for item <- purchase_order.items do
-        peer = get_to_peer_for_product(state, item.product_id)
-
-        if peer do
-          {{location_id, _product_id}, pid} = peer
-          propagate_push_route(pid, item.quantity, item.product_id)
-
-          [
-            %{
-              quantity: item.quantity,
-              product_id: item.product_id,
-              from_inventory_id: accts[item.id].id,
-              to_inventory_id: state.location_id
-            },
-            %{
-              quantity: item.quantity,
-              product_id: item.product_id,
-              from_inventory_id: state.location_id,
-              to_inventory_id: location_id
-            }
-          ]
-        else
-          [
-            %{
-              quantity: item.quantity,
-              product_id: item.product_id,
-              from_inventory_id: accts[item.id].id,
-              to_inventory_id: state.location_id
-            }
-          ]
-        end
-      end
-      |> List.flatten()
-
-    {:reply, :ok,
-     state
-     |> Map.put(:purchase_orders, [purchase_order | state.purchase_orders])
-     |> add_movements(movements)}
+    state = _add_purchase_order(state, purchase_order)
+    {:reply, :ok, state}
   end
 
   def handle_call({:receive_products, {from_inventory_id, product, amount}}, _from, state) do
@@ -395,5 +414,53 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
       end
 
     Decimal.lt?(left_clean, right_clean)
+  end
+
+  def sub_inv(state, quantity, product_id) do
+    inv = Map.put(state.inventory, :product_id, Money.sub!(state.inventory[product_id], quantity))
+    %{state | inventory: inv}
+  end
+
+  defp _add_purchase_order(state, purchase_order) do
+    accts = generate_po_accts(purchase_order)
+
+    movements =
+      for item <- purchase_order.items do
+        peer = get_to_peer_for_product(state, item.product_id)
+
+        if peer do
+          {{location_id, _product_id}, pid} = peer
+          propagate_push_route(pid, item.quantity, item.product_id)
+
+          [
+            %{
+              quantity: item.quantity,
+              product_id: item.product_id,
+              from_inventory_id: accts[item.id].id,
+              to_inventory_id: state.location_id
+            },
+            %{
+              quantity: item.quantity,
+              product_id: item.product_id,
+              from_inventory_id: state.location_id,
+              to_inventory_id: location_id
+            }
+          ]
+        else
+          [
+            %{
+              quantity: item.quantity,
+              product_id: item.product_id,
+              from_inventory_id: accts[item.id].id,
+              to_inventory_id: state.location_id
+            }
+          ]
+        end
+      end
+      |> List.flatten()
+
+    state
+    |> Map.put(:purchase_orders, [purchase_order | state.purchase_orders])
+    |> add_movements(movements)
   end
 end

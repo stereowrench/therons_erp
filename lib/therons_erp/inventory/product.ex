@@ -100,6 +100,6 @@ defmodule TheronsErp.Inventory.Product do
       destination_attribute_on_join_resource :routes_id
     end
 
-    has_one :replenishments, TheronsErp.Purchasing.Replenishment
+    has_one :replenishment, TheronsErp.Purchasing.Replenishment
   end
 end

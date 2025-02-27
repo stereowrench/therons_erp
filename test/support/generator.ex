@@ -1,6 +1,22 @@
 defmodule TheronsErp.Generator do
   use Ash.Generator
 
+  def replenishment(opts \\ []) do
+    changeset_generator(
+      TheronsErp.Purchasing.Replenishment,
+      :create,
+      defaults: [
+        product_id: nil,
+        vendor_id: nil,
+        quantity_multiple: 1,
+        price: Money.new(0, :XIT),
+        trigger_quantity: 10,
+        lead_time_days: 1
+      ],
+      overrides: opts
+    )
+  end
+
   def vendor(opts \\ []) do
     changeset_generator(
       TheronsErp.Purchasing.Vendor,
