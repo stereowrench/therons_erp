@@ -76,7 +76,10 @@ defmodule TheronsErp.Ledger.Balance do
                 first(
                   later_balances,
                   field: :timestamp,
-                  query: [sort: [timestamp: :desc], filter: expr(balance >= ^arg(:request))]
+                  query: [
+                    sort: [timestamp: :desc],
+                    filter: expr(balance > ^arg(:request) or balance == ^arg(:request))
+                  ]
                 )
               ) do
       argument :request, :money, allow_nil?: false
