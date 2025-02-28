@@ -119,6 +119,8 @@ defmodule TheronsErp.Inventory.Movement do
 
     {from_account_id, to_account_id} = get_locations(changeset, :predicted)
 
+    date = Ash.Changeset.get_attribute(changeset, :date)
+
     {:ok, predicted_transfer} =
       TheronsErp.Ledger.Transfer
       |> Ash.Changeset.for_create(
@@ -126,7 +128,8 @@ defmodule TheronsErp.Inventory.Movement do
         %{
           from_account_id: from_account_id,
           to_account_id: to_account_id,
-          amount: Money.new(amount, :XIT)
+          amount: Money.new(amount, :XIT),
+          timestamp: date || MyDate.today()
         }
       )
       |> Ash.create()
@@ -141,6 +144,8 @@ defmodule TheronsErp.Inventory.Movement do
     attribute :quantity, :decimal
 
     attribute :manually_created, :boolean, default: false
+
+    attribute :date, :date
 
     timestamps()
   end

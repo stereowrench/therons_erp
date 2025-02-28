@@ -171,14 +171,15 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     if peer && lt?(inv_amt, quantity) do
       {{_location_id, _product_id}, pid} = peer
 
-      propagate_pull_route(
-        pid,
-        Decimal.sub(quantity, inv_amt.amount),
-        product_id,
-        state.location_id
-      )
+      {:ok, date} =
+        propagate_pull_route(
+          pid,
+          Decimal.sub(quantity, inv_amt.amount),
+          product_id,
+          state.location_id
+        )
 
-      {:reply, :ok, add_movements(state, movement) |> sub_inv(inv_amt, product_id)}
+      {:reply, {:ok, date}, add_movements(state, movement) |> sub_inv(inv_amt, product_id)}
     else
       product =
         TheronsErp.Inventory.Product
