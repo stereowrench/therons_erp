@@ -438,13 +438,17 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
               quantity: item.quantity,
               product_id: item.product_id,
               from_inventory_id: accts[item.id].id,
-              to_inventory_id: state.location_id
+              to_inventory_id: state.location_id,
+              date: purchase_order.delivery_date,
+              purchase_order_id: purchase_order.id
             },
             %{
               quantity: item.quantity,
               product_id: item.product_id,
               from_inventory_id: state.location_id,
-              to_inventory_id: location_id
+              to_inventory_id: location_id,
+              date: purchase_order.delivery_date,
+              purchase_order_id: purchase_order.id
             }
           ]
         else
@@ -453,7 +457,9 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
               quantity: item.quantity,
               product_id: item.product_id,
               from_inventory_id: accts[item.id].id,
-              to_inventory_id: state.location_id
+              to_inventory_id: state.location_id,
+              date: purchase_order.delivery_date,
+              purchase_order_id: purchase_order.id
             }
           ]
         end

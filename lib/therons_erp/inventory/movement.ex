@@ -42,7 +42,8 @@ defmodule TheronsErp.Inventory.Movement do
         :product_id,
         :actual_transfer_id,
         :predicted_transfer_id,
-        :eager_transfer_id
+        :eager_transfer_id,
+        :purchase_order_id
       ]
 
       change fn changeset, _ ->
@@ -64,7 +65,8 @@ defmodule TheronsErp.Inventory.Movement do
         :product_id,
         :actual_transfer_id,
         :predicted_transfer_id,
-        :eager_transfer_id
+        :eager_transfer_id,
+        :purchase_order_id
       ]
     end
 
@@ -169,6 +171,8 @@ defmodule TheronsErp.Inventory.Movement do
     belongs_to :to_location, TheronsErp.Inventory.Location do
       allow_nil? false
     end
+
+    belongs_to :purchase_order, TheronsErp.Purchasing.PurchaseOrder
   end
 
   def get_acct_id(identifier) do

@@ -15,11 +15,6 @@ defmodule TheronsErp.Scheduler do
   def schedule() do
     # TheronsErp.Repo.transaction(fn ->
     # TODO ensure no cycles. For now just set a timeout.
-    purchase_orders =
-      TheronsErp.Purchasing.PurchaseOrder
-      |> Ash.Query.filter(state == :created)
-      |> Ash.read!(load: [:items])
-
     locations =
       TheronsErp.Inventory.Location
       |> Ash.read!()
@@ -88,6 +83,11 @@ defmodule TheronsErp.Scheduler do
     for movement <- movements do
       SchedulerAgent.add_movement(location_map[movement.to_location_id], movement)
     end
+
+    purchase_orders =
+      TheronsErp.Purchasing.PurchaseOrder
+      |> Ash.Query.filter(state == :created)
+      |> Ash.read!(load: [:items])
 
     for purchase_order <- purchase_orders do
       SchedulerAgent.add_purchase_order(
