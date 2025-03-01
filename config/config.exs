@@ -9,7 +9,7 @@ import Config
 
 config :therons_erp, Oban,
   engine: Oban.Engines.Basic,
-  notifier: Oban.Notifiers.Postgres,
+  notifier: Oban.Notifiers.PG,
   queues: [default: 10],
   repo: TheronsErp.Repo
 
@@ -29,6 +29,7 @@ config :spark,
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
+        :admin,
         :account,
         :balance,
         :transfer,
@@ -51,13 +52,16 @@ config :spark,
         :identities
       ]
     ],
-    "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
+    "Ash.Domain": [
+      section_order: [:admin, :resources, :policies, :authorization, :domain, :execution]
+    ]
   ]
 
 config :therons_erp,
   ecto_repos: [TheronsErp.Repo],
   generators: [timestamp_type: :utc_datetime],
   ash_domains: [
+    TheronsErp.Purchasing,
     TheronsErp.Invoices,
     TheronsErp.People,
     TheronsErp.Sales,

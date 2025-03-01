@@ -4,6 +4,8 @@ defmodule TheronsErp.Ledger.Balance do
     data_layer: AshPostgres.DataLayer,
     extensions: [AshDoubleEntry.Balance]
 
+  require Ash.Query
+
   balance do
     transfer_resource TheronsErp.Ledger.Transfer
     account_resource TheronsErp.Ledger.Account
@@ -57,9 +59,59 @@ defmodule TheronsErp.Ledger.Balance do
       allow_nil? false
       attribute_writable? true
     end
+
+    has_many :later_balances, __MODULE__ do
+      source_attribute :account_id
+      destination_attribute :account_id
+      filter expr(transfer.id > parent(transfer.id))
+    end
+  end
+
+  calculations do
+    calculate :timestamp, :utc_datetime, expr(transfer.timestamp)
+
+    calculate :next_available,
+              :utc_datetime,
+              expr(
+                first(
+                  later_balances,
+                  field: :timestamp,
+                  query: [
+                    sort: [timestamp: :desc],
+                    filter: expr(balance > ^arg(:request) or balance == ^arg(:request))
+                  ]
+                )
+              ) do
+      argument :request, :money, allow_nil?: false
+    end
   end
 
   identities do
     identity :unique_references, [:account_id, :transfer_id]
+  end
+
+  def get_next_available(requested_amount, account_id) do
+    TheronsErp.Ledger.Balance
+    |> Ash.Query.filter(account_id == ^account_id)
+    |> Ash.Query.filter(balance < ^requested_amount)
+    |> Ash.Query.load(:timestamp)
+    |> Ash.Query.sort(timestamp: :desc)
+    |> Ash.Query.load(next_available: [request: requested_amount])
+    |> Ash.read_one!()
+    |> case do
+      nil ->
+        TheronsErp.Ledger.Balance
+        |> Ash.Query.filter(account_id == ^account_id)
+        |> Ash.Query.filter(balance > ^requested_amount or balance == ^requested_amount)
+        |> Ash.Query.load(:timestamp)
+        |> Ash.Query.sort(timestamp: :desc)
+        |> Ash.Query.load(:transfer)
+        |> Ash.read_one!()
+        |> Map.get(:transfer)
+        |> Map.get(:timestamp)
+
+      %{next_available: next_available} ->
+        next_available
+    end
   end
 end

@@ -19,7 +19,7 @@ defmodule TheronsErp.MixProject do
   def application do
     [
       mod: {TheronsErp.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :wx, :observer, :debugger]
     ]
   end
 
@@ -79,7 +79,8 @@ defmodule TheronsErp.MixProject do
       {:petal_components, "~> 2.8"},
       {:credo, "~> 1.7"},
       {:faker, "~> 0.18.0", only: :test},
-      {:phoenix_test, "~> 0.5.2", only: :test, runtime: false}
+      {:phoenix_test, "~> 0.5.2", only: :test, runtime: false},
+      {:ash_admin, "~> 0.13.0"}
     ]
   end
 

@@ -5,9 +5,6 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
   import TheronsErpWeb.Selects
   import TheronsErpWeb.Layouts
 
-  # TODO address should be selectable when customer is changed but not persisted
-  # TODO address should be reset when customer changed
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -47,6 +44,16 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
             </.button>
             <.button phx-disable-with="Saving..." phx-click="set-invoice">
               Generate invoice
+            </.button>
+          <% end %>
+          <%= if @sales_order.state == :cancelled do %>
+            <.button phx-disable-with="Saving..." phx-click="set-draft">
+              Return to draft
+            </.button>
+          <% end %>
+          <%= if @sales_order.state == :invoiced && @sales_order.invoice.state == :draft do %>
+            <.button phx-disable-with="Saving..." phx-click="set-cancelled">
+              Cancel invoice
             </.button>
           <% end %>
         </:actions>
@@ -485,7 +492,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
       if cid = params["from_args"]["customer_id"] do
         Ash.get!(People.Entity, cid, load: [:addresses])
       else
-        sales_order.customer
+        if cid = params["args"]["customer_id"] do
+          Ash.get!(People.Entity, cid, load: [:addresses])
+        else
+          sales_order.customer
+        end
       end
 
     {:noreply,
@@ -658,7 +669,19 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
         %{"sales_order" => sales_order_params, "_target" => target} = params,
         socket
       ) do
-    sales_order_params = process_modifications(sales_order_params, socket)
+    sales_order_params =
+      process_modifications(sales_order_params, socket)
+
+    sales_order_params =
+      case target do
+        ["sales_order", "sales_lines", idx, "product_id"] ->
+          put_in(sales_order_params, ["sales_lines", idx], %{
+            "product_id" => sales_order_params["sales_lines"][idx]["product_id"]
+          })
+
+        _ ->
+          sales_order_params
+      end
 
     socket =
       socket
@@ -728,7 +751,9 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               nil
             end
 
-          form = AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
+          form =
+            AshPhoenix.Form.validate(socket.assigns.form, sales_order_params)
+
           drop = length(sales_order_params["_drop_sales_lines"] || [])
 
           {:noreply,
@@ -779,6 +804,11 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
 
   def handle_event("set-draft", _, socket) do
     Ash.Changeset.for_update(socket.assigns.sales_order, :revive) |> Ash.update!()
+    {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
+  end
+
+  def handle_event("set-cancelled", _, socket) do
+    Ash.Changeset.for_update(socket.assigns.sales_order, :cancel_invoice) |> Ash.update!()
     {:noreply, socket |> assign(:sales_order, load_by_id(socket.assigns.sales_order.id, socket))}
   end
 
@@ -956,7 +986,7 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
                 price
               end
 
-            !Money.equal?(price, line_data.total_price)
+            !Money.equal?(price, line_data.active_price)
           else
             line_data.total_price != nil
           end
@@ -1129,7 +1159,8 @@ defmodule TheronsErpWeb.SalesOrderLive.Show do
               AshPhoenix.Form.validate(form, new_args)
 
             true ->
-              AshPhoenix.Form.validate(form, %{})
+              update_live_forms(args)
+              AshPhoenix.Form.validate(form, args)
           end
       end
 

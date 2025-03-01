@@ -2,6 +2,7 @@ import Config
 config :therons_erp, Oban, testing: :manual
 config :therons_erp, token_signing_secret: "mX3jn0HNkCoVKy3YiiF4B1CxZMTGajAA"
 config :ash, disable_async?: true
+config :ash, :missed_notifications, :ignore
 
 # Configure your database
 #
@@ -40,3 +41,5 @@ config :phoenix_test, :endpoint, TheronsErpWeb.Endpoint
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+config :ash, :policies, show_policy_breakdowns?: true

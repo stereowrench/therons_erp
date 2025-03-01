@@ -6,11 +6,12 @@ defmodule TheronsErpWeb.Selects do
     matches =
       Seqfuzz.matches(items, text, & &1.label, filter: true, sort: true)
 
-    (matches
-     |> Enum.map(fn {items, c} ->
-       %{value: items.value, label: items.label, matches: c.matches}
-     end)
-     |> Enum.take(5)) ++ additional_options()
+    ((matches
+      |> Enum.map(fn {items, c} ->
+        %{value: items.value, label: items.label, matches: c.matches}
+      end)
+      |> Enum.take(5)) ++ additional_options())
+    |> Enum.uniq()
   end
 
   def get_categories(selected) do

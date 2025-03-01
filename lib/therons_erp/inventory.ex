@@ -1,8 +1,16 @@
 defmodule TheronsErp.Inventory do
-  use Ash.Domain,
-    otp_app: :therons_erp
+  use Ash.Domain, otp_app: :therons_erp, extensions: [AshAdmin.Domain]
+
+  admin do
+    show? true
+  end
 
   resources do
+    resource TheronsErp.Inventory.ProductRoutes
+    resource TheronsErp.Inventory.Routes
+    resource TheronsErp.Inventory.Movement
+    resource TheronsErp.Inventory.Location
+
     resource TheronsErp.Inventory.ProductCategory do
       define :create_category, args: [:name], action: :create
       define :change_parent, args: [:product_category_id], action: :update_parent

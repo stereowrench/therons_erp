@@ -24,7 +24,15 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     create :create do
-      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable, :cost]
+      accept [
+        :name,
+        :sales_price,
+        :type,
+        :category_id,
+        :saleable,
+        :purchaseable,
+        :cost
+      ]
     end
 
     create :create_stub do
@@ -36,7 +44,15 @@ defmodule TheronsErp.Inventory.Product do
     end
 
     update :update do
-      accept [:name, :sales_price, :type, :category_id, :saleable, :purchaseable, :cost]
+      accept [
+        :name,
+        :sales_price,
+        :type,
+        :category_id,
+        :saleable,
+        :purchaseable,
+        :cost
+      ]
     end
 
     destroy :destroy do
@@ -75,5 +91,15 @@ defmodule TheronsErp.Inventory.Product do
 
   relationships do
     belongs_to :category, TheronsErp.Inventory.ProductCategory
+
+    many_to_many :routes, TheronsErp.Inventory.Routes do
+      through TheronsErp.Inventory.ProductRoutes
+      source_attribute :id
+      source_attribute_on_join_resource :product_id
+      destination_attribute :id
+      destination_attribute_on_join_resource :routes_id
+    end
+
+    has_one :replenishment, TheronsErp.Purchasing.Replenishment
   end
 end
