@@ -27,7 +27,7 @@ defmodule TheronsErp.Purchasing.PurchaseOrderItem do
     defaults [:read]
 
     create :create do
-      accept [:quantity, :unit_price, :purchase_order_id, :product_id]
+      accept [:quantity, :unit_price, :purchase_order_id, :product_id, :replenishment_id]
     end
   end
 
@@ -41,5 +41,7 @@ defmodule TheronsErp.Purchasing.PurchaseOrderItem do
   relationships do
     belongs_to :purchase_order, TheronsErp.Purchasing.PurchaseOrder
     belongs_to :product, TheronsErp.Inventory.Product
+
+    belongs_to :replenishment, TheronsErp.Purchasing.Replenishment
   end
 end

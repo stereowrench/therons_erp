@@ -48,7 +48,8 @@ defmodule TheronsErp.Generator do
       defaults: [
         quantity: Faker.random_between(1, 10),
         product_id: generate(product()).id,
-        unit_price: Money.new(10, :USD)
+        unit_price: Money.new(10, :USD),
+        replenishment_id: nil
       ],
       overrides: opts
     )

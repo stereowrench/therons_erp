@@ -24,8 +24,8 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     GenServer.call(pid, {:set_product_inventory, inv})
   end
 
-  def receive_products(pid, from_inventory_id, product, amount) do
-    GenServer.call(pid, {:receive_products, {from_inventory_id, product, amount}})
+  def receive_products(pid, from_inventory_id, product, amount, po) do
+    GenServer.call(pid, {:receive_products, {from_inventory_id, product, amount, po}})
   end
 
   def generate_accounts(pid) do
@@ -79,19 +79,36 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     Map.put(state, :inventory, inventory)
   end
 
-  defp increase_inv(from_inventory_id, product, amount, state) do
+  def increase_inv(from_inventory_id, product, amount, state, delivery_date) do
     inventory =
       if state.inventory[product.id] do
         put_in(
           state.inventory,
           [product.id],
-          Money.add!(state.inventory[product.id], Money.new(amount, :XIT))
+          [{Money.new(amount, :XIT), delivery_date} | state.inventory[product.id]]
         )
       else
-        put_in(state.inventory, [product.id], Money.new(amount, :XIT))
+        put_in(state.inventory, [product.id], [
+          {Money.new(amount, :XIT), delivery_date} | state.inventory[product.id] || []
+        ])
       end
 
     Map.put(state, :inventory, inventory)
+  end
+
+  def get_inv_up_to_date(state, product_id, date) do
+    {:ok, sum} =
+      state.inventory[product_id]
+      |> Enum.filter(fn {_, date1} -> Date.before?(date1, date) or date1 == date end)
+      |> Enum.map(fn {amount, _date} -> amount end)
+      |> Money.sum()
+
+    sum
+  end
+
+  def sub_inv(state, quantity, product_id) do
+    inv = Map.put(state.inventory, :product_id, Money.sub!(state.inventory[product_id], quantity))
+    %{state | inventory: inv}
   end
 
   defp put_peer({location, product, pid}, state) do
@@ -163,7 +180,8 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
         quantity: quantity,
         product_id: product_id,
         to_inventory_id: from_location,
-        from_inventory_id: state.location_id
+        from_inventory_id: state.location_id,
+        date: nil
       }
 
     inv_amt = state.inventory[product_id] || 0
@@ -179,7 +197,8 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
           state.location_id
         )
 
-      {:reply, {:ok, date}, add_movements(state, movement) |> sub_inv(inv_amt, product_id)}
+      {:reply, {:ok, date},
+       add_movements(state, %{movement | date: date}) |> sub_inv(inv_amt, product_id)}
     else
       product =
         TheronsErp.Inventory.Product
@@ -209,13 +228,21 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
               product_id: product_id,
               quantity: repl_quantity * quantity_multiple,
               purchase_order_id: purchase_order.id,
-              unit_price: product.replenishment.price
+              unit_price: product.replenishment.price,
+              replenishment_id: product.replenishment.id
             })
 
           purchase_order = Ash.load!(purchase_order, [:items])
 
           state = _add_purchase_order(state, purchase_order)
-          increase_inv(state.location_id, product, repl_quantity * quantity_multiple, state)
+
+          increase_inv(
+            state.location_id,
+            product,
+            repl_quantity * quantity_multiple,
+            state,
+            purchase_order.delivery_date
+          )
         else
           state
         end
@@ -234,8 +261,13 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
     {:reply, :ok, state}
   end
 
-  def handle_call({:receive_products, {from_inventory_id, product, amount}}, _from, state) do
-    {:reply, :ok, increase_inv(from_inventory_id, product, amount, state)}
+  def handle_call(
+        {:receive_products, {from_inventory_id, product, amount, purchase_order}},
+        _from,
+        state
+      ) do
+    {:reply, :ok,
+     increase_inv(from_inventory_id, product, amount, state, purchase_order.delivery_date)}
   end
 
   def handle_call(:generate_accounts, _from, state) do
@@ -283,7 +315,13 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
         pid = find_route_for_product(item.product_id, state)
 
         if pid do
-          SchedulerAgent.receive_products(pid, state.location_id, item.product_id, item.quantity)
+          SchedulerAgent.receive_products(
+            pid,
+            state.location_id,
+            item.product_id,
+            item.quantity,
+            po
+          )
         end
       end
     end
@@ -415,11 +453,6 @@ defmodule TheronsErp.Scheduler.SchedulerAgent do
       end
 
     Decimal.lt?(left_clean, right_clean)
-  end
-
-  def sub_inv(state, quantity, product_id) do
-    inv = Map.put(state.inventory, :product_id, Money.sub!(state.inventory[product_id], quantity))
-    %{state | inventory: inv}
   end
 
   defp _add_purchase_order(state, purchase_order) do

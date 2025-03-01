@@ -363,6 +363,110 @@ defmodule TheronsErp.SchedulingTest do
 
   test "inventory timing"
 
+  test "Move up purchase order" do
+    vendor = generate(vendor())
+    product = generate(product())
+
+    loc_a = generate(location())
+    loc_b = generate(location())
+    loc_c = generate(location())
+
+    routes = [
+      %{from_location_id: loc_a.id, to_location_id: loc_b.id},
+      %{from_location_id: loc_b.id, to_location_id: loc_c.id}
+    ]
+
+    replenishment =
+      generate(
+        replenishment(
+          product_id: product.id,
+          vendor_id: vendor.id,
+          trigger_quantity: 0,
+          quantity_multiple: 5
+        )
+      )
+
+    po1 =
+      generate(
+        purchase_order(
+          vendor_id: vendor.id,
+          destination_location_id: loc_a.id,
+          delivery_date: Date.add(MyDate.today(), 14),
+          replenishment_id: replenishment.id
+        )
+      )
+
+    po1_item =
+      generate(
+        purchase_order_item(purchase_order_id: po1.id, quantity: 10, product_id: product.id)
+      )
+      |> Ash.load!(:product)
+
+    route = generate(routes(routes: routes, type: :pull))
+
+    product_routes =
+      generate(product_routes(product_id: product.id, routes_id: route.id))
+
+    so =
+      generate(sales_order())
+      |> Ash.Changeset.for_update(:ready, %{process_date: Date.add(MyDate.today(), 14)})
+      |> Ash.update!()
+
+    sales_line =
+      generate(
+        sales_line(
+          quantity: 6,
+          product_id: product.id,
+          sales_order_id: so.id,
+          pull_location_id: loc_c.id
+        )
+      )
+
+    so =
+      generate(sales_order())
+      |> Ash.Changeset.for_update(:ready, %{process_date: MyDate.today()})
+      |> Ash.update!()
+
+    sales_line =
+      generate(
+        sales_line(
+          quantity: 2,
+          product_id: product.id,
+          sales_order_id: so.id,
+          pull_location_id: loc_c.id
+        )
+      )
+
+    Scheduler.schedule()
+
+    assert Money.equals?(
+             get_balance_of_ledger(loc_c, product.id, :predicted, MyDate.today()),
+             Money.new(:XIT, 3)
+           )
+
+    assert Money.equals?(
+             get_balance_of_ledger(loc_c, product.id, :predicted, Date.add(MyDate.today(), 14)),
+             Money.new(:XIT, 2)
+           )
+  end
+
+  test "inventory adjustment functions" do
+    alias TheronsErp.Scheduler.SchedulerAgent
+
+    state = SchedulerAgent.increase_inv(nil, %{id: 1}, 1, %{inventory: %{}}, MyDate.today())
+    state = SchedulerAgent.increase_inv(nil, %{id: 1}, 1, state, Date.add(MyDate.today(), 14))
+
+    assert Money.equal?(
+             SchedulerAgent.get_inv_up_to_date(state, 1, MyDate.today()),
+             Money.new(:XIT, 1)
+           )
+
+    assert Money.equal?(
+             SchedulerAgent.get_inv_up_to_date(state, 1, Date.add(MyDate.today(), 14)),
+             Money.new(:XIT, 2)
+           )
+  end
+
   def generate_transactions_at_time(amount, time) do
     from_account =
       TheronsErp.Ledger.Account

@@ -94,7 +94,7 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     create :create do
-      accept [:customer_id, :address_id]
+      accept [:customer_id, :address_id, :process_date]
       primary? true
       argument :sales_lines, {:array, :map}
 
@@ -105,7 +105,7 @@ defmodule TheronsErp.Sales.SalesOrder do
     end
 
     update :update do
-      accept [:customer_id, :address_id]
+      accept [:customer_id, :address_id, :process_date]
       require_atomic? false
       argument :sales_lines, {:array, :map}
 
@@ -125,6 +125,8 @@ defmodule TheronsErp.Sales.SalesOrder do
     attribute :identifier, :integer do
       generated? true
     end
+
+    attribute :process_date, :date
 
     timestamps()
   end
